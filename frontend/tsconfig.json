@@ -1,0 +1,29 @@
+{
+  "compilerOptions": {
+    /* Core settings */
+    "target": "ESNext",
+    "lib": ["ESNext", "DOM"],
+    "module": "ESNext",
+    "moduleResolution": "Node",
+    "jsx": "react-jsx",
+
+    /* Type safety */
+    "strict": true,
+    //    "noUnusedLocals": true,
+    //    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+
+    /* Interop & imports */
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true,
+
+    /* Output & tooling */
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "isolatedModules": true,
+    "noEmit": true
+  },
+  "include": ["src"],
+  "exclude": ["node_modules", "dist"]
+}
