@@ -1,7 +1,7 @@
 import {ResponseCode} from "../../types/response-code";
 import {ApiResponse, isApiResponse} from "../../types/api-response";
 
-const basePath = "http://localhost:4000/api";
+const basePath = `http://localhost:3000/api`;
 
 /**
  * Send a GET request to the API

@@ -9,8 +9,6 @@
 
     /* Type safety */
     "strict": true,
-    //    "noUnusedLocals": true,
-    //    "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
 
     /* Interop & imports */
