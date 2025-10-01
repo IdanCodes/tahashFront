@@ -1,12 +1,15 @@
 import express from "express";
 import cors from "cors";
 import apiRouter from "./src/apiRouter";
+import session from "express-session";
+import MongoStore from "connect-mongo";
+import { config } from "dotenv";
+config();
 
 const PORT = 3000;
 const app = express();
 
 app.use(cors());
-// middleware to parse json requests (Content-Type: application/json)
 app.use(express.json());
 
 app.use("/api", apiRouter);

@@ -31,7 +31,7 @@ export async function sendGetRequest(path: string) {
 
 /**
  * Send a POST request to the API
- * @param path The request's path
+ * @param path The request's path (Not including /api)
  * @param body The body to send
  */
 export async function sendPostRequest(
@@ -64,5 +64,5 @@ export async function sendPostRequest(
   }
 }
 
-// TODO:
+// TODO: a method to create a post request's body
 export function getPostBody(headers: object) {}
