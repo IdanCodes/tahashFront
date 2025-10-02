@@ -1,8 +1,6 @@
 import express from "express";
 import cors from "cors";
 import apiRouter from "./src/apiRouter";
-import session from "express-session";
-import MongoStore from "connect-mongo";
 import { config } from "dotenv";
 config();
 

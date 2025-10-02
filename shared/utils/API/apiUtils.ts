@@ -40,11 +40,11 @@ export async function sendPostRequest(
 ): Promise<ApiResponse> {
   try {
     const res = await fetch(basePath + path, {
-      method: "post",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(body),
+        method: "post",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify(body),
     });
 
     if (!res.ok)

@@ -15,3 +15,5 @@ export function getEnv(name: string): string {
 
   return value;
 }
+
+export const NODE_ENV = getEnv("NODE_ENV");
