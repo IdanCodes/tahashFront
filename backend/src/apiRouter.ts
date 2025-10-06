@@ -6,7 +6,7 @@ import {
   getUserDataByToken,
   WCA_AUTH_URL,
 } from "./utils/wcaApiUtils";
-import { getEnv, NODE_ENV } from "./utils/env";
+import { getEnv, IS_PRODUCTION } from "./utils/env";
 import {
   errorObject,
   isErrorObject,
@@ -15,6 +15,7 @@ import session from "express-session";
 import MongoStore from "connect-mongo";
 import { UserInfo } from "./interfaces/user-info";
 import cors from "cors";
+import { MongoClient } from "mongodb";
 
 const router = Router();
 
@@ -27,9 +28,10 @@ declare module "express-session" {
   }
 }
 
-console.log("Connecting to sessions database...");
 // TODO: Cleaner mongo connection
-const mongoConnection = `mongodb://${getEnv("MONGO_INITDB_ROOT_USERNAME")}:${getEnv("MONGO_INITDB_ROOT_PASSWORD")}@localhost:27017/tahash?authSource=admin`;
+const mongoHost = IS_PRODUCTION ? getEnv("MONGO_SERVICE") : "localhost";
+const mongoConnection = `mongodb://${getEnv("MONGO_INITDB_ROOT_USERNAME")}:${getEnv("MONGO_INITDB_ROOT_PASSWORD")}@${mongoHost}:27017/tahash?authSource=admin`;
+console.log(`Connecting to sessions database... ${mongoConnection}`);
 const mongoSession = session({
   secret: getEnv("MONGO_SESSION_SECRET"),
   resave: false, // don't force save if unmodified
@@ -37,27 +39,37 @@ const mongoSession = session({
   cookie: {
     maxAge: 24 * 60 * 60 * 1000, // 1 day
     httpOnly: true,
-    secure: NODE_ENV == "production",
-    sameSite: NODE_ENV == "production" ? "none" : "lax",
+    secure: IS_PRODUCTION,
+    sameSite: IS_PRODUCTION ? "none" : "lax",
   },
   store: MongoStore.create({
-    mongoUrl: mongoConnection,
+    clientPromise: MongoClient.connect(mongoConnection, {
+      serverSelectionTimeoutMS: 1500, // initial connection timeout
+      connectTimeoutMS: 1500, // ongoing connection timeout
+    }),
     collectionName: "sessions",
     ttl: 7 * 24 * 60 * 60, // 1 week (in seconds)
   }),
 });
+
 router.use(mongoSession);
-console.log("Connected to MongoDB!");
 
 router.get("/", (req: Request, res: Response) => {
+  console.log("Received");
   res.status(200).json(new ApiResponse(ResponseCode.Success, "Api Response"));
 });
 
-router.get("/auth-wca", (req: Request, res: Response) => {
+// get the wca authentication url based on a redirect url
+// url param "redirect" for the callback url
+router.get("/auth-wca-url", (req: Request, res: Response) => {
   const redirectUri = req.query.redirect;
   if (typeof redirectUri !== "string")
-    return res.status(400).json(errorObject("Missing redirect param"));
-  res.redirect(WCA_AUTH_URL(redirectUri));
+    return res
+      .status(400)
+      .json(new ApiResponse(ResponseCode.Error, "Missing redirect param"));
+  res
+    .status(200)
+    .json(new ApiResponse(ResponseCode.Success, WCA_AUTH_URL(redirectUri)));
 });
 
 // exchange wca code

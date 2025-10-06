@@ -2,14 +2,14 @@ import {
   errorObject,
   ErrorObject,
   isErrorObject,
-} from "../../../shared/interfaces/error-object";
+} from "@shared/interfaces/error-object";
 import { UserInfo, wcaUserToUserInfo } from "../interfaces/user-info";
 import {
   WcaMeResponse,
   WcaUserResponse,
-} from "../../../shared/interfaces/wca-api/wcaUser";
+} from "@shared/interfaces/wca-api/wcaUser";
 import { getEnv } from "./env";
-import { WcaOAuthTokenResponse } from "../../../shared/interfaces/wca-api/wcaOAuth";
+import { WcaOAuthTokenResponse } from "@shared/interfaces/wca-api/wcaOAuth";
 
 /**
  * WCA OAuth application id (environment variable)

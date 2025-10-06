@@ -4,12 +4,13 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "tsc && node ./dist/backend/index.js"
+    "build": "tsc && tsc-alias",
+    "start": "tsc && tsc-alias && node ./dist/backend/index.js",
+    "prod": "node ./dist/backend/index.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "commonjs",
   "dependencies": {
     "connect-mongo": "^5.1.0",
     "cors": "^2.8.5",
@@ -18,11 +19,13 @@
     "express-session": "^1.18.2",
     "mongoose": "^8.18.3",
     "prettier": "^3.6.2",
-    "process": "^0.11.10"
+    "process": "^0.11.10",
+    "typescript": "^5.9.3"
   },
   "devDependencies": {
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.3",
-    "@types/express-session": "^1.18.2"
+    "@types/express-session": "^1.18.2",
+    "tsc-alias": "^1.8.16"
   }
 }

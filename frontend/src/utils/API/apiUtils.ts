@@ -1,5 +1,6 @@
-import {ResponseCode} from "../../types/response-code";
-import {ApiResponse, isApiResponse} from "../../types/api-response";
+import { ResponseCode } from "@shared/types/response-code";
+import { ApiResponse, isApiResponse } from "@shared/types/api-response";
+import { errorObject } from "@shared/interfaces/error-object";
 
 const basePath = `http://localhost:3000/api`;
 
@@ -25,7 +26,10 @@ export async function sendGetRequest(path: string) {
     return apiRes;
   } catch (err) {
     console.error(`Network error (GET to ${path}):`, err);
-    return new ApiResponse(ResponseCode.Error, "Network Error");
+    return new ApiResponse(
+      ResponseCode.Error,
+      errorObject(`Network Error (GET to ${path})`, err),
+    );
   }
 }
 
@@ -40,11 +44,11 @@ export async function sendPostRequest(
 ): Promise<ApiResponse> {
   try {
     const res = await fetch(basePath + path, {
-        method: "post",
-        headers: {
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify(body),
+      method: "post",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body),
     });
 
     if (!res.ok)

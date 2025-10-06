@@ -7,8 +7,11 @@
     "backend": "./backend/npm start",
     "build": "./backend/tsc"
   },
-  "dependencies": {},
+  "dependencies": {
+    "dotenv": "^17.2.3"
+  },
   "devDependencies": {
+    "@types/node": "^24.7.0",
     "typescript": "^5.5.3"
   },
   "private": true

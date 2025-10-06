@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import apiRouter from "./src/apiRouter";
 import { config } from "dotenv";
+
 config();
 
 const PORT = 3000;

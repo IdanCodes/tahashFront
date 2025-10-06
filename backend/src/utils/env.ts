@@ -17,3 +17,4 @@ export function getEnv(name: string): string {
 }
 
 export const NODE_ENV = getEnv("NODE_ENV");
+export const IS_PRODUCTION = NODE_ENV == "production";

@@ -1,4 +1,4 @@
-import { WcaUser } from "../../../shared/interfaces/wca-api/wcaUser";
+import { WcaUser } from "../../../shared/interfaces/wca-api/wcaUser.js";
 
 /**
  * Represents a user's information from the WCA database.

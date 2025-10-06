@@ -1,12 +1,28 @@
-import React from "react";
+import React, { useState } from "react";
 import PrimaryButton from "../components/buttons/PrimaryButton";
 import { ButtonSize } from "../components/buttons/ButtonSize";
+import { sendGetRequest } from "../utils/API/apiUtils";
+import { ResponseCode } from "@shared/types/response-code";
+import { redirectToError } from "../utils/utils";
+import { errorObject } from "@shared/interfaces/error-object";
 
 function Login() {
+  const [disableInteract, setDisableInteract] = useState(false);
+
   async function startLogin() {
+    setDisableInteract(true);
+
+    await sendGetRequest("/");
+
     console.log("Redirecting to auth...");
-    const redirectUri = `${window.location.origin}/wca-auth-callback`;
-    window.location.href = `/api/auth-wca?redirect=${encodeURIComponent(redirectUri)}`;
+    const redirectUri = encodeURIComponent(
+      `${window.location.origin}/wca-auth-callback`,
+    );
+    const res = await sendGetRequest(`/auth-wca-url?redirect=${redirectUri}`);
+    if (res.code == ResponseCode.Error) return redirectToError(res.data);
+
+    // res.code = Success -> data is valid
+    window.location.href = res.data as string;
   }
 
   return (
@@ -15,6 +31,7 @@ function Login() {
       <div>
         <div className="mt-10 flex place-items-center justify-center">
           <PrimaryButton
+            disabled={disableInteract}
             text="Log In With WCA"
             buttonSize={ButtonSize.Medium}
             onClick={startLogin}

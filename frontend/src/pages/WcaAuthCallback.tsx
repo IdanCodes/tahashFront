@@ -5,7 +5,7 @@ import {
   isErrorObject,
 } from "../../../shared/interfaces/error-object";
 import { redirectToError } from "../utils/utils";
-import { sendPostRequest } from "../../../shared/utils/API/apiUtils";
+import { sendPostRequest } from "../utils/API/apiUtils";
 import { ResponseCode } from "../../../shared/types/response-code";
 import { WcaOAuthTokenResponse } from "../../../shared/interfaces/wca-api/wcaOAuth";
 
