@@ -156,17 +156,13 @@ router.post("/wca-code-exchange", async (req: Request, res: Response) => {
 // returns: If there was an error, undefined.
 // Otherwise, the user's UserInfo.
 router.get("/user-info", (req: Request, res: Response) => {
-  if (!req.session.userSession) {
-    // Not logged in
-    console.log("No session data.");
-    return res.json(new ApiResponse(ResponseCode.Error, "Not logged in"));
-  }
-
-  console.log("Found session data");
   res
     .status(200)
     .json(
-      new ApiResponse(ResponseCode.Success, req.session.userSession.userInfo),
+      new ApiResponse(
+        ResponseCode.Success,
+        isLoggedIn(req) ? req.session.userSession!.userInfo : null,
+      ),
     );
 });
 

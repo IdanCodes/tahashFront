@@ -5,14 +5,14 @@ import {ResponseCode} from "./response-code";
  */
 export class ApiResponse {
     code: ResponseCode;
-    data: any;
+    data: any | null;
 
     constructor(
         code: ResponseCode,
-        data: any | undefined = undefined,
+        data: any | null = null,
     ) {
         this.code = code;
-        this.data = data || { };
+        this.data = data;
     }
 }
 

@@ -1,12 +1,20 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import PrimaryButton from "../components/buttons/PrimaryButton";
 import { ButtonSize } from "../components/buttons/ButtonSize";
 import { sendGetRequest } from "../utils/API/apiUtils";
 import { ResponseCode } from "@shared/types/response-code";
-import { redirectToError } from "../utils/utils";
+import { redirectToError } from "../utils/errorUtils";
+import { useUserInfo } from "../context/UserContext";
+import { useNavigate } from "react-router-dom";
 
 function Login() {
   const [disableInteract, setDisableInteract] = useState(false);
+  const userInfo = useUserInfo();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (userInfo.user) navigate("/profile");
+  });
 
   async function startLogin() {
     setDisableInteract(true);

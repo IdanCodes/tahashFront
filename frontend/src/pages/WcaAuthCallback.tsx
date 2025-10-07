@@ -1,17 +1,15 @@
 import React, { useEffect, useRef } from "react";
-import {
-  ErrorObject,
-  errorObject,
-  isErrorObject,
-} from "@shared/interfaces/error-object";
-import { redirectToError } from "../utils/utils";
+import { ErrorObject, isErrorObject } from "@shared/interfaces/error-object";
+import { redirectToError } from "../utils/errorUtils";
 import { sendPostRequest } from "../utils/API/apiUtils";
 import { ResponseCode } from "@shared/types/response-code";
 import { WcaOAuthTokenResponse } from "@shared/interfaces/wca-api/wcaOAuth";
 import { useNavigate } from "react-router-dom";
+import { useUserInfo } from "../context/UserContext";
 
 function WcaAuthCallback() {
   const calledRef = useRef(false);
+  const userInfo = useUserInfo();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -20,20 +18,23 @@ function WcaAuthCallback() {
 
     const urlParams = new URLSearchParams(window.location.search);
     const authCode = urlParams.get("code");
-    if (!authCode)
-      return redirectToError(errorObject("Missing authentication code"));
+    if (!authCode) {
+      navigate("/login");
+      return;
+    }
 
     const redirectUri = encodeURIComponent(
       `${window.location.origin}/wca-auth-callback`,
     );
     sendPostRequest(`/wca-code-exchange?redirect=${redirectUri}`, {
       code: authCode,
-    }).then((res) => {
+    }).then(async (res) => {
       if (res.code != ResponseCode.Success) return redirectToError(res.data);
 
       const tokenRes = res.data as ErrorObject | WcaOAuthTokenResponse;
       if (isErrorObject(tokenRes)) return redirectToError(tokenRes);
 
+      await userInfo.refresh();
       navigate("/profile");
     });
   }, []);
