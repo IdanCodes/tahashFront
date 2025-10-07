@@ -3,7 +3,7 @@ import {
   ErrorObject,
   isErrorObject,
 } from "@shared/interfaces/error-object";
-import { UserInfo, wcaUserToUserInfo } from "../interfaces/user-info";
+import { UserInfo, wcaUserToUserInfo } from "@shared/interfaces/user-info";
 import {
   WcaMeResponse,
   WcaUserResponse,
@@ -30,11 +30,6 @@ const WCA_BASE_URL = "https://www.worldcubeassociation.org";
  * WCA Api Path
  */
 const WCA_API_PATH = "/api/v0";
-
-/**
- * WCA Callback Path
- */
-export const WCA_CALLBACK_PATH = "/auth-wca-callback";
 
 /**
  * Get the WCA auth url given the host's base url

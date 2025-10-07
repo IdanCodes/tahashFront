@@ -4,15 +4,12 @@ import { ButtonSize } from "../components/buttons/ButtonSize";
 import { sendGetRequest } from "../utils/API/apiUtils";
 import { ResponseCode } from "@shared/types/response-code";
 import { redirectToError } from "../utils/utils";
-import { errorObject } from "@shared/interfaces/error-object";
 
 function Login() {
   const [disableInteract, setDisableInteract] = useState(false);
 
   async function startLogin() {
     setDisableInteract(true);
-
-    await sendGetRequest("/");
 
     console.log("Redirecting to auth...");
     const redirectUri = encodeURIComponent(

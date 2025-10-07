@@ -3,14 +3,16 @@ import {
   ErrorObject,
   errorObject,
   isErrorObject,
-} from "../../../shared/interfaces/error-object";
+} from "@shared/interfaces/error-object";
 import { redirectToError } from "../utils/utils";
 import { sendPostRequest } from "../utils/API/apiUtils";
-import { ResponseCode } from "../../../shared/types/response-code";
-import { WcaOAuthTokenResponse } from "../../../shared/interfaces/wca-api/wcaOAuth";
+import { ResponseCode } from "@shared/types/response-code";
+import { WcaOAuthTokenResponse } from "@shared/interfaces/wca-api/wcaOAuth";
+import { useNavigate } from "react-router-dom";
 
 function WcaAuthCallback() {
   const calledRef = useRef(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (calledRef.current) return; // already initialized
@@ -28,17 +30,20 @@ function WcaAuthCallback() {
       code: authCode,
     }).then((res) => {
       if (res.code != ResponseCode.Success)
-        return redirectToError(errorObject("Error in code exchange", res.data));
+        return redirectToError(errorObject("Error in log in", res.data));
 
       const tokenRes = res.data as ErrorObject | WcaOAuthTokenResponse;
       if (isErrorObject(tokenRes)) return redirectToError(tokenRes);
 
-      // TODO: save the token here
-      console.log("Received token:", tokenRes);
+      navigate("/profile");
     });
   }, []);
 
-  return <div>Callback</div>;
+  return (
+    <div>
+      <p className="m-10 text-center text-4xl">Loading...</p>
+    </div>
+  );
 }
 
 export default WcaAuthCallback;

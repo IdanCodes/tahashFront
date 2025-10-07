@@ -1,4 +1,4 @@
-import { ErrorObject, isErrorObject } from "@shared/interfaces/error-object";
+import { isErrorObject } from "@shared/interfaces/error-object";
 
 export function redirectToError(error: object): void {
   let text: string;
@@ -8,7 +8,8 @@ export function redirectToError(error: object): void {
     data = error.context
       ? `&data=${encodeURIComponent(JSON.stringify(error.context))}`
       : "";
-  } else text = error.toString();
+  } else if (typeof error == "object") text = JSON.stringify(error);
+  else text = error as string;
 
   window.location.href = `/error?text=${encodeURIComponent(text)}${data}`;
 }

@@ -20,7 +20,9 @@ export interface WcaUser {
     /**
      * Full name of the user's country (e.g., "Israel").
      */
-    country: string;
+    country: {
+        name: string
+    };
 
     /**
      * URLs for the user's avatar image.

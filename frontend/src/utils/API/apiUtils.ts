@@ -11,7 +11,9 @@ const basePath = `http://localhost:3000/api`;
  */
 export async function sendGetRequest(path: string) {
   try {
-    const res = await fetch(basePath + path);
+    const res = await fetch(basePath + path, {
+      credentials: "include",
+    });
 
     if (!res.ok)
       return new ApiResponse(
@@ -48,6 +50,7 @@ export async function sendPostRequest(
       headers: {
         "Content-Type": "application/json",
       },
+      credentials: "include",
       body: JSON.stringify(body),
     });
 
@@ -69,4 +72,4 @@ export async function sendPostRequest(
 }
 
 // TODO: a method to create a post request's body
-export function getPostBody(headers: object) {}
+// export function getPostBody(headers: object) {}

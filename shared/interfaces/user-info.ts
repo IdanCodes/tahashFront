@@ -1,4 +1,4 @@
-import { WcaUser } from "../../../shared/interfaces/wca-api/wcaUser.js";
+import {WcaUser} from "./wca-api/wcaUser";
 
 /**
  * Represents a user's information from the WCA database.
@@ -20,7 +20,7 @@ export function wcaUserToUserInfo(wcaUser: WcaUser): UserInfo {
     id: wcaUser.id,
     name: wcaUser.name,
     wcaId: wcaUser.wca_id,
-    country: wcaUser.country,
+    country: wcaUser.country.name,
     photoUrl: wcaUser.avatar.url,
   };
 }
