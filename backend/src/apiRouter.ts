@@ -4,6 +4,7 @@ import { ApiResponse } from "@shared/types/api-response";
 import {
   exchangeAuthCode,
   getUserDataByToken,
+  renewAuthentication,
   WCA_AUTH_URL,
 } from "./utils/wcaApiUtils";
 import { getEnv, IS_PRODUCTION } from "./utils/env";
@@ -46,45 +47,51 @@ const mongoSession = session({
 });
 const SID_COOKIE_NAME = "connect.sid";
 
+/**
+ * Check if a client is logged in
+ * @param req A request made by the client to check
+ */
+function isLoggedIn(req: Request): boolean {
+  return req.session.userSession !== undefined;
+}
+
 router.use(mongoSession);
 
-// router.use(async (req: Request, res: Response, next: NextFunction) => {
-//   const userSession = req.session.userSession;
-//   console.log("USERSESSION:", userSession);
-//   if (!userSession || userSession.expiration < new Date().getTime())
-//     return next();
-//
-//   // get new access token
-//   const tokenRes = await renewAuthentication(userSession.refresh_token);
-//   if (isErrorObject(tokenRes))
-//     return res.json(new ApiResponse(ResponseCode.Error, tokenRes));
-//
-//   // fetch WCA user data
-//   const userInfo = await getUserDataByToken(tokenRes.access_token);
-//   if (isErrorObject(userInfo))
-//     return res.json(new ApiResponse(ResponseCode.Error, userInfo));
-//
-//   req.session.userSession = {
-//     access_token: tokenRes.access_token,
-//     refresh_token: tokenRes.refresh_token,
-//     expiration: new Date().getTime() + tokenRes.expires_in * 100,
-//     userInfo: userInfo,
-//   };
-//
-//   next();
-// });
+// Middleware to refresh an expired WCA session
+router.use(async (req: Request, res: Response, next: NextFunction) => {
+  const userSession = req.session.userSession;
+  if (!userSession || userSession.expiration < new Date().getTime())
+    return next();
 
-router.use((req: Request, res: Response, next: NextFunction) => {
-  console.log("Session id: ", req.sessionID);
+  // get new access token
+  const tokenRes = await renewAuthentication(userSession.refresh_token);
+  if (isErrorObject(tokenRes))
+    return res.json(new ApiResponse(ResponseCode.Error, tokenRes));
+
+  // fetch WCA user data
+  const userInfo = await getUserDataByToken(tokenRes.access_token);
+  if (isErrorObject(userInfo))
+    return res.json(new ApiResponse(ResponseCode.Error, userInfo));
+
+  req.session.userSession = {
+    access_token: tokenRes.access_token,
+    refresh_token: tokenRes.refresh_token,
+    expiration: new Date().getTime() + tokenRes.expires_in * 100,
+    userInfo: userInfo,
+  };
+
   next();
 });
 
+// Testing
 router.get("/", (req: Request, res: Response) => {
   res.status(200).json(new ApiResponse(ResponseCode.Success, "Api Response"));
 });
 
-// get the wca authentication url based on a redirect url
-// url param "redirect" for the callback url
+/**
+ * Get the WCA authentication url based on a redirect url
+ * @param url Redirect url for the callback
+ */
 router.get("/auth-wca-url", (req: Request, res: Response) => {
   const redirectUri = req.query.redirect;
   if (typeof redirectUri !== "string")
@@ -112,8 +119,7 @@ router.post("/wca-code-exchange", async (req: Request, res: Response) => {
       new ApiResponse(ResponseCode.Error, "Missing redirect param"),
     );
 
-  if (req.session.userSession)
-    // already logged in
+  if (isLoggedIn(req))
     return res.json(new ApiResponse(ResponseCode.Error, "Already logged in"));
 
   // Exchange authentication code
@@ -135,32 +141,20 @@ router.post("/wca-code-exchange", async (req: Request, res: Response) => {
   };
 
   req.session.save((err) => {
-    // if (err)
-    //   return res.json(
-    //     new ApiResponse(
-    //       ResponseCode.Error,
-    //       errorObject("Error saving session", err),
-    //     ),
-    //   );
-
-    console.log("Saved! Error:", err);
     res.json(
       err
         ? new ApiResponse(
             ResponseCode.Error,
             errorObject("Error saving session", err),
           )
-        : new ApiResponse(ResponseCode.Success, userInfo),
+        : new ApiResponse(ResponseCode.Success, "Logged in successfully!"),
     );
   });
-
-  // return res.json(
-  //   new ApiResponse(ResponseCode.Success, "Logged in successfully!"),
-  // );
 });
 
 // get the user info of a user who's logged in
-// returns: either undefined in Error, or the user's UserInfo when no error.
+// returns: If there was an error, undefined.
+// Otherwise, the user's UserInfo.
 router.get("/user-info", (req: Request, res: Response) => {
   if (!req.session.userSession) {
     // Not logged in
@@ -176,11 +170,10 @@ router.get("/user-info", (req: Request, res: Response) => {
     );
 });
 
+// Remove the user's session from the database and destroy the cookie
 router.get("/logout", (req: Request, res: Response) => {
-  if (!req.session.userSession) {
-    // Not logged in
+  if (!isLoggedIn(req))
     return res.json(new ApiResponse(ResponseCode.Error, "Not logged in"));
-  }
 
   req.session.destroy((err) => {
     if (err)

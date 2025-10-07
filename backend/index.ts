@@ -9,6 +9,7 @@ config();
 const PORT = 3000;
 const app = express();
 
+// CORS config
 const WEBSITE_ORIGIN = getEnv("WEBSITE_ORIGIN") || "http://localhost:5173";
 app.use(
   cors({
@@ -16,8 +17,10 @@ app.use(
     credentials: true,
   }),
 );
+
 app.use(express.json());
 
+// Router middleware
 app.use("/api", apiRouter);
 
 app.listen(PORT, () => {

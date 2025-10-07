@@ -29,8 +29,7 @@ function WcaAuthCallback() {
     sendPostRequest(`/wca-code-exchange?redirect=${redirectUri}`, {
       code: authCode,
     }).then((res) => {
-      if (res.code != ResponseCode.Success)
-        return redirectToError(errorObject("Error in log in", res.data));
+      if (res.code != ResponseCode.Success) return redirectToError(res.data);
 
       const tokenRes = res.data as ErrorObject | WcaOAuthTokenResponse;
       if (isErrorObject(tokenRes)) return redirectToError(tokenRes);
