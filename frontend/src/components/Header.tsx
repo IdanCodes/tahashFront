@@ -27,7 +27,7 @@ function NavbarButton({ to, text }: { to: string; text: string }): JSX.Element {
       to={to}
       className={({ isActive }) =>
         clsx(
-          "box-border rounded-xl border-3 border-black text-xl transition-all duration-75 ease-out",
+          "box-border rounded-xl border-3 border-black text-2xl transition-all duration-75 ease-out",
           isActive && "bg-gray-500/90 font-semibold",
           !isActive && "bg-gray-200 hover:scale-107 hover:bg-gray-400",
         )

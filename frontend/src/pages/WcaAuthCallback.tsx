@@ -16,6 +16,11 @@ function WcaAuthCallback() {
     if (calledRef.current) return; // already initialized
     calledRef.current = true;
 
+    if (userInfo.user) {
+      navigate("/profile");
+      return;
+    }
+
     const urlParams = new URLSearchParams(window.location.search);
     const authCode = urlParams.get("code");
     if (!authCode) {

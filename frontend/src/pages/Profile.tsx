@@ -2,7 +2,6 @@ import React, { JSX, ReactNode, useEffect, useState } from "react";
 import { useUserInfo } from "../context/UserContext";
 import { useNavigate } from "react-router-dom";
 import PrimaryButton from "../components/buttons/PrimaryButton";
-import { sendGetRequest } from "../utils/API/apiUtils";
 import { ButtonSize } from "../components/buttons/ButtonSize";
 
 function ProfileAttribute({
@@ -31,11 +30,11 @@ function Profile() {
 
   return (
     <>
-      <p className="m-3 text-center text-4xl font-bold">Profile</p>
+      <p className="m-3 text-center text-5xl font-bold">Profile</p>
 
       {userInfo.user ? (
         <>
-          <div className="mx-auto flex w-2/5 flex-col">
+          <div className="mx-auto flex w-3/10 flex-col">
             <ProfileAttribute name="Name:" value={userInfo.user.name} />
             <ProfileAttribute name="WCA ID:" value={userInfo.user.wcaId} />
             <ProfileAttribute name="Country:" value={userInfo.user.country} />
@@ -68,8 +67,7 @@ function Profile() {
               onClick={async (e) => {
                 e.preventDefault();
                 setDisableLogout(true);
-                await sendGetRequest("/logout");
-                await userInfo.refresh();
+                await userInfo.logout();
                 navigate("/login");
                 setDisableLogout(false);
               }}
