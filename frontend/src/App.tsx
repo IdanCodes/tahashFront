@@ -15,20 +15,23 @@ function App(): JSX.Element {
   return (
     <BrowserRouter>
       <div className="h-full bg-gray-300/90">
-        {/*<LoadingProvider>*/}
-        <UserInfoProvider>
-          <Header />
-          {/*<LoadingWrapper>*/}
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/error" element={<Error />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/profile" element={<Profile />} />
-            <Route path="/wca-auth-callback" element={<WcaAuthCallback />} />
-          </Routes>
-          {/*</LoadingWrapper>*/}
-        </UserInfoProvider>
-        {/*</LoadingProvider>*/}
+        <LoadingProvider>
+          <UserInfoProvider>
+            <Header />
+            <LoadingWrapper>
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/error" element={<Error />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/profile" element={<Profile />} />
+                <Route
+                  path="/wca-auth-callback"
+                  element={<WcaAuthCallback />}
+                />
+              </Routes>
+            </LoadingWrapper>
+          </UserInfoProvider>
+        </LoadingProvider>
       </div>
     </BrowserRouter>
   );

@@ -3,6 +3,8 @@ import { useUserInfo } from "../context/UserContext";
 import { useNavigate } from "react-router-dom";
 import PrimaryButton from "../components/buttons/PrimaryButton";
 import { ButtonSize } from "../components/buttons/ButtonSize";
+import { useLoading } from "../context/LoadingContext";
+import { UserInfo } from "@shared/interfaces/user-info";
 
 function ProfileAttribute({
   name,
@@ -19,63 +21,87 @@ function ProfileAttribute({
   );
 }
 
-function Profile() {
+function ProfilePanel({ userInfo }: { userInfo: UserInfo }) {
+  return (
+    <>
+      <div className="mx-auto flex w-3/10 flex-col">
+        <ProfileAttribute name="Name:" value={userInfo.name} />
+        <ProfileAttribute name="WCA ID:" value={userInfo.wcaId} />
+        <ProfileAttribute name="Country:" value={userInfo.country} />
+        <ProfileAttribute
+          name="Photo:"
+          value={
+            <a
+              target="_blank"
+              href={`https://www.worldcubeassociation.org/persons/${userInfo.wcaId ?? ""}`}
+            >
+              <img
+                src={userInfo.photoUrl}
+                alt="User's WCA photo"
+                className="h-auto w-35 cursor-pointer rounded-2xl border-4 border-black transition-all duration-75 hover:scale-103"
+              />
+            </a>
+          }
+        />
+      </div>
+    </>
+  );
+}
+
+function LogoutButton({ logout }: { logout: () => Promise<void> }) {
   const [disableLogout, setDisableLogout] = useState(false);
+  const navigate = useNavigate();
+  const { addLoading, removeLoading } = useLoading();
+
+  async function onClick(e: React.MouseEvent<Element, MouseEvent>) {
+    e.preventDefault();
+    setDisableLogout(true);
+    addLoading();
+    await logout();
+    removeLoading();
+    navigate("/login");
+    setDisableLogout(false);
+  }
+
+  return (
+    <div className="m-3 flex place-content-center justify-center">
+      <PrimaryButton
+        colors={{
+          normal: "bg-red-500",
+          hover: "bg-red-400/90",
+          click: "bg-purple-500",
+        }}
+        buttonSize={ButtonSize.Large}
+        text="Logout"
+        disabled={disableLogout}
+        onClick={onClick}
+      />
+    </div>
+  );
+}
+
+function Profile() {
   const userInfo = useUserInfo();
+  const { addLoading, removeLoading } = useLoading();
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!userInfo.user) navigate("/login");
+    addLoading();
+    userInfo.onLoadCached(() => {
+      removeLoading();
+      if (!userInfo.user) navigate("/login");
+    });
   });
 
   return (
     <>
       <p className="m-3 text-center text-5xl font-bold">Profile</p>
 
-      {userInfo.user ? (
+      {userInfo.user && (
         <>
-          <div className="mx-auto flex w-3/10 flex-col">
-            <ProfileAttribute name="Name:" value={userInfo.user.name} />
-            <ProfileAttribute name="WCA ID:" value={userInfo.user.wcaId} />
-            <ProfileAttribute name="Country:" value={userInfo.user.country} />
-            <ProfileAttribute
-              name="Photo:"
-              value={
-                <a
-                  target="_blank"
-                  href={`https://www.worldcubeassociation.org/persons/${userInfo.user!.wcaId ?? ""}`}
-                >
-                  <img
-                    src={userInfo.user.photoUrl}
-                    alt="User's WCA photo"
-                    className="h-auto w-35 cursor-pointer rounded-2xl border-4 border-black transition-all duration-75 hover:scale-103"
-                  />
-                </a>
-              }
-            />
-          </div>
-          <div className="m-3 flex place-content-center justify-center">
-            <PrimaryButton
-              colors={{
-                normal: "bg-red-500",
-                hover: "bg-red-400/90",
-                click: "bg-purple-500",
-              }}
-              buttonSize={ButtonSize.Large}
-              text="Logout"
-              disabled={disableLogout}
-              onClick={async (e) => {
-                e.preventDefault();
-                setDisableLogout(true);
-                await userInfo.logout();
-                navigate("/login");
-                setDisableLogout(false);
-              }}
-            />
-          </div>
+          <ProfilePanel userInfo={userInfo.user} />
+          <LogoutButton logout={userInfo.logout} />
         </>
-      ) : (
-        <div>Loading...</div>
       )}
     </>
   );

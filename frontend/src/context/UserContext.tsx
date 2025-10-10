@@ -9,17 +9,19 @@ import {
 } from "react";
 import { sendGetRequest } from "../utils/API/apiUtils";
 import { ResponseCode } from "@shared/types/response-code";
-import { useLoading } from "./LoadingContext";
+import { useLocalStorage } from "../hooks/useLocalStorage";
 
 interface UserInfoContextType {
   user: UserInfo | null;
   refreshSync: () => void;
   refresh: () => Promise<void>;
   logout: () => Promise<void>;
+  onLoadCached: (cb: () => void) => void;
 }
 
 const UserContext = createContext<UserInfoContextType | undefined>(undefined);
 
+const userInfoStorage = "user-info";
 export function UserInfoProvider({ children }: { children: ReactNode }) {
   /**
    * user:
@@ -27,69 +29,54 @@ export function UserInfoProvider({ children }: { children: ReactNode }) {
    * - null -> not logged in
    * - otherwise -> UserInfo
    */
-  const [user, setUser] = useState<UserInfo | null | undefined>(undefined);
+  const [user, setUser] = useLocalStorage<UserInfo | null | undefined>(
+    userInfoStorage,
+    undefined,
+  );
   const [refreshFlag, setRefreshFlag] = useState(false);
-  // const { addLoading, removeLoading } = useLoading();
-  const loaded = useRef(false);
+  const onLoadCachedCbs = useRef<(() => void)[]>([]);
 
   function refreshSync() {
     setRefreshFlag(true);
-    loaded.current = false;
-  }
-
-  const userInfoStorage = "user-info";
-  function storeUserInfo(userInfo: UserInfo | null) {
-    setUser(userInfo);
-    if (userInfo)
-      localStorage.setItem(userInfoStorage, JSON.stringify(userInfo));
-    else localStorage.removeItem(userInfoStorage);
-  }
-
-  function loadCachedUserInfo(): void {
-    const value = localStorage.getItem(userInfoStorage);
-    const userInfo: UserInfo | null = value
-      ? (JSON.parse(value) as UserInfo)
-      : null;
-    setUser(userInfo);
   }
 
   async function refresh() {
-    console.log("refresh");
     const res = await sendGetRequest("/user-info");
-    if (res.code == ResponseCode.Success) return storeUserInfo(res.data);
+    if (res.code == ResponseCode.Success) return setUser(res.data);
 
     console.error(
       "UserInfoProvider.refreshSync: Error refreshing user info!",
       res,
     );
-    // removeLoading();
   }
 
   async function logout() {
     await sendGetRequest("/logout");
-    storeUserInfo(null);
+    setUser(null);
   }
 
-  useEffect(() => {
-    if (loaded.current) return;
-    loaded.current = true;
+  // whether the user info storage is initialized
+  function storageInitialized(): boolean {
+    return user !== undefined;
+  }
 
-    if (user === undefined) {
-      // first render
-      loadCachedUserInfo();
-      refreshSync();
+  // initialize user
+  useEffect(() => {
+    if (!storageInitialized()) {
+      refresh().then();
       return;
     }
 
-    // addLoading();
+    for (const cb of onLoadCachedCbs.current) cb();
+    onLoadCachedCbs.current = [];
+  }, [user]);
 
-    loadCachedUserInfo();
-    if (refreshFlag) {
-      // addLoading();
-      setRefreshFlag(false);
-      refresh().then();
-    }
-    // removeLoading();
+  // for refreshSync
+  useEffect(() => {
+    if (!storageInitialized() || !refreshFlag) return;
+
+    setRefreshFlag(false);
+    refresh().then();
   }, [refreshFlag]);
 
   return (
@@ -99,6 +86,10 @@ export function UserInfoProvider({ children }: { children: ReactNode }) {
         refreshSync: refreshSync,
         refresh: refresh,
         logout: logout,
+        onLoadCached: (cb) => {
+          if (storageInitialized()) cb();
+          else onLoadCachedCbs.current.push(cb);
+        },
       }}
     >
       {children}
