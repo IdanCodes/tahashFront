@@ -27,13 +27,13 @@ function NavbarButton({ to, text }: { to: string; text: string }): JSX.Element {
       to={to}
       className={({ isActive }) =>
         clsx(
-          "box-border rounded-xl border-3 border-black text-2xl transition-all duration-75 ease-out",
-          isActive && "bg-gray-500/90 font-semibold",
+          "box-border rounded-xl border-3 border-black text-2xl transition-all duration-125 ease-out",
+          isActive && "bg-gray-500 font-semibold",
           !isActive && "bg-gray-200 hover:scale-107 hover:bg-gray-400",
         )
       }
     >
-      <div className="px-3 py-2">
+      <div className="box-border px-3 py-2">
         <p className="text-center text-black">{text}</p>
       </div>
     </NavLink>
