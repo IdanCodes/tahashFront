@@ -1,5 +1,5 @@
 import "./index.css";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
 import { JSX } from "react";
 import Header from "./components/Header";
 import Home from "./pages/Home";
@@ -10,6 +10,59 @@ import WcaAuthCallback from "./pages/WcaAuthCallback";
 import { UserInfoProvider } from "./context/UserContext";
 import { LoadingProvider } from "./context/LoadingContext";
 import LoadingWrapper from "./components/LoadingWrapper";
+import { AnimatePresence } from "motion/react";
+import { PageTransition } from "./components/PageTransition";
+
+function AnimatedRoutes(): JSX.Element {
+  const location = useLocation();
+
+  return (
+    <AnimatePresence mode="wait">
+      <Routes location={location} key={location.pathname}>
+        <Route
+          path="/"
+          element={
+            <PageTransition>
+              <Home />
+            </PageTransition>
+          }
+        />
+        <Route
+          path="/error"
+          element={
+            <PageTransition>
+              <Error />
+            </PageTransition>
+          }
+        />
+        <Route
+          path="/login"
+          element={
+            <PageTransition>
+              <Login />
+            </PageTransition>
+          }
+        />
+        <Route
+          path="/profile"
+          element={
+            <PageTransition>
+              <Profile />
+            </PageTransition>
+          }
+        />
+        <Route
+          path="/wca-auth-callback"
+          element={
+            <PageTransition>
+              <WcaAuthCallback />
+            </PageTransition>
+          }
+        />
+      </Routes>
+    </AnimatePresence>
+  );
+}
 
 function App(): JSX.Element {
   return (
@@ -19,16 +72,7 @@ function App(): JSX.Element {
           <UserInfoProvider>
             <Header />
             <LoadingWrapper>
-              <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="/error" element={<Error />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/profile" element={<Profile />} />
-                <Route
-                  path="/wca-auth-callback"
-                  element={<WcaAuthCallback />}
-                />
-              </Routes>
+              <AnimatedRoutes />
             </LoadingWrapper>
           </UserInfoProvider>
         </LoadingProvider>
