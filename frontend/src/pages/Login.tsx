@@ -6,6 +6,8 @@ import { ResponseCode } from "@shared/types/response-code";
 import { redirectToError } from "../utils/errorUtils";
 import { useUserInfo } from "../context/UserContext";
 import { useNavigate } from "react-router-dom";
+import { RoutePath } from "@shared/constants/routePath";
+import { QueryParams } from "@shared/constants/query-params";
 
 function Login() {
   const [disableInteract, setDisableInteract] = useState(false);
@@ -13,7 +15,7 @@ function Login() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (userInfo.user) navigate("/profile");
+    if (userInfo.user) navigate(RoutePath.Page.Profile);
   });
 
   async function startLogin() {
@@ -21,9 +23,11 @@ function Login() {
 
     console.log("Redirecting to auth...");
     const redirectUri = encodeURIComponent(
-      `${window.location.origin}/wca-auth-callback`,
+      `${window.location.origin}${RoutePath.Page.WcaAuthCallback}`,
     );
-    const res = await sendGetRequest(`/auth-wca-url?redirect=${redirectUri}`);
+    const res = await sendGetRequest(
+      `${RoutePath.Get.AuthWcaUrl}?${QueryParams.Redirect}=${redirectUri}`,
+    );
     if (res.code == ResponseCode.Error) return redirectToError(res.data);
 
     // res.code = Success -> data is valid

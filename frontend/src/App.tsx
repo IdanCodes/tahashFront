@@ -12,6 +12,8 @@ import { LoadingProvider } from "./context/LoadingContext";
 import LoadingWrapper from "./components/LoadingWrapper";
 import { AnimatePresence } from "motion/react";
 import { PageTransition } from "./components/PageTransition";
+import Scrambles from "./pages/Scrambles";
+import { RoutePath } from "@shared/constants/routePath";
 
 function AnimatedRoutes(): JSX.Element {
   const location = useLocation();
@@ -20,7 +22,7 @@ function AnimatedRoutes(): JSX.Element {
     <AnimatePresence mode="wait">
       <Routes location={location} key={location.pathname}>
         <Route
-          path="/"
+          path={RoutePath.Page.HomeRedirect}
           element={
             <PageTransition>
               <Home />
@@ -28,7 +30,7 @@ function AnimatedRoutes(): JSX.Element {
           }
         />
         <Route
-          path="/error"
+          path={RoutePath.Page.Error}
           element={
             <PageTransition>
               <Error />
@@ -36,7 +38,7 @@ function AnimatedRoutes(): JSX.Element {
           }
         />
         <Route
-          path="/login"
+          path={RoutePath.Page.Login}
           element={
             <PageTransition>
               <Login />
@@ -44,7 +46,7 @@ function AnimatedRoutes(): JSX.Element {
           }
         />
         <Route
-          path="/profile"
+          path={RoutePath.Page.Profile}
           element={
             <PageTransition>
               <Profile />
@@ -52,7 +54,15 @@ function AnimatedRoutes(): JSX.Element {
           }
         />
         <Route
-          path="/wca-auth-callback"
+          path={RoutePath.Page.Scrambles}
+          element={
+            <PageTransition>
+              <Scrambles />
+            </PageTransition>
+          }
+        />
+        <Route
+          path={RoutePath.Page.WcaAuthCallback}
           element={
             <PageTransition>
               <WcaAuthCallback />

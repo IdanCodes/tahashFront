@@ -28,8 +28,8 @@ function NavbarButton({ to, text }: { to: string; text: string }): JSX.Element {
       className={({ isActive }) =>
         clsx(
           "box-border rounded-xl border-3 border-black text-2xl transition-all duration-125 ease-out",
-          isActive && "bg-gray-500 font-semibold",
-          !isActive && "bg-gray-200 hover:scale-107 hover:bg-gray-400",
+          isActive && "scale-109 bg-gray-500",
+          !isActive && "bg-gray-200 hover:scale-105 hover:bg-gray-400",
         )
       }
     >
@@ -44,6 +44,7 @@ function LoggedInButtons(): JSX.Element {
   return (
     <>
       <NavbarButton to="/profile" text="Profile" />
+      <NavbarButton to="/scrambles" text="Scrambles" />
     </>
   );
 }

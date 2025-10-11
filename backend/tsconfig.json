@@ -10,7 +10,8 @@
     "strict": true,
     "lib": [ "ES2021", "dom" ],
     "forceConsistentCasingInFileNames": true,
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "skipLibCheck": true
   },
   "include": ["./**/*"]
 }

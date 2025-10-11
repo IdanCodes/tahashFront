@@ -8,8 +8,11 @@ import {
   WcaMeResponse,
   WcaUserResponse,
 } from "@shared/interfaces/wca-api/wcaUser";
-import { getEnv } from "./env";
+import { getEnv } from "../config/env";
 import { WcaOAuthTokenResponse } from "@shared/interfaces/wca-api/wcaOAuth";
+import { EventRecords } from "../interfaces/event-records";
+import { TimeFormat } from "../constants/time-formats";
+import { EventId } from "../database/comp-event";
 
 /**
  * WCA OAuth application id (environment variable)
@@ -120,12 +123,12 @@ export async function getUserDataByUserId(
 
 /* returns a "records" array of the user's WCA records */
 // TODO: implement getWCARecordsOfUser
-// export async function getWCARecordsOfUser(
-//   userId: number,
-// ): Promise<Record<string, EventRecords<TimeFormat>>> {
-//   console.error("getWCARecordsOfUser not implemented");
-//   return {};
-// }
+export async function getWCARecordsOfUser(
+  userId: number,
+): Promise<Map<EventId, EventRecords<TimeFormat>>> {
+  console.error("getWCARecordsOfUser not implemented");
+  return new Map();
+}
 
 /**
  * Exchange an authentication token for a {@link WcaOAuthTokenResponse} object.

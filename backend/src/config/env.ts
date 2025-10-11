@@ -16,5 +16,15 @@ export function getEnv(name: string): string {
   return value;
 }
 
+/**
+ * Get an environment variable using process.env (use for environment variables which are *NOT* mandatory).
+ * @throws Throws an `Error` if the environment variable is not set.
+ * @param name The name of the environment variable.
+ * @returns The environment variable's value, or `undefined` if it wasn't found.
+ */
+export function tryGetEnv(name: string): string | undefined {
+  return process.env[name];
+}
+
 export const NODE_ENV = getEnv("NODE_ENV");
 export const IS_PRODUCTION = NODE_ENV == "production";

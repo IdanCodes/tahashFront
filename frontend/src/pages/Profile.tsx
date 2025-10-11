@@ -5,6 +5,7 @@ import PrimaryButton from "../components/buttons/PrimaryButton";
 import { ButtonSize } from "../components/buttons/ButtonSize";
 import { useLoading } from "../context/LoadingContext";
 import { UserInfo } from "@shared/interfaces/user-info";
+import { RoutePath } from "@shared/constants/routePath";
 
 function ProfileAttribute({
   name,
@@ -89,7 +90,7 @@ function Profile() {
     addLoading();
     userInfo.onLoadCached(() => {
       removeLoading();
-      if (!userInfo.user) navigate("/login");
+      if (!userInfo.user) navigate(RoutePath.Page.Login);
     });
   });
 

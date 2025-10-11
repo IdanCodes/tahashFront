@@ -2,8 +2,8 @@ import React, { JSX } from "react";
 import PrimaryButton from "../components/buttons/PrimaryButton";
 import { ButtonSize } from "../components/buttons/ButtonSize";
 import { useNavigate } from "react-router-dom";
-import LoadingWrapper from "../components/LoadingWrapper";
 import { useLoading } from "../context/LoadingContext";
+import { RoutePath } from "@shared/constants/routePath";
 
 function Home(): JSX.Element {
   const navigate = useNavigate();
@@ -11,17 +11,18 @@ function Home(): JSX.Element {
 
   return (
     <>
-      <div className="mx-auto flex w-4/5 flex-row">
-        <div className="text-center text-4xl">Home</div>
+      <div className="text-center text-5xl font-bold">Home</div>
+      <div className="mx-auto flex w-4/5 flex-col">
         <div className="mt-10 flex place-items-center justify-center">
           <PrimaryButton
             text="Log In"
             buttonSize={ButtonSize.Medium}
-            onClick={() => navigate("/login")}
+            onClick={() => navigate(RoutePath.Page.Login)}
           />
         </div>
+        <br />
         <PrimaryButton
-          text="Loading screen"
+          text="Loading screen for 3 seconds"
           onClick={() => {
             addLoading();
             setTimeout(() => {
@@ -30,11 +31,9 @@ function Home(): JSX.Element {
           }}
         />
 
-        <LoadingWrapper>
-          <div>
-            <p>Loaded content!</p>
-          </div>
-        </LoadingWrapper>
+        <div>
+          <p>Loaded content!</p>
+        </div>
       </div>
     </>
   );
