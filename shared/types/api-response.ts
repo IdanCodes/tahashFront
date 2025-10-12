@@ -19,3 +19,10 @@ export class ApiResponse {
 export function isApiResponse(data: any): data is ApiResponse {
     return (typeof data === 'object' && data !== null && "code" in data && "data" in data);
 }
+
+/**
+ * A helper to create an {@link ApiResponse} with an error
+ */
+export function errorResponse(error: any | null = null) {
+    return new ApiResponse(ResponseCode.Error, error);
+}

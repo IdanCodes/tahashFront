@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response, Router } from "express";
 import { ResponseCode } from "@shared/types/response-code";
-import { ApiResponse } from "@shared/types/api-response";
+import { ApiResponse, errorResponse } from "@shared/types/api-response";
 import { getUserDataByToken, renewAuthentication } from "./utils/wcaApiUtils";
 import { isErrorObject } from "@shared/interfaces/error-object";
 import { TahashUserSession } from "./interfaces/tahash-user-session";
@@ -11,6 +11,9 @@ import { validate } from "./middleware/validate";
 import { authHandlers } from "./handlers/auth-routes";
 import { createMongoSession } from "./middleware/db-session";
 import { authWcaUrlSchemas, codeExchangeSchemas } from "./schemas/wca-schemas";
+import { WcaOAuthTokenResponse } from "@shared/interfaces/wca-api/wcaOAuth";
+import { UserInfo } from "@shared/interfaces/user-info";
+import { updateAndSaveSession } from "./utils/session-helpers";
 
 const router = Router();
 
@@ -20,14 +23,6 @@ declare module "express-session" {
   }
 }
 const SID_COOKIE_NAME = "connect.sid";
-
-/**
- * Check if a client is logged in
- * @param req A request made by the client to check
- */
-function isLoggedIn(req: Request): boolean {
-  return req.session.userSession !== undefined;
-}
 
 router.use(createMongoSession());
 
@@ -41,25 +36,23 @@ router.use(async (req: Request, res: Response, next: NextFunction) => {
 
   // get new access token
   const tokenRes = await renewAuthentication(userSession.refresh_token);
-  if (isErrorObject(tokenRes))
-    return res.json(new ApiResponse(ResponseCode.Error, tokenRes));
+  if (isErrorObject(tokenRes)) {
+    req.session.userSession = undefined;
+    return res.json(errorResponse(tokenRes));
+  }
 
   // fetch WCA user data
   const userInfo = await getUserDataByToken(tokenRes.access_token);
-  if (isErrorObject(userInfo))
+  if (isErrorObject(userInfo)) {
+    req.session.userSession = undefined;
     return res.json(new ApiResponse(ResponseCode.Error, userInfo));
+  }
 
-  req.session.userSession = {
-    access_token: tokenRes.access_token,
-    refresh_token: tokenRes.refresh_token,
-    expiration: new Date().getTime() + tokenRes.expires_in * 100,
-    userInfo: userInfo,
-  };
-
+  updateAndSaveSession(req, tokenRes, userInfo);
   next();
 });
 
-// Testing
+// Test Endpoint
 router.get("/", (req: Request, res: Response) => {
   res.status(200).json(new ApiResponse(ResponseCode.Success, "Api Response"));
 });
@@ -144,5 +137,11 @@ router.get(RoutePath.Get.GetCompEvents, async (req: Request, res: Response) => {
 
   res.json(new ApiResponse(ResponseCode.Success, eventIds));
 });
+
+// get
+router.get(
+  RoutePath.Get.GetActiveCompEvents,
+  (req: Request, res: Response) => {},
+);
 
 export default router;
