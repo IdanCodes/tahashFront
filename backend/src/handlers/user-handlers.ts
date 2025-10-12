@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { ApiResponse } from "@shared/types/api-response";
+import { ApiResponse, errorResponse } from "@shared/types/api-response";
 import { ResponseCode } from "@shared/types/response-code";
 import { isLoggedIn } from "../middleware/auth/require-auth";
 import { SID_COOKIE_NAME } from "../middleware/db-session";
@@ -24,8 +24,7 @@ async function userInfo(req: Request, res: Response) {
  */
 async function logout(req: Request, res: Response) {
   req.session.destroy((err) => {
-    if (err)
-      return res.json(new ApiResponse(ResponseCode.Error, "Could not log out"));
+    if (err) return res.json(errorResponse("Could not log out"));
 
     res.clearCookie(SID_COOKIE_NAME);
     res.status(200).json(new ApiResponse(ResponseCode.Success));

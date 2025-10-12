@@ -1,5 +1,5 @@
 import { Response } from "express";
-import { ApiResponse } from "@shared/types/api-response";
+import { ApiResponse, errorResponse } from "@shared/types/api-response";
 import { ResponseCode } from "@shared/types/response-code";
 import {
   exchangeAuthCode,
@@ -35,13 +35,11 @@ async function wcaCodeExchange(req: CodeExchangeRequest, res: Response) {
 
   // Exchange authentication code
   const tokenRes = await exchangeAuthCode(authCode, redirect);
-  if (isErrorObject(tokenRes))
-    return res.json(new ApiResponse(ResponseCode.Error, tokenRes));
+  if (isErrorObject(tokenRes)) return res.json(errorResponse(tokenRes));
 
   // Fetch WCA user data
   const userInfo = await getUserDataByToken(tokenRes.access_token);
-  if (isErrorObject(userInfo))
-    return res.json(new ApiResponse(ResponseCode.Error, userInfo));
+  if (isErrorObject(userInfo)) return res.json(errorResponse(userInfo));
 
   updateAndSaveSession(req, tokenRes, userInfo);
   res.json(new ApiResponse(ResponseCode.Success, "Logged in successfully!"));

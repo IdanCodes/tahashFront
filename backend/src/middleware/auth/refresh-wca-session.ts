@@ -34,7 +34,7 @@ export const refreshWcaSession = async (
   const userInfo = await getUserDataByToken(tokenRes.access_token);
   if (isErrorObject(userInfo)) {
     req.session.userSession = undefined;
-    return res.json(new ApiResponse(ResponseCode.Error, userInfo));
+    return res.json(errorResponse(userInfo));
   }
 
   updateAndSaveSession(req, tokenRes, userInfo);

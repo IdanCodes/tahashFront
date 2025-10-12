@@ -1,5 +1,9 @@
 import { ResponseCode } from "@shared/types/response-code";
-import { ApiResponse, isApiResponse } from "@shared/types/api-response";
+import {
+  ApiResponse,
+  errorResponse,
+  isApiResponse,
+} from "@shared/types/api-response";
 import { errorObject } from "@shared/interfaces/error-object";
 
 const basePath = `http://localhost:3000/api`;
@@ -22,8 +26,7 @@ export async function sendGetRequest(path: string) {
       );
 
     const apiRes = await res.json();
-    if (!isApiResponse(apiRes))
-      return new ApiResponse(ResponseCode.Error, "Invalid Server Response");
+    if (!isApiResponse(apiRes)) return errorResponse("Invalid Server Response");
 
     return apiRes;
   } catch (err) {
@@ -61,13 +64,12 @@ export async function sendPostRequest(
       );
 
     const apiRes = await res.json();
-    if (!isApiResponse(apiRes))
-      return new ApiResponse(ResponseCode.Error, "Invalid Server Response");
+    if (!isApiResponse(apiRes)) return errorResponse("Invalid Server Response");
 
     return apiRes;
   } catch (err) {
     console.error(`Network error (POST to ${path}):`, err);
-    return new ApiResponse(ResponseCode.Error, "Network Error");
+    return errorResponse("Network Error");
   }
 }
 
