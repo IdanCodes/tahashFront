@@ -1,4 +1,4 @@
-import { EventId } from "../database/comp-event";
+import { EventId } from "../../backend/src/database/comp-event";
 
 /**
  * A {@link CompEvent}'s information for UI.

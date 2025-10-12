@@ -4,7 +4,7 @@ import {
   TahashCompMethods,
 } from "../models/tahash-comp.model";
 import { EventId, generateScrambles, getEventDisplayInfo } from "../comp-event";
-import { EventDisplayInfo } from "../../interfaces/event-display-info";
+import { EventDisplayInfo } from "@shared/interfaces/event-display-info";
 import { CompEventResults } from "../../interfaces/comp-event-results";
 import { SubmissionData } from "../../interfaces/submission-data";
 

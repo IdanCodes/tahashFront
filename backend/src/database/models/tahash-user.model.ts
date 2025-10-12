@@ -11,7 +11,7 @@ import {
 } from "../../interfaces/packed-result";
 import { datediffEpoch } from "../../utils/global-utils";
 import { getUserDataByUserId } from "../../utils/wcaApiUtils";
-import { EventSubmissionStatus } from "../../constants/event-submission-status";
+import { EventSubmissionStatus } from "@shared/constants/event-submission-status";
 import { isErrorObject } from "@shared/interfaces/error-object";
 
 const userInfoSchema = new mongoose.Schema(
