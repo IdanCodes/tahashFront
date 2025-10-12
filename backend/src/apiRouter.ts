@@ -20,7 +20,6 @@ declare module "express-session" {
     userSession: TahashUserSession;
   }
 }
-const SID_COOKIE_NAME = "connect.sid";
 
 router.use(createMongoSession());
 
@@ -46,19 +45,7 @@ router.post(
 
 router.get(RoutePath.Get.UserInfo, userHandlers.userInfo);
 
-// Remove the user's session from the database and destroy the cookie
-router.get(RoutePath.Get.Logout, (req: Request, res: Response) => {
-  if (!isLoggedIn(req))
-    return res.json(new ApiResponse(ResponseCode.Error, "Not logged in"));
-
-  req.session.destroy((err) => {
-    if (err)
-      return res.json(new ApiResponse(ResponseCode.Error, "Could not log out"));
-
-    res.clearCookie(SID_COOKIE_NAME);
-    res.status(200).json(new ApiResponse(ResponseCode.Success));
-  });
-});
+router.get(RoutePath.Get.Logout, requireAuth(), userHandlers.logout);
 
 /**
  * GET /getCompEvents?comp-number=X

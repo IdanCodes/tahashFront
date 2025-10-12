@@ -5,11 +5,13 @@ import MongoStore from "connect-mongo";
 import { MongoClient } from "mongodb";
 import { getConnectionString } from "../config/db-config";
 
+export const SID_COOKIE_NAME = "connect.sid";
 export function createMongoSession(): RequestHandler {
   return session({
     secret: getEnv("MONGO_SESSION_SECRET"),
     resave: false, // don't force save if unmodified
     saveUninitialized: false, // don't save empty sessions
+    name: SID_COOKIE_NAME,
     cookie: {
       maxAge: 24 * 60 * 60 * 1000, // 1 day
       httpOnly: true,
