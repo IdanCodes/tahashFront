@@ -8,6 +8,10 @@ import { EventDisplayInfo } from "../../interfaces/event-display-info";
 import { CompEventResults } from "../../interfaces/comp-event-results";
 import { SubmissionData } from "../../interfaces/submission-data";
 
+/*
+TODO:
+  Does this really have a use? Maybe only cache the active comp's event ids and event infos and delete this.
+*/
 /**
  * An instance of a {@link TahashCompDoc}. Includes cached fields for faster fetching and calculation.
  */
@@ -26,9 +30,7 @@ export class TahashCompInstance implements ITahashComp, TahashCompMethods {
 
   constructor(srcDoc: TahashCompDoc) {
     this.srcDoc = srcDoc;
-
-    // initialize eventIds array
-    this.eventIds = [...this.data.keys()];
+    this.eventIds = srcDoc.eventIds;
 
     // initialize eventDisplayInfos array
     this.eventDisplayInfos = this.eventIds.map((evId) =>

@@ -189,10 +189,7 @@ const tahashUserSchema = new Schema<
       getEventStatuses(): Record<EventId, EventSubmissionStatus> {
         const statuses: Record<EventId, EventSubmissionStatus> = {};
 
-        const entries: [EventId, UserEventResult][] = Object.entries(
-          this.eventResults,
-        );
-        for (const [eventId, results] of entries)
+        for (const [eventId, results] of this.eventResults)
           statuses[eventId] = results.finished
             ? EventSubmissionStatus.Completed
             : EventSubmissionStatus.InProgress;

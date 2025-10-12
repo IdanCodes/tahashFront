@@ -5,6 +5,7 @@ import {
   TahashCompDoc,
 } from "../models/tahash-comp.model";
 import { TahashCompInstance } from "./tahash-comp-instance";
+import { EventId } from "../comp-event";
 
 /**
  * A singleton to manage the "comps" collection of the database.
@@ -109,7 +110,7 @@ export class CompManager {
    * Get a {@link TahashCompData} object from the database by its comp number.
    * @param compNumber The comp number.
    * @return
-   * - If the desired comp was found, returns the respective {@link TahashCompData}.
+   * - If the desired comp was found, returns the {@link TahashCompDoc}.
    * - Otherwise, returns `null`.
    */
   public async getTahashComp(
@@ -125,6 +126,16 @@ export class CompManager {
    */
   compExists(compNumber: number) {
     return compNumber > 0 && compNumber <= this.getActiveCompNum();
+  }
+
+  /**
+   * Get the event ids of a comp
+   * @param compNumber The number of the comp
+   * @return If the comp number is valid, returns an array of the event ids
+   */
+  async getCompEventIds(compNumber: number): Promise<EventId[] | null> {
+    const comp = await this.getTahashComp(compNumber);
+    return comp ? comp.eventIds : null;
   }
 
   // /**

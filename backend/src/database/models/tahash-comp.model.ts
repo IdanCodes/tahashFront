@@ -82,6 +82,13 @@ export interface ITahashComp {
   data: Map<EventId, CompEventResults>;
 }
 
+export interface TahashCompVirtuals {
+  /**
+   * Get this tahash comp's event ids
+   */
+  eventIds: EventId[];
+}
+
 export interface TahashCompMethods {
   /**
    * Get a deep clone of this {@link TahashCompData}'s data.
@@ -132,14 +139,17 @@ export interface TahashCompStatics {
 }
 
 // Instance of data
-export type TahashCompDoc = mongoose.Document & ITahashComp & TahashCompMethods;
+export type TahashCompDoc = mongoose.Document &
+  ITahashComp &
+  TahashCompVirtuals &
+  TahashCompMethods;
 
 export const TahashCompSchema = new Schema<
   ITahashComp,
   Model<ITahashComp>,
   TahashCompMethods,
   {},
-  {},
+  TahashCompVirtuals,
   TahashCompStatics
 >(
   {
@@ -369,6 +379,11 @@ export const TahashCompSchema = new Schema<
 // };
 // // endregion
 
+// get event ids virtual
+TahashCompSchema.virtual("eventIds").get(function (): EventId[] {
+  return [...this.data.keys()];
+});
+
 /**
  * Create a new source for a {@link TahashCompData}.
  * @param compNumber The comp's number.
@@ -401,7 +416,7 @@ export function createCompSrc(
     extras,
   );
 
-  // construct competition's data (empty)
+  // construct competition's data (each event is empty)
   const data: Record<EventId, CompEventResults> = Object.fromEntries(
     allEventIds.map((evId) => [evId, { scrambles: [], submissions: [] }]),
   );
