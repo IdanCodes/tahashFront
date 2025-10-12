@@ -6,7 +6,7 @@ import { ResponseCode } from "@shared/types/response-code";
 import { WcaOAuthTokenResponse } from "@shared/interfaces/wca-api/wcaOAuth";
 import { useNavigate } from "react-router-dom";
 import { useUserInfo } from "../context/UserContext";
-import { RoutePath } from "@shared/constants/routePath";
+import { RoutePath } from "@shared/constants/route-path";
 import { QueryParams } from "@shared/constants/query-params";
 
 function WcaAuthCallback() {

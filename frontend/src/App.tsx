@@ -13,7 +13,7 @@ import LoadingWrapper from "./components/LoadingWrapper";
 import { AnimatePresence } from "motion/react";
 import { PageTransition } from "./components/PageTransition";
 import Scrambles from "./pages/Scrambles";
-import { RoutePath } from "@shared/constants/routePath";
+import { RoutePath } from "@shared/constants/route-path";
 
 function AnimatedRoutes(): JSX.Element {
   const location = useLocation();

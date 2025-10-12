@@ -5,7 +5,7 @@ import PrimaryButton from "../components/buttons/PrimaryButton";
 import { ButtonSize } from "../components/buttons/ButtonSize";
 import { useLoading } from "../context/LoadingContext";
 import { UserInfo } from "@shared/interfaces/user-info";
-import { RoutePath } from "@shared/constants/routePath";
+import { RoutePath } from "@shared/constants/route-path";
 
 function ProfileAttribute({
   name,

@@ -3,7 +3,7 @@ import PrimaryButton from "../components/buttons/PrimaryButton";
 import { ButtonSize } from "../components/buttons/ButtonSize";
 import { useNavigate } from "react-router-dom";
 import { useLoading } from "../context/LoadingContext";
-import { RoutePath } from "@shared/constants/routePath";
+import { RoutePath } from "@shared/constants/route-path";
 
 function Home(): JSX.Element {
   const navigate = useNavigate();
