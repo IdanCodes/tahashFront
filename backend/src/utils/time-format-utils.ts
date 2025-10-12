@@ -7,7 +7,7 @@ import {
   ExtraArgsMbld,
 } from "../interfaces/event-extra-args/extra-args-mbld";
 import { ExtraArgsFmc } from "../interfaces/event-extra-args/extra-args-fmc";
-import { CompEvent, EventId, getEventById } from "../database/comp-event.js";
+import { CompEvent, EventId, getEventById } from "@shared/types/comp-event";
 
 /**
  * Calculate an average of 5 given the full attempt.

@@ -10,9 +10,9 @@ import {
 } from "@shared/interfaces/wca-api/wcaUser";
 import { getEnv } from "../config/env";
 import { WcaOAuthTokenResponse } from "@shared/interfaces/wca-api/wcaOAuth";
-import { EventRecords } from "../interfaces/event-records";
+import { EventRecords } from "../types/event-records";
 import { TimeFormat } from "../constants/time-formats";
-import { EventId } from "../database/comp-event";
+import { EventId } from "@shared/types/comp-event";
 
 /**
  * WCA OAuth application id (environment variable)

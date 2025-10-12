@@ -6,6 +6,7 @@ import { getEnv } from "./src/config/env";
 import mongoose from "mongoose";
 import { connectToDb } from "./src/config/db-config";
 
+// .env config
 config();
 
 // Database

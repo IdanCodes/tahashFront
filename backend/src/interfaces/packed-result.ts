@@ -1,10 +1,10 @@
-import { ExtraArgs } from "./extra-args";
+import { ExtraArgs } from "../types/extra-args";
 import { Penalties, Penalty } from "../constants/penalties";
 import { maxTimeParts, TimeUnit } from "../constants/time-unit";
 import { formatTimeParts, formatTimeWithPenalty } from "./time-parts";
 import { BaseResult } from "./base-result";
 import { unpackTime } from "../utils/time-utils";
-import { CompEvent, createEmptyArgs } from "../database/comp-event";
+import { CompEvent, createEmptyArgs } from "@shared/types/comp-event";
 
 /**
  * Packed result - smaller size.

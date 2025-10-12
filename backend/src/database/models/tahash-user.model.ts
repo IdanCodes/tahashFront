@@ -1,8 +1,8 @@
 import mongoose, { Model, Schema } from "mongoose";
 import { UserInfo } from "@shared/interfaces/user-info";
-import { EventId } from "../comp-event";
-import { UserEventResult } from "../../interfaces/user-event-result";
-import { EventRecords } from "../../interfaces/event-records";
+import { EventId } from "@shared/types/comp-event";
+import { UserEventResult } from "../../types/user-event-result";
+import { EventRecords } from "../../types/event-records";
 import { TimeFormat } from "../../constants/time-formats";
 import { packedResultSchema } from "./packed-result.schema";
 import {

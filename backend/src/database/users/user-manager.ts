@@ -2,9 +2,9 @@ import {
   getUserDataByUserId,
   getWCARecordsOfUser,
 } from "../../utils/wcaApiUtils";
-import { EventRecords } from "../../interfaces/event-records";
+import { EventRecords } from "../../types/event-records";
 import { TimeFormat } from "../../constants/time-formats";
-import { EventId } from "../comp-event.js";
+import { EventId } from "@shared/types/comp-event";
 import { UserInfo } from "@shared/interfaces/user-info";
 import { isErrorObject } from "@shared/interfaces/error-object";
 import {
@@ -12,7 +12,7 @@ import {
   TahashUser,
   TahashUserDoc,
 } from "../models/tahash-user.model";
-import { UserEventResult } from "../../interfaces/user-event-result";
+import { UserEventResult } from "../../types/user-event-result";
 
 /**
  * A singleton to manage the "users" collection of the database.
