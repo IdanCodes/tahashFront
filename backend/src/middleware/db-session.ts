@@ -15,8 +15,11 @@ export function createMongoSession(): RequestHandler {
     cookie: {
       maxAge: 24 * 60 * 60 * 1000, // 1 day
       httpOnly: true,
-      secure: IS_PRODUCTION,
-      sameSite: IS_PRODUCTION ? "none" : "lax",
+      secure: getEnv("COOKIE_SECURE") === "true",
+      sameSite:
+        getEnv("COOKIE_SAMESITE") === "lax"
+          ? "lax"
+          : "none" /*IS_PRODUCTION ? "none" : "lax"*/,
     },
     store: MongoStore.create({
       clientPromise: MongoClient.connect(getConnectionString(), {

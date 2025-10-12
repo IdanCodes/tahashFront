@@ -1,4 +1,4 @@
-import express from "express";
+import express, { Request, Response, NextFunction } from "express";
 import cors from "cors";
 import apiRouter from "./src/apiRouter";
 import { config } from "dotenv";
@@ -7,7 +7,7 @@ import mongoose from "mongoose";
 import { connectToDb } from "./src/config/db-config";
 
 // .env config
-config();
+config({ quiet: true });
 
 // Database
 (async () => await connectToDb())();

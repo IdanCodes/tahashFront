@@ -19,7 +19,7 @@ export const requireAuth = (
   next: NextFunction,
 ) => {
   if (!isLoggedIn(req))
-    res.json(
+    return res.json(
       new ApiResponse(
         ResponseCode.Error,
         "Authentication is required for this request.",

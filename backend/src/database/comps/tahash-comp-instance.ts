@@ -6,6 +6,7 @@ import {
 import {
   EventId,
   generateScrambles,
+  getEventById,
   getEventDisplayInfo,
 } from "@shared/types/comp-event";
 import { EventDisplayInfo } from "@shared/interfaces/event-display-info";
@@ -37,9 +38,9 @@ export class TahashCompInstance implements ITahashComp, TahashCompMethods {
     this.eventIds = srcDoc.eventIds;
 
     // initialize eventDisplayInfos array
-    this.eventDisplayInfos = this.eventIds.map((evId) =>
-      getEventDisplayInfo(evId),
-    );
+    this.eventDisplayInfos = this.eventIds.map((evId) => {
+      return getEventDisplayInfo(evId);
+    });
   }
 
   get compNumber(): number {

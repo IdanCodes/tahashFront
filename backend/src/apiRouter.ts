@@ -1,10 +1,9 @@
-import { Request, Response, Router } from "express";
+import { NextFunction, Request, Response, Router } from "express";
 import { ResponseCode } from "@shared/types/response-code";
 import { ApiResponse } from "@shared/types/api-response";
 import { TahashUserSession } from "./interfaces/tahash-user-session";
 import { QueryParams } from "@shared/constants/query-params";
 import { RoutePath } from "@shared/constants/route-path";
-import { CompManager } from "./database/comps/comp-manager";
 import { validate } from "./middleware/validate";
 import { authHandlers } from "./handlers/auth-handlers";
 import { createMongoSession } from "./middleware/db-session";

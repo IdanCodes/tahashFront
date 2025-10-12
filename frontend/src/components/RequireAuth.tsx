@@ -1,4 +1,4 @@
-import React, { ReactNode, useEffect } from "react";
+import React, { createContext, ReactNode, useEffect } from "react";
 import { useUserInfo } from "../context/UserContext";
 import { RoutePath } from "@shared/constants/route-path";
 import { useLoading } from "../context/LoadingContext";
@@ -20,5 +20,7 @@ function RequireAuth({ children }: { children: ReactNode }) {
 
   return <>{children}</>;
 }
+
+// export function useRequireAuth() {}
 
 export default RequireAuth;

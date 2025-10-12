@@ -82,7 +82,7 @@ function AnimatedRoutes(): JSX.Element {
 function App(): JSX.Element {
   return (
     <BrowserRouter>
-      <div className="h-full bg-gray-300/90">
+      <div className="min-h-full bg-gray-300/90">
         <LoadingProvider>
           <UserInfoProvider>
             <Header />

@@ -50,9 +50,9 @@ export class CompEvent {
    * The event's display information as a {@link EventDisplayInfo}.
    */
   public readonly displayInfo: EventDisplayInfo = {
-    eventId: "-",
-    eventTitle: "-",
-    iconName: "-",
+    eventId: this.eventId,
+    eventTitle: this.eventTitle,
+    iconName: this.iconName,
   };
 
   /**
