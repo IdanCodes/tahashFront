@@ -25,6 +25,7 @@ export const RoutePath = {
         Logout: "/logout",
         GetCompEvents: "/comp-events",
         GetActiveCompEvents: "/active-comp-events",
+        EventsDisplayAndStatus: "/comp-display-status",
 
         RetrieveTimes: "/retrieve-times",
         EventStatuses: "/event-statuses",

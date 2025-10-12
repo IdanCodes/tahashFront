@@ -25,12 +25,12 @@ export class TahashCompInstance implements ITahashComp, TahashCompMethods {
   /**
    * The ids of all the events in this competition.
    */
-  private readonly eventIds: readonly EventId[];
+  public readonly eventIds: readonly EventId[];
 
   /**
    * Cached display infos for faster fetching
    */
-  private readonly eventDisplayInfos: readonly EventDisplayInfo[];
+  public readonly eventDisplayInfos: readonly EventDisplayInfo[];
 
   constructor(srcDoc: TahashCompDoc) {
     this.srcDoc = srcDoc;

@@ -12,6 +12,7 @@ import { authWcaUrlSchemas, codeExchangeSchemas } from "./schemas/wca-schemas";
 import { refreshWcaSession } from "./middleware/auth/refresh-wca-session";
 import { requireAuth } from "./middleware/auth/require-auth";
 import { userHandlers } from "./handlers/user-handlers";
+import { compHandlers } from "./handlers/comp-handlers";
 
 const router = Router();
 
@@ -45,7 +46,13 @@ router.post(
 
 router.get(RoutePath.Get.UserInfo, userHandlers.userInfo);
 
-router.get(RoutePath.Get.Logout, requireAuth(), userHandlers.logout);
+router.get(RoutePath.Get.Logout, requireAuth, userHandlers.logout);
+
+router.get(
+  RoutePath.Get.EventsDisplayAndStatus,
+  requireAuth,
+  compHandlers.eventsDisplayAndStatus,
+);
 
 /**
  * GET /getCompEvents?comp-number=X
@@ -60,37 +67,31 @@ router.get(RoutePath.Get.Logout, requireAuth(), userHandlers.logout);
  * - 400 Bad Request: Error object if the comp number was invalid.
  * - 404 Not Found: Error object if the requested comp was not found.
  */
-router.get(RoutePath.Get.GetCompEvents, async (req: Request, res: Response) => {
-  if (!isLoggedIn(req)) return res.json();
-
-  // comp number parameter
-  const compNumber: number | undefined = Number(
-    req.query[QueryParams.CompNumber],
-  );
-  if (!compNumber)
-    return res.json(
-      new ApiResponse(
-        ResponseCode.Error,
-        "Required comp number as a query parameter",
-      ),
-    );
-
-  const eventIds = await CompManager.getInstance().getCompEventIds(compNumber);
-  if (!eventIds)
-    return res.json(
-      new ApiResponse(
-        ResponseCode.Error,
-        `Comp with comp number ${compNumber} does not exist.`,
-      ),
-    );
-
-  res.json(new ApiResponse(ResponseCode.Success, eventIds));
-});
-
-// get
-router.get(
-  RoutePath.Get.GetActiveCompEvents,
-  (req: Request, res: Response) => {},
-);
+// router.get(RoutePath.Get.GetCompEvents, async (req: Request, res: Response) => {
+//   if (!isLoggedIn(req)) return res.json();
+//
+//   // comp number parameter
+//   const compNumber: number | undefined = Number(
+//     req.query[QueryParams.CompNumber],
+//   );
+//   if (!compNumber)
+//     return res.json(
+//       new ApiResponse(
+//         ResponseCode.Error,
+//         "Required comp number as a query parameter",
+//       ),
+//     );
+//
+//   const eventIds = await CompManager.getInstance().getCompEventIds(compNumber);
+//   if (!eventIds)
+//     return res.json(
+//       new ApiResponse(
+//         ResponseCode.Error,
+//         `Comp with comp number ${compNumber} does not exist.`,
+//       ),
+//     );
+//
+//   res.json(new ApiResponse(ResponseCode.Success, eventIds));
+// });
 
 export default router;

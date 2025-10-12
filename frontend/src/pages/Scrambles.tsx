@@ -1,14 +1,10 @@
 import React, { useEffect } from "react";
 import { useSessionStorage } from "../hooks/useSessionStorage";
-import { EventDisplayInfo } from "@shared/interfaces/event-display-info";
-import { EventSubmissionStatus } from "@shared/constants/event-submission-status";
-import { EventId } from "@shared/types/comp-event";
+import { EventDisplayAndStatus } from "@shared/types/event-display-and-status";
 
 function Scrambles() {
   const [events, setEvents] =
-    useSessionStorage<
-      Record<EventId, { info: EventDisplayInfo; status: EventSubmissionStatus }>
-    >("events");
+    useSessionStorage<EventDisplayAndStatus[]>("events");
 
   useEffect(() => {});
 

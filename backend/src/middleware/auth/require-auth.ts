@@ -13,14 +13,17 @@ export function isLoggedIn(req: Request): boolean {
 /**
  * Require authentication middleware
  */
-export const requireAuth =
-  () => (req: Request, res: Response, next: NextFunction) => {
-    if (!isLoggedIn(req))
-      res.json(
-        new ApiResponse(
-          ResponseCode.Error,
-          "Authentication is required for this request.",
-        ),
-      );
-    next();
-  };
+export const requireAuth = (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  if (!isLoggedIn(req))
+    res.json(
+      new ApiResponse(
+        ResponseCode.Error,
+        "Authentication is required for this request.",
+      ),
+    );
+  next();
+};

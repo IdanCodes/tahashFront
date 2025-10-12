@@ -110,14 +110,6 @@ export interface TahashUserMethods {
   finishedEvent(eventId: EventId): boolean;
 
   /**
-   * Get the user's event statuses for the current competition.
-   * @return For each event the user started to submit (and not finished), its value will be {@link EventSubmissionStatus.InProgress}.
-   * For events the user fully submitted, returns {@link EventSubmissionStatus.Completed}.
-   * All other events in the competition are not included in the returned {@link Record}.
-   */
-  getEventStatuses(): Record<EventId, EventSubmissionStatus>;
-
-  /**
    * Try to update the user's user info ({@link UserInfo}).
    * @param force Whether to force updating.
    * @return Whether the data was updated (data will not update unless enough time has passed or forced=true).
@@ -125,11 +117,23 @@ export interface TahashUserMethods {
   tryUpdateWcaData(force?: boolean): Promise<boolean>;
 }
 
+export interface TahashUserVirtuals {
+  /**
+   * The user's event statuses for the active Tahash comp.
+   * For each event the user started to submit (and not finished), its value will be {@link EventSubmissionStatus.InProgress}.
+   * For events the user fully submitted, returns {@link EventSubmissionStatus.Completed}.
+   * All other events in the competition are not included in the Record.
+   */
+  eventStatuses: Map<EventId, EventSubmissionStatus>;
+}
+
 const updateWCADataInterval: Readonly<number> = 28; /* number of days to wait between updating wca data */
 const tahashUserSchema = new Schema<
   ITahashUser,
   Model<ITahashUser>,
-  TahashUserMethods
+  TahashUserMethods,
+  {},
+  TahashUserVirtuals
 >(
   {
     userInfo: {
@@ -186,17 +190,6 @@ const tahashUserSchema = new Schema<
         return eventResult !== undefined && eventResult.finished;
       },
 
-      getEventStatuses(): Record<EventId, EventSubmissionStatus> {
-        const statuses: Record<EventId, EventSubmissionStatus> = {};
-
-        for (const [eventId, results] of this.eventResults)
-          statuses[eventId] = results.finished
-            ? EventSubmissionStatus.Completed
-            : EventSubmissionStatus.InProgress;
-
-        return statuses;
-      },
-
       async tryUpdateWcaData(force = false): Promise<boolean> {
         if (
           !force &&
@@ -221,5 +214,22 @@ const tahashUserSchema = new Schema<
   },
 );
 
+tahashUserSchema.virtual("eventStatuses").get(function () {
+  const statuses: Map<EventId, EventSubmissionStatus> = new Map();
+
+  for (const [eventId, results] of this.eventResults)
+    statuses.set(
+      eventId,
+      results.finished
+        ? EventSubmissionStatus.Completed
+        : EventSubmissionStatus.InProgress,
+    );
+
+  return statuses;
+});
+
 export const TahashUser = mongoose.model("TahashUser", tahashUserSchema);
-export type TahashUserDoc = mongoose.Document & ITahashUser & TahashUserMethods;
+export type TahashUserDoc = mongoose.Document &
+  ITahashUser &
+  TahashUserMethods &
+  TahashUserVirtuals;
