@@ -1,5 +1,5 @@
 import { NextFunction, Request, RequestHandler, Response } from "express";
-import { ZodError } from "zod";
+import z, { ZodError } from "zod";
 import {
   RequestKeys,
   RequestValidationSchemas,
@@ -24,12 +24,12 @@ export const validate = (schemas: RequestValidationSchemas): RequestHandler => {
       return next();
     } catch (error) {
       return error instanceof ZodError
-        ? res.status(400).json(
+        ? res.json(
             new ApiResponse(
               ResponseCode.Error,
               errorObject("Validation Error", {
                 status: "error",
-                message: error.message,
+                message: z.treeifyError(error),
               }),
             ),
           )

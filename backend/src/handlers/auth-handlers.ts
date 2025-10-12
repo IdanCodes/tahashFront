@@ -31,10 +31,10 @@ function authWcaUrl(req: AuthWcaUrlRequest, res: Response) {
  */
 async function wcaCodeExchange(req: CodeExchangeRequest, res: Response) {
   const { redirect } = req.query as CodeExchangeQueryInput;
-  const { authCode } = req.body as CodeExchangeBodyInput;
+  const { code } = req.body as CodeExchangeBodyInput;
 
   // Exchange authentication code
-  const tokenRes = await exchangeAuthCode(authCode, redirect);
+  const tokenRes = await exchangeAuthCode(code, redirect);
   if (isErrorObject(tokenRes)) return res.json(errorResponse(tokenRes));
 
   // Fetch WCA user data

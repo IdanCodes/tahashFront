@@ -14,15 +14,7 @@ function WcaAuthCallback() {
   const userInfo = useUserInfo();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    if (calledRef.current) return; // already initialized
-    calledRef.current = true;
-
-    if (userInfo.user) {
-      navigate(RoutePath.Page.Profile);
-      return;
-    }
-
+  function doCodeExchange() {
     const urlParams = new URLSearchParams(window.location.search);
     const authCode = urlParams.get("code");
     if (!authCode) {
@@ -46,6 +38,16 @@ function WcaAuthCallback() {
 
       await userInfo.refresh();
       navigate(RoutePath.Page.Profile);
+    });
+  }
+
+  useEffect(() => {
+    if (calledRef.current) return; // already initialized
+    calledRef.current = true;
+
+    userInfo.onLoadCached(() => {
+      if (userInfo.user) return navigate(RoutePath.Page.Profile);
+      doCodeExchange();
     });
   }, []);
 

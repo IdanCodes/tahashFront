@@ -14,6 +14,7 @@ import { AnimatePresence } from "motion/react";
 import { PageTransition } from "./components/PageTransition";
 import Scrambles from "./pages/Scrambles";
 import { RoutePath } from "@shared/constants/route-path";
+import RequireAuth from "./components/RequireAuth";
 
 function AnimatedRoutes(): JSX.Element {
   const location = useLocation();
@@ -46,27 +47,31 @@ function AnimatedRoutes(): JSX.Element {
           }
         />
         <Route
-          path={RoutePath.Page.Profile}
-          element={
-            <PageTransition>
-              <Profile />
-            </PageTransition>
-          }
-        />
-        <Route
-          path={RoutePath.Page.Scrambles}
-          element={
-            <PageTransition>
-              <Scrambles />
-            </PageTransition>
-          }
-        />
-        <Route
           path={RoutePath.Page.WcaAuthCallback}
           element={
             <PageTransition>
               <WcaAuthCallback />
             </PageTransition>
+          }
+        />
+        <Route
+          path={RoutePath.Page.Profile}
+          element={
+            <RequireAuth>
+              <PageTransition>
+                <Profile />
+              </PageTransition>
+            </RequireAuth>
+          }
+        />
+        <Route
+          path={RoutePath.Page.Scrambles}
+          element={
+            <RequireAuth>
+              <PageTransition>
+                <Scrambles />
+              </PageTransition>
+            </RequireAuth>
           }
         />
       </Routes>

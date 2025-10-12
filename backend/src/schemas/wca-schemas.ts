@@ -31,13 +31,13 @@ export type CodeExchangeQueryInput = z.infer<typeof codeExchangeQuerySchema>;
 
 // body
 const codeExchangeBodySchema = z.object({
-  authCode: authCodeSchema,
+  code: authCodeSchema,
 });
 export type CodeExchangeBodyInput = z.infer<typeof codeExchangeBodySchema>;
 
 // full request
 export const codeExchangeSchemas: RequestValidationSchemas = {
-  query: codeExchangeBodySchema,
+  query: codeExchangeQuerySchema,
   body: codeExchangeBodySchema,
 };
 export type CodeExchangeRequest = ValidatedRequest<typeof codeExchangeSchemas>;

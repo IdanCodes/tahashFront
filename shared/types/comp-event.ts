@@ -1,7 +1,7 @@
 import csTimer from "cstimer_module";
 import { NumScrambles, TimeFormat } from "../../backend/src/constants/time-formats";
 import { getRandomString } from "../../backend/src/utils/global-utils";
-import { EventDisplayInfo } from "shared/interfaces/event-display-info";
+import { EventDisplayInfo } from "../interfaces/event-display-info";
 import { ExtraArgs } from "../../backend/src/types/extra-args";
 
 /**

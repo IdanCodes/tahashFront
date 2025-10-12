@@ -1,4 +1,4 @@
-import React, { JSX, ReactNode, useEffect, useState } from "react";
+import React, { JSX, ReactNode, useState } from "react";
 import { useUserInfo } from "../context/UserContext";
 import { useNavigate } from "react-router-dom";
 import PrimaryButton from "../components/buttons/PrimaryButton";
@@ -60,8 +60,7 @@ function LogoutButton({ logout }: { logout: () => Promise<void> }) {
     addLoading();
     await logout();
     removeLoading();
-    navigate("/login");
-    setDisableLogout(false);
+    navigate(RoutePath.Page.Login);
   }
 
   return (
@@ -83,16 +82,6 @@ function LogoutButton({ logout }: { logout: () => Promise<void> }) {
 
 function Profile() {
   const userInfo = useUserInfo();
-  const { addLoading, removeLoading } = useLoading();
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    addLoading();
-    userInfo.onLoadCached(() => {
-      removeLoading();
-      if (!userInfo.user) navigate(RoutePath.Page.Login);
-    });
-  });
 
   return (
     <>
