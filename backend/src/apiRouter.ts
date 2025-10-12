@@ -1,8 +1,6 @@
-import { NextFunction, Request, Response, Router } from "express";
+import { Request, Response, Router } from "express";
 import { ResponseCode } from "@shared/types/response-code";
-import { ApiResponse, errorResponse } from "@shared/types/api-response";
-import { getUserDataByToken, renewAuthentication } from "./utils/wcaApiUtils";
-import { isErrorObject } from "@shared/interfaces/error-object";
+import { ApiResponse } from "@shared/types/api-response";
 import { TahashUserSession } from "./interfaces/tahash-user-session";
 import { QueryParams } from "@shared/constants/query-params";
 import { RoutePath } from "@shared/constants/route-path";
@@ -11,9 +9,7 @@ import { validate } from "./middleware/validate";
 import { authHandlers } from "./handlers/auth-routes";
 import { createMongoSession } from "./middleware/db-session";
 import { authWcaUrlSchemas, codeExchangeSchemas } from "./schemas/wca-schemas";
-import { WcaOAuthTokenResponse } from "@shared/interfaces/wca-api/wcaOAuth";
-import { UserInfo } from "@shared/interfaces/user-info";
-import { updateAndSaveSession } from "./utils/session-helpers";
+import { refreshWcaSession } from "./middleware/auth/refresh-wca-session";
 
 const router = Router();
 
@@ -26,31 +22,8 @@ const SID_COOKIE_NAME = "connect.sid";
 
 router.use(createMongoSession());
 
-// TODO: Middleware to block users who aren't logged in from making requests that require authentication
-
 // Middleware to refresh an expired WCA session
-router.use(async (req: Request, res: Response, next: NextFunction) => {
-  const userSession = req.session.userSession;
-  if (!userSession || userSession.expiration < new Date().getTime())
-    return next();
-
-  // get new access token
-  const tokenRes = await renewAuthentication(userSession.refresh_token);
-  if (isErrorObject(tokenRes)) {
-    req.session.userSession = undefined;
-    return res.json(errorResponse(tokenRes));
-  }
-
-  // fetch WCA user data
-  const userInfo = await getUserDataByToken(tokenRes.access_token);
-  if (isErrorObject(userInfo)) {
-    req.session.userSession = undefined;
-    return res.json(new ApiResponse(ResponseCode.Error, userInfo));
-  }
-
-  updateAndSaveSession(req, tokenRes, userInfo);
-  next();
-});
+router.use(refreshWcaSession);
 
 // Test Endpoint
 router.get("/", (req: Request, res: Response) => {

@@ -14,6 +14,7 @@ import {
   CodeExchangeQueryInput,
   CodeExchangeRequest,
 } from "../schemas/wca-schemas";
+import { updateAndSaveSession } from "../utils/session-helpers";
 
 /**
  * Get the WCA authentication url based on a redirect url
@@ -42,24 +43,8 @@ async function wcaCodeExchange(req: CodeExchangeRequest, res: Response) {
   if (isErrorObject(userInfo))
     return res.json(new ApiResponse(ResponseCode.Error, userInfo));
 
-  // Save user's data in session
-  req.session.userSession = {
-    access_token: tokenRes.access_token,
-    refresh_token: tokenRes.refresh_token,
-    expiration: new Date().getTime() + tokenRes.expires_in * 100,
-    userInfo: userInfo,
-  };
-
-  req.session.save((err) => {
-    res.json(
-      err
-        ? new ApiResponse(
-            ResponseCode.Error,
-            errorObject("Error saving session", err),
-          )
-        : new ApiResponse(ResponseCode.Success, "Logged in successfully!"),
-    );
-  });
+  updateAndSaveSession(req, tokenRes, userInfo);
+  res.json(new ApiResponse(ResponseCode.Success, "Logged in successfully!"));
 }
 
 export const authHandlers = { authWcaUrl, wcaCodeExchange };

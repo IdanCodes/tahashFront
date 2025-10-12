@@ -1,7 +1,6 @@
 import { Request } from "express";
 import { WcaOAuthTokenResponse } from "@shared/interfaces/wca-api/wcaOAuth";
 import { UserInfo } from "@shared/interfaces/user-info";
-import { TahashUserSession } from "../interfaces/tahash-user-session";
 
 /**
  * Updates the session with new token and user data.
