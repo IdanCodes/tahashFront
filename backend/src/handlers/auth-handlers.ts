@@ -6,7 +6,7 @@ import {
   getUserDataByToken,
   WCA_AUTH_URL,
 } from "../utils/wcaApiUtils";
-import { errorObject, isErrorObject } from "@shared/interfaces/error-object";
+import { isErrorObject } from "@shared/interfaces/error-object";
 import {
   AuthWcaUrlQueryInput,
   AuthWcaUrlRequest,

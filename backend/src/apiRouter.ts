@@ -6,10 +6,12 @@ import { QueryParams } from "@shared/constants/query-params";
 import { RoutePath } from "@shared/constants/route-path";
 import { CompManager } from "./database/comps/comp-manager";
 import { validate } from "./middleware/validate";
-import { authHandlers } from "./handlers/auth-routes";
+import { authHandlers } from "./handlers/auth-handlers";
 import { createMongoSession } from "./middleware/db-session";
 import { authWcaUrlSchemas, codeExchangeSchemas } from "./schemas/wca-schemas";
 import { refreshWcaSession } from "./middleware/auth/refresh-wca-session";
+import { requireAuth } from "./middleware/auth/require-auth";
+import { userHandlers } from "./handlers/user-handlers";
 
 const router = Router();
 
@@ -42,20 +44,7 @@ router.post(
   authHandlers.wcaCodeExchange,
 );
 
-// get the user info of a user who's logged in
-// returns: If there was an error, undefined.
-// Otherwise, the user's UserInfo.
-router.get(RoutePath.Get.UserInfo, (req: Request, res: Response) => {
-  req.query;
-  res
-    .status(200)
-    .json(
-      new ApiResponse(
-        ResponseCode.Success,
-        isLoggedIn(req) ? req.session.userSession!.userInfo : null,
-      ),
-    );
-});
+router.get(RoutePath.Get.UserInfo, userHandlers.userInfo);
 
 // Remove the user's session from the database and destroy the cookie
 router.get(RoutePath.Get.Logout, (req: Request, res: Response) => {

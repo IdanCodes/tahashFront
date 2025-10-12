@@ -1,10 +1,10 @@
-// components
 import { z } from "zod";
 import {
   RequestValidationSchemas,
   ValidatedRequest,
 } from "../types/validated-request";
 
+// components
 const redirectUriSchema = z.url().nonempty();
 const authCodeSchema = z.string().nonempty();
 
