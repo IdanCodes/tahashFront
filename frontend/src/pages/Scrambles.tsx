@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect } from "react";
 import { EventDisplayAndStatus } from "@shared/types/event-display-and-status";
 import { sendGetRequest } from "../utils/API/apiUtils";
 import { RoutePath } from "@shared/constants/route-path";
@@ -26,7 +26,7 @@ function Scrambles() {
       console.log("data:", res.data);
       setEvents(res.data as EventDisplayAndStatus[]);
     });
-  }, []);
+  }, [events]);
 
   return (
     <>

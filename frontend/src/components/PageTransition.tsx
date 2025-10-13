@@ -1,5 +1,17 @@
 import { JSX, ReactNode } from "react";
-import { motion } from "motion/react";
+import { motion, MotionProps } from "motion/react";
+import { easeOut } from "motion";
+
+export const PageTransitionProps: MotionProps = {
+  transition: {
+    duration: 0.2,
+    ease: easeOut,
+  },
+  variants: {
+    active: { opacity: 1 },
+    inactive: { opacity: 0 },
+  },
+};
 
 export function PageTransition({
   children,
@@ -8,10 +20,10 @@ export function PageTransition({
 }): JSX.Element {
   return (
     <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.1, ease: "easeIn" }}
+      {...PageTransitionProps}
+      initial="inactive"
+      animate="active"
+      exit="inactive"
     >
       {children}
     </motion.div>

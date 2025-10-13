@@ -1,15 +1,24 @@
-import { createContext, ReactNode, useContext, useState } from "react";
+import {
+  createContext,
+  ReactNode,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 
 interface LoadingContextType {
   isLoading: boolean;
   addLoading: () => void;
   removeLoading: () => void;
+  onFinishLoading: (cb: () => void) => void;
 }
 
 const LoadingContext = createContext<LoadingContextType | undefined>(undefined);
 
 export function LoadingProvider({ children }: { children: ReactNode }) {
   const [count, setCount] = useState(0);
+  const finishLoadCbs = useRef<(() => void)[]>([]);
   const isLoading = count > 0;
 
   function addLoading() {
@@ -20,12 +29,25 @@ export function LoadingProvider({ children }: { children: ReactNode }) {
     setCount((c) => c - 1);
   }
 
+  function onFinishLoading(cb: () => void) {
+    finishLoadCbs.current.push(cb);
+  }
+
+  useEffect(() => {
+    if (!isLoading) return;
+    finishLoadCbs.current.forEach((cb) => {
+      cb();
+    });
+    finishLoadCbs.current = [];
+  }, [isLoading]);
+
   return (
     <LoadingContext.Provider
       value={{
         isLoading: isLoading,
         addLoading: addLoading,
         removeLoading: removeLoading,
+        onFinishLoading: onFinishLoading,
       }}
     >
       {children}
