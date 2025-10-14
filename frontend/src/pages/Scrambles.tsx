@@ -6,6 +6,7 @@ import { ResponseCode } from "@shared/types/response-code";
 import { redirectToError } from "../utils/errorUtils";
 import { useLoading } from "../context/LoadingContext";
 import { useSessionStorage } from "../hooks/useSessionStorage";
+import EventBoxes from "../components/EventBoxes";
 
 function Scrambles() {
   const [events, setEvents] = useSessionStorage<EventDisplayAndStatus[] | null>(
@@ -15,35 +16,22 @@ function Scrambles() {
 
   useEffect(() => {
     addLoading();
-    if (events) {
-      removeLoading();
-      return;
-    }
-
-    sendGetRequest(RoutePath.Get.EventsDisplayAndStatus).then((res) => {
-      removeLoading();
-      if (res.code != ResponseCode.Success) return redirectToError(res.data);
-      console.log("data:", res.data);
-      setEvents(res.data as EventDisplayAndStatus[]);
-    });
+    if (!events) {
+      sendGetRequest(RoutePath.Get.EventsDisplayAndStatus).then((res) => {
+        removeLoading();
+        if (res.code != ResponseCode.Success) return redirectToError(res.data);
+        console.log("data:", res.data);
+        setEvents(res.data as EventDisplayAndStatus[]);
+      });
+    } else removeLoading();
   }, [events]);
 
   return (
     <>
+      <p className="text-center text-5xl font-bold">Scrambles</p>
       {events ? (
         <div>
-          <p className="text-center text-5xl font-bold">Scrambles</p>
-
-          <div className="mx-auto my-5 flex w-8/10 flex-wrap place-content-center gap-5 gap-x-15">
-            {events.map((eds, index) => (
-              <div
-                key={index}
-                className="flex size-25 place-content-center items-center rounded-2xl border-2 border-black"
-              >
-                <p className="text-center text-xl">Id: {eds.info.eventId}</p>
-              </div>
-            ))}
-          </div>
+          <EventBoxes events={events} />
         </div>
       ) : (
         <></>

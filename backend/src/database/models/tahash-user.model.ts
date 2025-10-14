@@ -127,13 +127,21 @@ export interface TahashUserVirtuals {
   eventStatuses: Map<EventId, EventSubmissionStatus>;
 }
 
+export interface TahashUserStatics {
+  /**
+   * Find a user by their id.
+   */
+  findById(userId: number): Promise<TahashUserDoc | null>;
+}
+
 const updateWCADataInterval: Readonly<number> = 28; /* number of days to wait between updating wca data */
 const tahashUserSchema = new Schema<
   ITahashUser,
   Model<ITahashUser>,
   TahashUserMethods,
   {},
-  TahashUserVirtuals
+  TahashUserVirtuals,
+  TahashUserStatics
 >(
   {
     userInfo: {
@@ -209,6 +217,11 @@ const tahashUserSchema = new Schema<
 
         this.userInfo = response;
         return true;
+      },
+    },
+    statics: {
+      async findById(userId: number): Promise<TahashUserDoc | null> {
+        return this.findOne({ "userInfo.userId": userId });
       },
     },
   },

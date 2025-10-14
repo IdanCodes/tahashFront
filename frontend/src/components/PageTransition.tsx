@@ -1,11 +1,11 @@
 import { JSX, ReactNode } from "react";
 import { motion, MotionProps } from "motion/react";
-import { easeOut } from "motion";
+import { easeInOut } from "motion";
 
 export const PageTransitionProps: MotionProps = {
   transition: {
-    duration: 0.2,
-    ease: easeOut,
+    duration: 0.12,
+    ease: easeInOut,
   },
   variants: {
     active: { opacity: 1 },
@@ -24,6 +24,7 @@ export function PageTransition({
       initial="inactive"
       animate="active"
       exit="inactive"
+      style={{ margin: "auto" }}
     >
       {children}
     </motion.div>
