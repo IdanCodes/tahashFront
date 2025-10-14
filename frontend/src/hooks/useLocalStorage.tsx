@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 
 // initialValue = undefined -> initial value is the stored value
+// if a value is already stored, doesn't replace it
 export function useLocalStorage<T>(
   key: string,
   initialValue: T | undefined = undefined,
@@ -11,7 +12,9 @@ export function useLocalStorage<T>(
 
     const item = window.localStorage.getItem(key);
     try {
-      return item ? JSON.parse(item) : initialValue;
+      if (item) return JSON.parse(item);
+      if (initialValue) localStorage.setItem(key, JSON.stringify(initialValue));
+      return initialValue;
     } catch {
       console.error(`localStorage value of '${key}' is not valid: "${item}"`);
       return initialValue;
@@ -19,11 +22,14 @@ export function useLocalStorage<T>(
   });
 
   // undefined -> remove item from storage
-  function setValue(newValue: React.SetStateAction<T>) {
-    if (newValue === undefined) window.localStorage.removeItem(key);
-    else window.localStorage.setItem(key, JSON.stringify(newValue));
-    setStoredValue(newValue);
-  }
+  const setValue = useCallback(
+    (newValue: React.SetStateAction<T>) => {
+      if (newValue === undefined) window.localStorage.removeItem(key);
+      else window.localStorage.setItem(key, JSON.stringify(newValue));
+      setStoredValue(newValue);
+    },
+    [key],
+  );
 
   return [storedValue, setValue];
 }

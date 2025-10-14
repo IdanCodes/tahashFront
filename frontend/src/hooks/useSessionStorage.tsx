@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 
 // initialValue = undefined -> initial value is the stored value
+// if a value is already stored, doesn't replace it
 export function useSessionStorage<T>(
   key: string,
   initialValue: T | undefined = undefined,
@@ -11,7 +12,10 @@ export function useSessionStorage<T>(
 
     const item = window.sessionStorage.getItem(key);
     try {
-      return item ? JSON.parse(item) : initialValue;
+      if (item) return JSON.parse(item);
+      if (initialValue)
+        sessionStorage.setItem(key, JSON.stringify(initialValue));
+      return initialValue;
     } catch {
       console.error(`sessionStorage value of '${key}' is not valid: "${item}"`);
       return initialValue;
@@ -19,11 +23,14 @@ export function useSessionStorage<T>(
   });
 
   // undefined -> remove item from storage
-  function setValue(newValue: React.SetStateAction<T>) {
-    if (newValue === undefined) window.sessionStorage.removeItem(key);
-    else window.sessionStorage.setItem(key, JSON.stringify(newValue));
-    setStoredValue(newValue);
-  }
+  const setValue = useCallback(
+    (newValue: React.SetStateAction<T>) => {
+      if (newValue === undefined) window.sessionStorage.removeItem(key);
+      else window.sessionStorage.setItem(key, JSON.stringify(newValue));
+      setStoredValue(newValue);
+    },
+    [key],
+  );
 
   return [storedValue, setValue];
 }
