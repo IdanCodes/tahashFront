@@ -26,7 +26,7 @@ function EventBoxes({ events }: { events: EventDisplayAndStatus[] }) {
   return (
     <div className="mx-auto my-5 flex w-8/10 flex-wrap place-content-center gap-5 gap-x-10">
       {events.map((eds, index) => (
-        <div className="">
+        <div key={index}>
           {/*on hover child (the className="" div is the child) tell parent to rotate and show title*/}
           <div className="group grid">
             <div
@@ -36,7 +36,6 @@ function EventBoxes({ events }: { events: EventDisplayAndStatus[] }) {
               <span
                 className={`cubing-icon ${eds.info.iconName} scale-500`}
               ></span>
-              <div className="absolute h-full w-full bg-yellow-500"></div>
             </div>
             <p
               className={clsx(

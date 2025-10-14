@@ -1,10 +1,11 @@
-import express, { Request, Response, NextFunction } from "express";
+import express from "express";
 import cors from "cors";
 import apiRouter from "./src/apiRouter";
 import { config } from "dotenv";
 import { getEnv } from "./src/config/env";
 import mongoose from "mongoose";
 import { connectToDb } from "./src/config/db-config";
+import cookieParser from "cookie-parser";
 
 // .env config
 config({ quiet: true });
@@ -25,6 +26,8 @@ app.use(
 );
 
 app.use(express.json());
+
+app.use(cookieParser());
 
 // Router middleware
 app.use("/api", apiRouter);

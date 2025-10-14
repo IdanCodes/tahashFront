@@ -1,4 +1,4 @@
-import React, { createContext, ReactNode, useEffect } from "react";
+import React, { ReactNode, useEffect } from "react";
 import { useUserInfo } from "../context/UserContext";
 import { RoutePath } from "@shared/constants/route-path";
 import { useLoading } from "../context/LoadingContext";
@@ -16,7 +16,7 @@ function RequireAuth({ children }: { children: ReactNode }) {
       removeLoading();
       if (!userInfo.user) navigate(RoutePath.Page.Login);
     });
-  });
+  }, []);
 
   return <>{children}</>;
 }

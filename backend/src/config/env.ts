@@ -28,3 +28,9 @@ export function tryGetEnv(name: string): string | undefined {
 
 export const NODE_ENV = getEnv("NODE_ENV");
 export const IS_PRODUCTION = NODE_ENV == "production";
+export const COOKIE_CONFIG = {
+  SECURE: getEnv("COOKIE_SECURE") === "true",
+  SAMESITE: (getEnv("COOKIE_SAMESITE") === "lax"
+    ? "lax"
+    : "none") /*IS_PRODUCTION ? "none" : "lax"*/ as "lax" | "none",
+};

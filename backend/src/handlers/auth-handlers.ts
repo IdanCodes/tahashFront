@@ -41,7 +41,7 @@ async function wcaCodeExchange(req: CodeExchangeRequest, res: Response) {
   const userInfo = await getUserDataByToken(tokenRes.access_token);
   if (isErrorObject(userInfo)) return res.json(errorResponse(userInfo));
 
-  updateAndSaveSession(req, tokenRes, userInfo);
+  updateAndSaveSession(req, res, tokenRes, userInfo);
   res.json(new ApiResponse(ResponseCode.Success, "Logged in successfully!"));
 }
 

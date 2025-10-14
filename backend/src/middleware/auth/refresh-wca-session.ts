@@ -4,8 +4,7 @@ import {
   renewAuthentication,
 } from "../../utils/wcaApiUtils";
 import { isErrorObject } from "@shared/interfaces/error-object";
-import { ApiResponse, errorResponse } from "@shared/types/api-response";
-import { ResponseCode } from "@shared/types/response-code";
+import { errorResponse } from "@shared/types/api-response";
 import { updateAndSaveSession } from "../../utils/session-helpers";
 
 /**
@@ -37,6 +36,6 @@ export const refreshWcaSession = async (
     return res.json(errorResponse(userInfo));
   }
 
-  updateAndSaveSession(req, tokenRes, userInfo);
+  updateAndSaveSession(req, res, tokenRes, userInfo);
   next();
 };

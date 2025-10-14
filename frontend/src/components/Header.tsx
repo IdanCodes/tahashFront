@@ -14,7 +14,7 @@ function Header(): JSX.Element {
       <nav className="flex items-center justify-between">
         <div className="flex gap-5">
           <NavbarButton to="/" text="Home" />
-          {userInfo.user ? <LoggedInButtons /> : <LoggedOutButtons />}
+          {userInfo.isLoggedIn ? <LoggedInButtons /> : <LoggedOutButtons />}
         </div>
       </nav>
     </div>

@@ -10,12 +10,15 @@ import {
 import { sendGetRequest } from "../utils/API/apiUtils";
 import { ResponseCode } from "@shared/types/response-code";
 import { useLocalStorage } from "../hooks/useLocalStorage";
+import { getCookie } from "react-use-cookie";
+import { CookieNames } from "@shared/constants/cookie-names";
 
 interface UserInfoContextType {
   user: UserInfo | null;
   refreshSync: () => void;
   refresh: () => Promise<void>;
   logout: () => Promise<void>;
+  isLoggedIn: boolean;
   onLoadCached: (cb: () => void) => void;
 }
 
@@ -60,6 +63,10 @@ export function UserInfoProvider({ children }: { children: ReactNode }) {
     return user !== undefined;
   }
 
+  function isLoggedIn() {
+    return getCookie(CookieNames.isLoggedIn) === "true";
+  }
+
   // initialize user
   useEffect(() => {
     if (!storageInitialized()) {
@@ -69,6 +76,11 @@ export function UserInfoProvider({ children }: { children: ReactNode }) {
 
     for (const cb of onLoadCachedCbs.current) cb();
     onLoadCachedCbs.current = [];
+
+    if ((!isLoggedIn() && user) || (isLoggedIn() && !user)) {
+      refresh().then();
+      return;
+    }
   }, [user]);
 
   // for refreshSync
@@ -82,12 +94,13 @@ export function UserInfoProvider({ children }: { children: ReactNode }) {
   return (
     <UserContext.Provider
       value={{
-        user: user ?? null,
+        user: isLoggedIn() ? (user ?? null) : null,
         refreshSync: refreshSync,
         refresh: refresh,
         logout: logout,
+        isLoggedIn: isLoggedIn(),
         onLoadCached: (cb) => {
-          if (storageInitialized()) cb();
+          if (storageInitialized() && isLoggedIn()) cb();
           else onLoadCachedCbs.current.push(cb);
         },
       }}

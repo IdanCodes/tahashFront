@@ -131,13 +131,13 @@ export interface TahashUserStatics {
   /**
    * Find a user by their id.
    */
-  findById(userId: number): Promise<TahashUserDoc | null>;
+  findUserById(userId: number): Promise<TahashUserDoc | null>;
 }
 
 const updateWCADataInterval: Readonly<number> = 28; /* number of days to wait between updating wca data */
 const tahashUserSchema = new Schema<
   ITahashUser,
-  Model<ITahashUser>,
+  Model<ITahashUser, {}, TahashUserMethods, TahashUserVirtuals>,
   TahashUserMethods,
   {},
   TahashUserVirtuals,
@@ -206,7 +206,7 @@ const tahashUserSchema = new Schema<
         )
           return false;
 
-        this.lastUpdatedWcaData = Date.now();
+        console.log("USERINFO", this.userInfo);
         const response = await getUserDataByUserId(this.userInfo.id);
         if (isErrorObject(response)) {
           console.error(
@@ -216,12 +216,15 @@ const tahashUserSchema = new Schema<
         }
 
         this.userInfo = response;
+        this.lastUpdatedWcaData = Date.now();
         return true;
       },
     },
     statics: {
-      async findById(userId: number): Promise<TahashUserDoc | null> {
-        return this.findOne({ "userInfo.userId": userId });
+      async findUserById(userId: number): Promise<TahashUserDoc | null> {
+        return await this.findOne({
+          "userInfo.id": userId,
+        }).exec();
       },
     },
   },

@@ -67,7 +67,7 @@ export class UserManager {
    * - Otherwise, returns the document of the user.
    */
   public async getUserDocById(userId: number): Promise<TahashUserDoc | null> {
-    return await TahashUser.findById(userId).exec();
+    return TahashUser.findUserById(userId);
   }
 
   /**
