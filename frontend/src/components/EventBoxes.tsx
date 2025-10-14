@@ -24,28 +24,24 @@ function EventBoxes({ events }: { events: EventDisplayAndStatus[] }) {
   }, []);
 
   return (
-    <div className="mx-auto my-5 flex w-8/10 flex-wrap place-content-center gap-5 gap-x-10">
+    <div className="mx-auto mt-2 mb-2 flex w-8/10 flex-wrap place-content-center gap-x-10 gap-y-12 border-3 border-black pt-10 pb-4">
       {events.map((eds, index) => (
-        <div key={index}>
+        <div
+          key={index}
+          className="box-content grid size-27 place-content-center items-center rounded-2xl border-3 border-black"
+        >
           {/*on hover child (the className="" div is the child) tell parent to rotate and show title*/}
-          <div className="group grid">
-            <div
-              key={index}
-              className="box-content grid size-25 place-content-center items-center rounded-2xl border-3 border-black"
-            >
-              <span
-                className={`cubing-icon ${eds.info.iconName} scale-500`}
-              ></span>
-            </div>
-            <p
-              className={clsx(
-                "pointer-events-none",
-                "relative bottom-33 text-center text-xl font-semibold opacity-0 transition-all duration-50 group-hover:opacity-100",
-              )}
-            >
-              {eds.info.eventTitle}
-            </p>
-          </div>
+          <span
+            className={`cubing-icon ${eds.info.iconName} col-1 row-1 m-auto scale-575`}
+          ></span>
+          <p
+            className={clsx(
+              "col-1 row-1",
+              "relative bottom-16 pb-3 text-center text-xl font-semibold transition-all duration-50 group-hover:opacity-100",
+            )}
+          >
+            {eds.info.eventTitle}
+          </p>
         </div>
       ))}
     </div>
