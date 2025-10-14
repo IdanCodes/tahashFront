@@ -10,7 +10,10 @@ import {
   PackedResult,
 } from "../../interfaces/packed-result";
 import { datediffEpoch } from "../../utils/global-utils";
-import { getUserDataByUserId } from "../../utils/wcaApiUtils";
+import {
+  getUserDataByUserId,
+  getWCARecordsOfUser,
+} from "../../utils/wcaApiUtils";
 import { EventSubmissionStatus } from "@shared/constants/event-submission-status";
 import { isErrorObject } from "@shared/interfaces/error-object";
 
@@ -134,7 +137,7 @@ export interface TahashUserStatics {
   findUserById(userId: number): Promise<TahashUserDoc | null>;
 }
 
-const updateWCADataInterval: Readonly<number> = 28; /* number of days to wait between updating wca data */
+const updateWCADataInterval: Readonly<number> = 7; /* number of days to wait between updating wca data */
 const tahashUserSchema = new Schema<
   ITahashUser,
   Model<ITahashUser, {}, TahashUserMethods, TahashUserVirtuals>,
@@ -199,6 +202,8 @@ const tahashUserSchema = new Schema<
       },
 
       async tryUpdateWcaData(force = false): Promise<boolean> {
+        // automatically force if there are no records
+        force ||= this.records.size == 0;
         if (
           !force &&
           datediffEpoch(this.lastUpdatedWcaData, Date.now()) <
@@ -206,16 +211,23 @@ const tahashUserSchema = new Schema<
         )
           return false;
 
-        console.log("USERINFO", this.userInfo);
-        const response = await getUserDataByUserId(this.userInfo.id);
-        if (isErrorObject(response)) {
+        const infoResponse = await getUserDataByUserId(this.userInfo.id);
+        if (isErrorObject(infoResponse)) {
           console.error(
-            `User ${this.userInfo.wcaId} encountered an error (get user data) in TahashUser.updateWCAData().\nError:${response.error} - ${response.context}`,
+            `User ${this.userInfo.wcaId} encountered an error (get user data) in TahashUserDoc.tryUpdateWcaData().\nError:${infoResponse.error} - ${infoResponse.context}`,
+          );
+          return false;
+        }
+        this.userInfo = infoResponse;
+
+        const recordsResponse = await getWCARecordsOfUser(this.userInfo.id);
+        if (isErrorObject(recordsResponse)) {
+          console.error(
+            `User ${this.userInfo.wcaId} encountered an error (get user records) in TahashUserDoc.tryUpdateWcaData().\nError:${recordsResponse.error} - ${recordsResponse.context}`,
           );
           return false;
         }
 
-        this.userInfo = response;
         this.lastUpdatedWcaData = Date.now();
         return true;
       },

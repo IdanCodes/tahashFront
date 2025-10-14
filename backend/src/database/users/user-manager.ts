@@ -81,7 +81,6 @@ export class UserManager {
     saveIfCreated: boolean = true,
   ): Promise<TahashUserDoc> {
     let userDoc = await this.getUserDocById(userId);
-    const isNewUser = userDoc == null;
 
     let userInfo: UserInfo = {
       id: userId,
@@ -96,31 +95,18 @@ export class UserManager {
     >();
     let lastUpdatedWcaData: number = -1;
 
-    if (isNewUser && saveIfCreated) {
-      // fetch user's wca data
-      const userInfoResponse = await getUserDataByUserId(userId);
-      userInfo = isErrorObject(userInfoResponse) ? userInfo : userInfoResponse;
-      records = await getWCARecordsOfUser(userId);
-      lastUpdatedWcaData = Date.now();
-    }
+    userDoc ??= new TahashUser({
+      userInfo: userInfo,
+      lastUpdatedWcaData: lastUpdatedWcaData,
+      lastComp: -1,
+      records: records,
+      eventResults: new Map<EventId, UserEventResult>(),
+    });
 
-    const userSrc: ITahashUser = userDoc
-      ? { ...userDoc }
-      : {
-          userInfo: userInfo,
-          lastUpdatedWcaData: lastUpdatedWcaData,
-          lastComp: -1,
-          records: records,
-          eventResults: new Map<EventId, UserEventResult>(),
-        };
+    if (await userDoc.tryUpdateWcaData()) await userDoc.save();
+    else if (saveIfCreated) await userDoc.save();
 
-    const newUser = new TahashUser(userSrc);
-
-    if (!isNewUser) {
-      if (await newUser.tryUpdateWcaData()) await newUser.save();
-    } else if (saveIfCreated) await newUser.save();
-
-    return newUser;
+    return userDoc;
   }
 
   // /**

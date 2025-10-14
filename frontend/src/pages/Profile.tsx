@@ -25,7 +25,7 @@ function ProfileAttribute({
 function ProfilePanel({ userInfo }: { userInfo: UserInfo }) {
   return (
     <>
-      <div className="mx-auto flex w-3/10 flex-col">
+      <div className="mx-auto flex w-35/100 flex-col">
         <ProfileAttribute name="Name:" value={userInfo.name} />
         <ProfileAttribute name="WCA ID:" value={userInfo.wcaId} />
         <ProfileAttribute name="Country:" value={userInfo.country} />
