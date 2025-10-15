@@ -9,7 +9,7 @@ function Header(): JSX.Element {
   return (
     <div className="mb-2 border-b-4 bg-blue-700 p-4 text-black">
       <h1 className="mb-3 text-center text-4xl font-bold">
-        Tahash - ILCubers Weekly Comp
+        ILCubers - Weekly Competition
       </h1>
       <nav className="flex items-center justify-between">
         <div className="flex gap-5">

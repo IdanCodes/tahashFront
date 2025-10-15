@@ -8,7 +8,7 @@ const EXTERNAL_ICONS_URL = "https://cdn.cubing.net/v0/css/@cubing/icons/css";
 function EventBoxIcon({ iconName }: { iconName: string }) {
   return (
     <motion.span
-      className={`cubing-icon ${iconName} col-1 row-1 m-auto scale-600`}
+      className={`cubing-icon ${iconName} col-1 row-1 m-auto text-8xl`}
       variants={{
         hover: {
           opacity: 0.8,
