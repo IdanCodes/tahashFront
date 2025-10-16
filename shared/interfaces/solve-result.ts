@@ -1,6 +1,7 @@
-import { packTime, TimeParts } from "./time-parts";
-import { BaseResult } from "./base-result";
-import { PackedResult } from "./packed-result";
+import { TimeParts } from "./time-parts";
+import { BaseResult } from "../../backend/src/interfaces/base-result";
+import { PackedResult } from "../../backend/src/interfaces/packed-result";
+import {packTime} from "../utils/time-utils";
 
 /**
  * Result of a single solve.

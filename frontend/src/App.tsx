@@ -15,6 +15,7 @@ import { PageTransition } from "./components/PageTransition";
 import Scrambles from "./pages/Scrambles";
 import { RoutePath } from "@shared/constants/route-path";
 import RequireAuth from "./components/RequireAuth";
+import Compete from "./pages/Compete";
 
 function AnimatedRoutes(): JSX.Element {
   const location = useLocation();
@@ -70,6 +71,16 @@ function AnimatedRoutes(): JSX.Element {
             <RequireAuth>
               <PageTransition>
                 <Scrambles />
+              </PageTransition>
+            </RequireAuth>
+          }
+        />
+        <Route
+          path={RoutePath.Page.CompeteEvent}
+          element={
+            <RequireAuth>
+              <PageTransition>
+                <Compete />
               </PageTransition>
             </RequireAuth>
           }

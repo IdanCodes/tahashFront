@@ -90,6 +90,9 @@ function EventBox({ das }: { das: EventDisplayAndStatus }) {
         }}
         whileHover="hover"
         whileTap="click"
+        onClick={() =>
+          (window.location.pathname = `/compete/${das.info.eventId}`)
+        }
       >
         <EventBoxIcon iconName={das.info.iconName} />
         <EventBoxTitle eventTitle={das.info.eventTitle} hovered={hovered} />

@@ -12,12 +12,14 @@ const basePath = "/api";
 /**
  * Send a GET request to the API
  * @param path The request's path
+ * @param headers
  * @returns A ApiResponse that matches the response from the server
  */
-export async function sendGetRequest(path: string) {
+export async function sendGetRequest(path: string, headers: HeadersInit = {}) {
   try {
     const res = await fetch(basePath + path, {
       credentials: "include",
+      headers,
     });
 
     if (!res.ok)

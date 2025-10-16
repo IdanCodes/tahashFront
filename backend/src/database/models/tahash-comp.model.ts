@@ -1,5 +1,5 @@
 import mongoose, { Model, Schema } from "mongoose";
-import { EventId, WCAEvents } from "@shared/types/comp-event";
+import { CompEvent, EventId, WCAEvents } from "../../types/comp-event";
 import { CompEventResults } from "../../interfaces/comp-event-results";
 import { SubmissionData } from "../../interfaces/submission-data";
 import { SubmissionState } from "../comps/submission-state";
@@ -21,6 +21,15 @@ const compEventResultsSchema = new Schema<CompEventResults>(
     _id: false,
   },
 );
+
+export type CompEventPair = {
+  eventId: EventId;
+  result: CompEventResults;
+};
+const compEventPairSchema = new Schema<CompEventPair>({
+  eventId: String,
+  result: compEventResultsSchema,
+});
 
 /**
  * The regular length for a {@link TahashCompData} in number of days.
@@ -79,7 +88,7 @@ export interface ITahashComp {
         }
     ]
     */
-  data: Map<EventId, CompEventResults>;
+  data: CompEventPair[];
 }
 
 export interface TahashCompVirtuals {
@@ -166,8 +175,7 @@ export const TahashCompSchema = new Schema<
       required: true,
     },
     data: {
-      type: Map,
-      of: compEventResultsSchema,
+      type: [compEventPairSchema],
       required: true,
     },
   },
@@ -179,10 +187,7 @@ export const TahashCompSchema = new Schema<
           CompEventResults
         >();
 
-        for (const [eventId, result] of Object.entries(this.data) as [
-          EventId,
-          CompEventResults,
-        ][]) {
+        for (const { eventId, result } of this.data) {
           clone.set(eventId, {
             scrambles: [...result.scrambles],
             submissions: result.submissions.map((s) => ({ ...s })),
@@ -199,13 +204,13 @@ export const TahashCompSchema = new Schema<
       },
 
       getEventResults(eventId: EventId): CompEventResults | undefined {
-        const evData: CompEventResults | undefined = this.data.get(eventId);
-        return evData ? Object.assign({}, evData) : undefined;
+        const evData = this.data.find((pair) => pair.eventId == eventId);
+        return evData ? Object.assign({}, evData.result) : undefined;
       },
 
       getEventSubmissions(eventId: EventId): SubmissionData[] | undefined {
-        const evData: CompEventResults | undefined = this.data.get(eventId);
-        return evData ? [...evData.submissions] : undefined;
+        const evResults = this.getEventResults(eventId);
+        return evResults ? [...evResults.submissions] : undefined;
       },
 
       setSubmissionState(
@@ -231,7 +236,7 @@ export const TahashCompSchema = new Schema<
         userId: number,
         results: SubmissionData,
       ): boolean {
-        const eventResults = this.data.get(eventId);
+        const eventResults = this.getEventResults(eventId);
         if (!eventResults) return false; // event doesn't exist in comp
 
         const alreadySubmitted = eventResults.submissions.some(
@@ -381,7 +386,7 @@ export const TahashCompSchema = new Schema<
 
 // get event ids virtual
 TahashCompSchema.virtual("eventIds").get(function (): EventId[] {
-  return [...this.data.keys()];
+  return this.data.map((d) => d.eventId);
 });
 
 /**
@@ -417,15 +422,21 @@ export function createCompSrc(
   );
 
   // construct competition's data (each event is empty)
-  const data: Record<EventId, CompEventResults> = Object.fromEntries(
-    allEventIds.map((evId) => [evId, { scrambles: [], submissions: [] }]),
+
+  // const data: Record<EventId, CompEventResults> = Object.fromEntries(
+  //   ,
+  // );
+  const data: CompEventPair[] = [];
+
+  allEventIds.forEach((evId) =>
+    data.push({ eventId: evId, result: { scrambles: [], submissions: [] } }),
   );
 
   return {
     compNumber,
     startDate,
     endDate,
-    data: new Map<EventId, CompEventResults>(Object.entries(data)),
+    data: data,
   };
 }
 

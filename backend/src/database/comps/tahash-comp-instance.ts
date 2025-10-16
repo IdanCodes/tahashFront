@@ -1,4 +1,5 @@
 import {
+  CompEventPair,
   ITahashComp,
   TahashCompDoc,
   TahashCompMethods,
@@ -8,7 +9,7 @@ import {
   generateScrambles,
   getEventById,
   getEventDisplayInfo,
-} from "@shared/types/comp-event";
+} from "../../types/comp-event";
 import { EventDisplayInfo } from "@shared/interfaces/event-display-info";
 import { CompEventResults } from "../../interfaces/comp-event-results";
 import { SubmissionData } from "../../interfaces/submission-data";
@@ -47,7 +48,7 @@ export class TahashCompInstance implements ITahashComp, TahashCompMethods {
     return this.srcDoc.compNumber;
   }
 
-  get data(): Map<EventId, CompEventResults> {
+  get data(): CompEventPair[] {
     return this.srcDoc.data;
   }
 
@@ -79,13 +80,13 @@ export class TahashCompInstance implements ITahashComp, TahashCompMethods {
    * Generate (and set) scrambles for all events that don't have scrambles.
    */
   fillScrambles(): void {
-    for (const eventId of this.eventIds) {
-      console.log(eventId);
-      console.log(typeof this.data);
-      console.log(this.data);
-      if (this.data.get(eventId)!.scrambles.length > 0) continue;
-      this.data.get(eventId)!.scrambles = generateScrambles(eventId);
+    const cloneData = this.data;
+    for (const { eventId, result } of cloneData) {
+      if (result.scrambles.length > 0) continue;
+      result.scrambles = generateScrambles(eventId);
     }
+
+    this.srcDoc.data = cloneData;
   }
 
   submitResults(

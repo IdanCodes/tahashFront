@@ -4,7 +4,7 @@ import {
 } from "../../utils/wcaApiUtils";
 import { EventRecords } from "../../types/event-records";
 import { TimeFormat } from "../../constants/time-formats";
-import { EventId } from "@shared/types/comp-event";
+import { EventId } from "../../types/comp-event";
 import { UserInfo } from "@shared/interfaces/user-info";
 import { isErrorObject } from "@shared/interfaces/error-object";
 import {

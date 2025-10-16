@@ -10,10 +10,10 @@ export const RoutePath = {
         Scrambles: "/scrambles",
         Error: "/error",
         WcaAuthCallback: "/wca-auth-callback",
+        CompeteEvent: "/compete/:eventId",
 
         RedirectToAuth: "/redirect-to-auth",
         AuthCallback: "/auth-callback",
-        CompeteEvent: "/compete/:eventId",
         AdminDashboard: "/admin-dashboard",
         Home: "/home",
     },
@@ -26,6 +26,7 @@ export const RoutePath = {
         GetCompEvents: "/comp-events",
         GetActiveCompEvents: "/active-comp-events",
         EventsDisplayAndStatus: "/comp-display-status",
+        UserEventData: "/user-event-data",
 
         RetrieveTimes: "/retrieve-times",
         EventStatuses: "/event-statuses",

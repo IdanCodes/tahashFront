@@ -14,6 +14,10 @@ export class ApiResponse {
         this.code = code;
         this.data = data;
     }
+
+    get hasError() {
+        return this.code == ResponseCode.Error;
+    }
 }
 
 export function isApiResponse(data: any): data is ApiResponse {

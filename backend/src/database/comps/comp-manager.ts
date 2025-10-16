@@ -5,7 +5,7 @@ import {
   TahashCompDoc,
 } from "../models/tahash-comp.model";
 import { TahashCompInstance } from "./tahash-comp-instance";
-import { EventId } from "@shared/types/comp-event";
+import { EventId } from "../../types/comp-event";
 
 /**
  * A singleton to manage the "comps" collection of the database.

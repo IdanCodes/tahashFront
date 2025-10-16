@@ -1,8 +1,8 @@
 import csTimer from "cstimer_module";
-import { NumScrambles, TimeFormat } from "../../backend/src/constants/time-formats";
-import { getRandomString } from "../../backend/src/utils/global-utils";
-import { EventDisplayInfo } from "../interfaces/event-display-info";
-import { ExtraArgs } from "../../backend/src/types/extra-args";
+import { NumScrambles, TimeFormat } from "../constants/time-formats";
+import { getRandomString } from "@shared/utils/global-utils";
+import { EventDisplayInfo } from "@shared/interfaces/event-display-info";
+import { ExtraArgs } from "./extra-args";
 
 /**
  * Represents a Tahash competition event.
@@ -222,7 +222,7 @@ export function createEmptyArgs<T extends ExtraArgs>(
  * @return An array of scrambles for of the requested event.
  */
 export function generateScrambles(eventId: EventId): string[] {
-  console.log(eventIdMap);
+  console.log("MAP", eventIdMap);
   return getEventById(eventId).generateScrambles();
 }
 

@@ -1,6 +1,6 @@
 import mongoose, { Model, Schema } from "mongoose";
 import { UserInfo } from "@shared/interfaces/user-info";
-import { EventId } from "@shared/types/comp-event";
+import { EventId } from "../../types/comp-event";
 import { UserEventResult } from "../../types/user-event-result";
 import { EventRecords } from "../../types/event-records";
 import { TimeFormat } from "../../constants/time-formats";
@@ -9,7 +9,7 @@ import {
   isFullPackedTimesArr,
   PackedResult,
 } from "../../interfaces/packed-result";
-import { datediffEpoch } from "../../utils/global-utils";
+import { datediffEpoch } from "@shared/utils/global-utils";
 import {
   getUserDataByUserId,
   getWCARecordsOfUser,

@@ -20,7 +20,6 @@ function Scrambles() {
       sendGetRequest(RoutePath.Get.EventsDisplayAndStatus).then((res) => {
         removeLoading();
         if (res.code != ResponseCode.Success) return redirectToError(res.data);
-        console.log("data:", res.data);
         setEvents(res.data as EventDisplayAndStatus[]);
       });
     } else removeLoading();
