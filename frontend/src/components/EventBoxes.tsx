@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { EventDisplayAndStatus } from "@shared/types/event-display-and-status";
 import clsx from "clsx";
 import { motion } from "motion/react";
+import { useNavigate } from "react-router-dom";
 
 const EXTERNAL_ICONS_URL = "https://cdn.cubing.net/v0/css/@cubing/icons/css";
 
@@ -59,6 +60,7 @@ function EventBoxTitle({
 
 function EventBox({ das }: { das: EventDisplayAndStatus }) {
   const [hovered, setHovered] = useState<boolean>(false);
+  const navigate = useNavigate();
 
   return (
     <>
@@ -90,9 +92,7 @@ function EventBox({ das }: { das: EventDisplayAndStatus }) {
         }}
         whileHover="hover"
         whileTap="click"
-        onClick={() =>
-          (window.location.pathname = `/compete/${das.info.eventId}`)
-        }
+        onClick={() => navigate(`/compete/${das.info.eventId}`)}
       >
         <EventBoxIcon iconName={das.info.iconName} />
         <EventBoxTitle eventTitle={das.info.eventTitle} hovered={hovered} />

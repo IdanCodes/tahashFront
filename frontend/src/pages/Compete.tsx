@@ -13,14 +13,8 @@ import { UserCompeteData } from "@shared/interfaces/user-compete-data";
 function Compete() {
   const params = useParams();
   const [competeData, setCompeteData] = useState<UserCompeteData>();
-  /**
-   * - array of scrambles
-   * - event display information
-   * - packedTimes of user in event
-   */
   const { addLoading, removeLoading } = useLoading();
   const userInfo = useUserInfo();
-  const [eventId, setEventId] = useState("NOT FOUND");
 
   useEffect(() => {
     addLoading();
@@ -50,7 +44,7 @@ function Compete() {
 
       setCompeteData(res.data);
     });
-  }, [params]);
+  }, []);
 
   return <h1>{JSON.stringify(competeData)}</h1>;
 }
