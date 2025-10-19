@@ -68,6 +68,10 @@ export class TahashCompInstance implements ITahashComp, TahashCompMethods {
     return this.srcDoc.getEventResults(eventId);
   }
 
+  getEventScrambles(eventId: EventId): string[] | undefined {
+    return this.srcDoc.getEventScrambles(eventId);
+  }
+
   getEventSubmissions(eventId: EventId): SubmissionData[] | undefined {
     return this.srcDoc.getEventSubmissions(eventId);
   }

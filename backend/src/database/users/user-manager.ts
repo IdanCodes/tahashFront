@@ -66,7 +66,7 @@ export class UserManager {
    * - If the user doesn't exist in the database, returns `null`.
    * - Otherwise, returns the document of the user.
    */
-  public async getUserDocById(userId: number): Promise<TahashUserDoc | null> {
+  private async getUserDocById(userId: number): Promise<TahashUserDoc | null> {
     return TahashUser.findUserById(userId);
   }
 

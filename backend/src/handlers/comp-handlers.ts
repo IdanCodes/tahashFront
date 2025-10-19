@@ -9,7 +9,9 @@ import {
   UserEventDataRequest,
 } from "../schemas/comp-schemas";
 import { HttpHeaders } from "@shared/constants/http-headers";
-import { isEventId } from "../types/comp-event";
+import { getEventById, isEventId } from "../types/comp-event";
+import { UserCompeteData } from "@shared/interfaces/user-compete-data";
+import { getEmptyPackedResults } from "../interfaces/packed-result";
 
 /**
  * Get all event displays and statuses
@@ -35,22 +37,37 @@ async function eventsDisplayAndStatus(req: Request, res: Response) {
  * headers:
  * userId: number
  * eventId: string
+ * response:
+ *
  */
-function userEventData(req: UserEventDataRequest, res: Response) {
+async function userEventData(req: UserEventDataRequest, res: Response) {
   const { [HttpHeaders.USER_ID]: userId, [HttpHeaders.EVENT_ID]: eventId } =
     req.headers as unknown as UserEventDataHeadersInput;
 
-  if (!isEventId(eventId))
-    return res.json(errorResponse(`Invalid event id ${eventId}`));
+  const eventInfo = getEventById(eventId);
+  if (!eventInfo) return res.json(errorResponse(`Invalid event id ${eventId}`));
 
+  const activeComp = CompManager.getInstance().getActiveComp();
+  const eventScrambles = activeComp.getEventScrambles(eventId);
+  if (!eventScrambles)
+    return res.json(
+      errorResponse(`Event \"${eventId}\" does not exist in the active comp`),
+    );
+
+  const userDoc = await UserManager.getInstance().getUserById(userId);
+  const results = userDoc.getEventResult(eventId) ?? {
+    finished: false,
+    times: getEmptyPackedResults(eventInfo),
+  };
+
+  const competeData: UserCompeteData = {
+    scrambles: eventScrambles,
+    displayInfo: eventInfo.displayInfo,
+    results: results,
+  };
   return res
     .status(200)
-    .json(
-      new ApiResponse(
-        ResponseCode.Success,
-        `Received userId ${userId} and eventId ${eventId}!!`,
-      ),
-    );
+    .json(new ApiResponse(ResponseCode.Success, competeData));
 }
 
 export const compHandlers = {

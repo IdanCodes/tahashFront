@@ -197,7 +197,7 @@ export function isEventId(id: string): id is EventId {
 /**
  * Get a {@link CompEvent} by its {@link EventId}.
  */
-export function getEventById(eventId: EventId): CompEvent {
+export function getEventById(eventId: EventId): CompEvent | undefined {
   return eventIdMap[eventId];
 }
 
@@ -222,8 +222,12 @@ export function createEmptyArgs<T extends ExtraArgs>(
  * @return An array of scrambles for of the requested event.
  */
 export function generateScrambles(eventId: EventId): string[] {
-  console.log("MAP", eventIdMap);
-  return getEventById(eventId).generateScrambles();
+  const event = getEventById(eventId);
+  if (!event)
+    throw new Error(
+      `Error in generateScrambles: \"${eventId}\" is not a valid event`,
+    );
+  return event.generateScrambles();
 }
 
 /**
@@ -231,5 +235,11 @@ export function generateScrambles(eventId: EventId): string[] {
  * @param eventId The event's id.
  */
 export function getEventDisplayInfo(eventId: EventId): EventDisplayInfo {
-  return getEventById(eventId).getEventInfo();
+  const event = getEventById(eventId);
+  if (!event)
+    throw new Error(
+      `Error in getEventDisplayInfo: \"${eventId}\" is not a valid event`,
+    );
+
+  return event.getEventInfo();
 }

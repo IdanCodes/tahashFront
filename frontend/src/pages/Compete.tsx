@@ -4,23 +4,19 @@ import { redirectToError } from "../utils/errorUtils";
 import { errorObject } from "@shared/interfaces/error-object";
 import { sendGetRequest } from "../utils/API/apiUtils";
 import { useLoading } from "../context/LoadingContext";
-import { EventDisplayInfo } from "@shared/interfaces/event-display-info";
 import { HttpHeaders } from "@shared/constants/http-headers";
 import { useUserInfo } from "../context/UserContext";
-import { SolveResult } from "@shared/interfaces/solve-result";
 import { ResponseCode } from "@shared/types/response-code";
+import { RoutePath } from "@shared/constants/route-path";
+import { UserCompeteData } from "@shared/interfaces/user-compete-data";
 
 function Compete() {
   const params = useParams();
-  const [competeData, setCompeteData] = useState<{
-    scrambles: string[];
-    displayInfo: EventDisplayInfo;
-    results: SolveResult[];
-  }>();
+  const [competeData, setCompeteData] = useState<UserCompeteData>();
   /**
-   * array of scrambles
-   * event display information
-   * packedTimes of user in event
+   * - array of scrambles
+   * - event display information
+   * - packedTimes of user in event
    */
   const { addLoading, removeLoading } = useLoading();
   const userInfo = useUserInfo();
@@ -38,11 +34,11 @@ function Compete() {
 
     if (!userInfo.user) {
       removeLoading();
-      redirect("/");
+      redirect(RoutePath.Page.HomeRedirect);
       return;
     }
 
-    sendGetRequest("/user-event-data", {
+    sendGetRequest(RoutePath.Get.UserEventData, {
       [HttpHeaders.USER_ID]: userInfo.user.id.toString(),
       [HttpHeaders.EVENT_ID]: eventId,
     }).then((res) => {
@@ -52,12 +48,11 @@ function Compete() {
         return;
       }
 
-      console.log(res);
-      setEventId(eventId);
+      setCompeteData(res.data);
     });
   }, [params]);
 
-  return <h1>Event Id: {eventId ?? "NOT FOUND"}</h1>;
+  return <h1>{JSON.stringify(competeData)}</h1>;
 }
 
 export default Compete;

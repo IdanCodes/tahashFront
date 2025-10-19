@@ -12,7 +12,7 @@ const compEventResultsSchema = new Schema<CompEventResults>(
       {
         userId: Number,
         submissionState: Number,
-        times: [packedResultSchema], // or whatever your packedTimes are
+        times: [packedResultSchema],
         resultStr: String,
       },
     ],
@@ -110,13 +110,22 @@ export interface TahashCompMethods {
   isActive(): boolean;
 
   /**
-   * Get a copy of the {@link CompEventResults} of an event.
+   * Get the {@link CompEventResults} of an event (not a clone).
    * @param eventId The id of the event.
-   * @result
+   * @return
    * - If the event exists in the competition, returns its {@link CompEventResults}.
    * - Otherwise, returns `undefined`.
    */
   getEventResults(eventId: EventId): CompEventResults | undefined;
+
+  /**
+   * Get the scrambles of an event in the competition.
+   * @param eventId The id of the event.
+   * @return
+   * - If the event exists in the competition, returns its scrambles.
+   * - Otherwise, returns `undefined`.
+   */
+  getEventScrambles(eventId: EventId): string[] | undefined;
 
   /**
    * Get a copy of the {@link SubmissionData}[] of an event.
@@ -203,9 +212,16 @@ export const TahashCompSchema = new Schema<
         return this.startDate <= now && now <= this.endDate;
       },
 
+      // returns the event's results (not a copy)
       getEventResults(eventId: EventId): CompEventResults | undefined {
         const evData = this.data.find((pair) => pair.eventId == eventId);
-        return evData ? Object.assign({}, evData.result) : undefined;
+        return evData ? evData.result : undefined;
+      },
+
+      // get a clone of the scrambles
+      getEventScrambles(eventId: EventId): string[] | undefined {
+        const evData = this.data.find((pair) => pair.eventId == eventId);
+        return evData ? [...evData.result.scrambles] : undefined;
       },
 
       getEventSubmissions(eventId: EventId): SubmissionData[] | undefined {

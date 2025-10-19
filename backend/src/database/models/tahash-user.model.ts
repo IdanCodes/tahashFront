@@ -107,6 +107,12 @@ export interface TahashUserMethods {
   ): boolean;
 
   /**
+   * Get the user's results in an event in the user's last competition.
+   * @param eventId The event to get the results of.
+   */
+  getEventResult(eventId: EventId): UserEventResult | undefined;
+
+  /**
    * Check if the user finished an event (submitted a full result) in the current competition.
    * @param eventId The event's id.
    */
@@ -193,7 +199,7 @@ const tahashUserSchema = new Schema<
       },
 
       getEventResult(eventId: EventId): UserEventResult | undefined {
-        return this.eventResults[eventId];
+        return this.eventResults.get(eventId);
       },
 
       finishedEvent(eventId: EventId): boolean {

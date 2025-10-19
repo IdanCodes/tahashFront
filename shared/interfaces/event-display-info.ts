@@ -8,3 +8,9 @@ export interface EventDisplayInfo {
   eventTitle: string;
   iconName: string;
 }
+
+export const EMPTY_DISPLAY_INFO = {
+    eventId: "-",
+    eventTitle: "-",
+    iconName: "-",
+};

@@ -7,7 +7,7 @@ import {
   ExtraArgsMbld,
 } from "../interfaces/event-extra-args/extra-args-mbld";
 import { ExtraArgsFmc } from "../interfaces/event-extra-args/extra-args-fmc";
-import { CompEvent, EventId, getEventById } from "../types/comp-event";
+import { CompEvent } from "../types/comp-event";
 
 /**
  * Calculate an average of 5 given the full attempt.
@@ -111,19 +111,17 @@ function calculateFMCResult(results: PackedResult<ExtraArgsFmc>[]): number {
 
 /**
  * Get the final result of the event (as a string), given the times (e.g. an ao5, mo3, ...).
- * @param eventId The event's id.
+ * @param compEvent The event to calculate the results of.
  * @param results The attempts.
  * @return
  * - If the event id was not found, returns -1.
  * - Otherwise, returns the result.
  */
 export function calcEventResult(
-  eventId: EventId,
+  compEvent: CompEvent,
   results: PackedResult[],
 ): number {
-  const compEvent: CompEvent = getEventById(eventId);
-
-  if (eventId === "fmc") return calculateFMCResult(results);
+  if (compEvent.eventId === "fmc") return calculateFMCResult(results);
 
   switch (compEvent.timeFormat) {
     case TimeFormat.ao5:
