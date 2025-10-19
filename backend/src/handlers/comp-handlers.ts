@@ -44,8 +44,8 @@ async function userEventData(req: UserEventDataRequest, res: Response) {
   const { [HttpHeaders.USER_ID]: userId, [HttpHeaders.EVENT_ID]: eventId } =
     req.headers as unknown as UserEventDataHeadersInput;
 
-  const eventInfo = getEventById(eventId);
-  if (!eventInfo) return res.json(errorResponse(`Invalid event id ${eventId}`));
+  const eventData = getEventById(eventId);
+  if (!eventData) return res.json(errorResponse(`Invalid event id ${eventId}`));
 
   const activeComp = CompManager.getInstance().getActiveComp();
   const eventScrambles = activeComp.getEventScrambles(eventId);
@@ -57,12 +57,12 @@ async function userEventData(req: UserEventDataRequest, res: Response) {
   const userDoc = await UserManager.getInstance().getUserById(userId);
   const results = userDoc.getEventResult(eventId) ?? {
     finished: false,
-    times: getEmptyPackedResults(eventInfo),
+    times: getEmptyPackedResults(eventData),
   };
 
   const competeData: UserCompeteData = {
     scrambles: eventScrambles,
-    displayInfo: eventInfo.displayInfo,
+    eventData: eventData,
     results: results,
   };
   return res

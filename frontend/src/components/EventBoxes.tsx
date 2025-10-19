@@ -3,8 +3,7 @@ import { EventDisplayAndStatus } from "@shared/types/event-display-and-status";
 import clsx from "clsx";
 import { motion } from "motion/react";
 import { useNavigate } from "react-router-dom";
-
-const EXTERNAL_ICONS_URL = "https://cdn.cubing.net/v0/css/@cubing/icons/css";
+import { CubingIconsSheet } from "./CubingIconsSheet";
 
 function EventBoxIcon({ iconName }: { iconName: string }) {
   return (
@@ -102,30 +101,15 @@ function EventBox({ das }: { das: EventDisplayAndStatus }) {
 }
 
 function EventBoxes({ events }: { events: EventDisplayAndStatus[] }) {
-  function addIconsStylesheet() {
-    const link = document.createElement("link");
-    link.href = EXTERNAL_ICONS_URL;
-    link.rel = "stylesheet";
-    link.type = "text/css";
-    link.id = "cubing-icons-stylesheet";
-    document.head.appendChild(link);
-  }
-
-  function removeIconsStylesheet() {
-    document.getElementById("cubing-icons-style")?.remove();
-  }
-
-  useEffect(() => {
-    addIconsStylesheet();
-    return removeIconsStylesheet;
-  }, []);
-
   return (
-    <div className="mx-auto mt-2 mb-2 flex w-8/10 flex-wrap place-content-center gap-x-9.5 gap-y-11 border-3 border-black pt-10 pb-4">
-      {events.map((das, index) => (
-        <EventBox key={index} das={das} />
-      ))}
-    </div>
+    <>
+      <CubingIconsSheet />
+      <div className="mx-auto mt-2 mb-2 flex w-8/10 flex-wrap place-content-center gap-x-9.5 gap-y-11 border-3 border-black pt-10 pb-4">
+        {events.map((das, index) => (
+          <EventBox key={index} das={das} />
+        ))}
+      </div>
+    </>
   );
 }
 

@@ -1,8 +1,8 @@
-import {EventDisplayInfo} from "./event-display-info";
 import {UserEventResult} from "../../backend/src/types/user-event-result";
+import {CompEvent} from "../../backend/src/types/comp-event";
 
 export interface UserCompeteData {
     scrambles: string[];
-    displayInfo: EventDisplayInfo;
+    eventData: CompEvent;
     results: UserEventResult;
 }
