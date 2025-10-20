@@ -13,6 +13,7 @@ import { CubingIconsSheet } from "../components/CubingIconsSheet";
 import { useCSTimer } from "../hooks/useCsTimer";
 import clsx from "clsx";
 import PrimaryButton from "../components/buttons/PrimaryButton";
+import { formatPackedResult } from "@shared/utils/time-utils";
 
 function Compete() {
   const params = useParams();
@@ -59,20 +60,42 @@ function Compete() {
           csTimer.getImage(scramble, competeData.eventData.scrType),
         ),
       ).then((scrImages) => {
-        removeLoading();
         setScrambleImages(scrImages);
+
+        removeLoading();
       });
     });
   }, []);
 
   if (!competeData) return <>no compete data</>;
 
+  function onClickScrambleNum(scrIndex: number) {
+    setActiveScramble(scrIndex);
+  }
+
   return (
     <>
       <CubingIconsSheet />
       <div>
         {/*Scamble number buttons*/}
-        <div></div>
+        <div className="mx-auto my-4 box-border flex w-80/100 justify-between gap-6">
+          {competeData.scrambles.map((_, i) => (
+            <div
+              key={i}
+              className={clsx(
+                `my-auto flex w-full cursor-pointer rounded-xl p-2 text-2xl transition-all duration-200 ease-in`,
+                activeScramble == i && "bg-gray-500",
+                activeScramble != i && "bg-gray-400 hover:bg-gray-500/80",
+              )}
+              onClick={() => onClickScrambleNum(i)}
+            >
+              <p className="absolute px-4 text-center font-bold">{i + 1}.</p>
+              <p className="ml-2 w-full text-center">
+                {formatPackedResult(competeData.results.times[i])}
+              </p>
+            </div>
+          ))}
+        </div>
 
         {/*Main Panel*/}
         <div className="mx-auto w-8/10 rounded-2xl border-5 border-black bg-gray-400">

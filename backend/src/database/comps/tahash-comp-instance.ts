@@ -9,7 +9,7 @@ import {
   generateScrambles,
   getEventById,
   getEventDisplayInfo,
-} from "../../types/comp-event";
+} from "@shared/types/comp-event";
 import { EventDisplayInfo } from "@shared/interfaces/event-display-info";
 import { CompEventResults } from "../../interfaces/comp-event-results";
 import { SubmissionData } from "../../interfaces/submission-data";

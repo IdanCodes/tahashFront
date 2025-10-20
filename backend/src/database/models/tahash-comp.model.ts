@@ -1,5 +1,5 @@
 import mongoose, { Model, Schema } from "mongoose";
-import { CompEvent, EventId, WCAEvents } from "../../types/comp-event";
+import { CompEvent, EventId, WCAEvents } from "@shared/types/comp-event";
 import { CompEventResults } from "../../interfaces/comp-event-results";
 import { SubmissionData } from "../../interfaces/submission-data";
 import { SubmissionState } from "../comps/submission-state";

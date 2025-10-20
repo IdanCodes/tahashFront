@@ -1,7 +1,7 @@
 import csTimer from "cstimer_module";
 import { NumScrambles, TimeFormat } from "../constants/time-formats";
-import { getRandomString } from "@shared/utils/global-utils";
-import { EventDisplayInfo } from "@shared/interfaces/event-display-info";
+import { getRandomString } from "../utils/global-utils";
+import { EventDisplayInfo } from "../interfaces/event-display-info";
 import { ExtraArgs } from "./extra-args";
 
 /**
@@ -49,11 +49,13 @@ export class CompEvent {
   /**
    * The event's display information as a {@link EventDisplayInfo}.
    */
-  public readonly displayInfo: EventDisplayInfo = {
-    eventId: this.eventId,
-    eventTitle: this.eventTitle,
-    iconName: this.iconName,
-  };
+  public get displayInfo(): EventDisplayInfo {
+      return {
+          eventId: this.eventId ?? "-",
+          eventTitle: this.eventTitle ?? "-",
+          iconName: this.iconName ?? "-",
+      };
+  }
 
   /**
    * Generate the length of a scramble.

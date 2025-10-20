@@ -1,5 +1,5 @@
 import { TimeParts } from "./time-parts";
-import { BaseResult } from "../../backend/src/interfaces/base-result";
+import { BaseResult } from "./base-result";
 import { PackedResult } from "../../backend/src/interfaces/packed-result";
 import {packTime} from "../utils/time-utils";
 

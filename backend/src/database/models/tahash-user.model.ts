@@ -1,9 +1,9 @@
 import mongoose, { Model, Schema } from "mongoose";
 import { UserInfo } from "@shared/interfaces/user-info";
-import { EventId } from "../../types/comp-event";
+import { EventId } from "@shared/types/comp-event";
 import { UserEventResult } from "../../types/user-event-result";
 import { EventRecords } from "../../types/event-records";
-import { TimeFormat } from "../../constants/time-formats";
+import { TimeFormat } from "@shared/constants/time-formats";
 import { packedResultSchema } from "./packed-result.schema";
 import {
   isFullPackedTimesArr,

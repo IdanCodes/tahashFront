@@ -1,6 +1,6 @@
 import {EventDisplayInfo} from "../interfaces/event-display-info";
 import {EventSubmissionStatus} from "../constants/event-submission-status";
-import {EventId} from "../../backend/src/types/comp-event";
+import {EventId} from "./comp-event";
 
 /**
  * An event's display information and submission status

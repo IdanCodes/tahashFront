@@ -1,5 +1,5 @@
 import { PackedResult } from "../interfaces/packed-result";
-import { TimeFormat } from "../constants/time-formats";
+import { TimeFormat } from "@shared/constants/time-formats";
 
 /**
  * Best results for events using the {@link TimeFormat.ao5} format.

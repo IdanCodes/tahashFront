@@ -1,13 +1,13 @@
 import { getPureCentisArr, PackedResult } from "../interfaces/packed-result";
-import { Penalties } from "../constants/penalties";
+import { Penalties } from "@shared/constants/penalties";
 import { NULL_TIME_CENTIS } from "@shared/utils/time-utils";
-import { NumScrambles, TimeFormat } from "../constants/time-formats";
+import { NumScrambles, TimeFormat } from "@shared/constants/time-formats";
 import {
   calcMultiBldTotalPoints,
   ExtraArgsMbld,
 } from "../interfaces/event-extra-args/extra-args-mbld";
 import { ExtraArgsFmc } from "../interfaces/event-extra-args/extra-args-fmc";
-import { CompEvent } from "../types/comp-event";
+import { CompEvent } from "@shared/types/comp-event";
 
 /**
  * Calculate an average of 5 given the full attempt.

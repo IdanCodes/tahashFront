@@ -1,5 +1,5 @@
 import {UserEventResult} from "../../backend/src/types/user-event-result";
-import {CompEvent} from "../../backend/src/types/comp-event";
+import {CompEvent} from "../types/comp-event";
 
 export interface UserCompeteData {
     scrambles: string[];

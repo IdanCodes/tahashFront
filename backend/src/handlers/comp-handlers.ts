@@ -9,7 +9,7 @@ import {
   UserEventDataRequest,
 } from "../schemas/comp-schemas";
 import { HttpHeaders } from "@shared/constants/http-headers";
-import { getEventById, isEventId } from "../types/comp-event";
+import { getEventById, isEventId } from "@shared/types/comp-event";
 import { UserCompeteData } from "@shared/interfaces/user-compete-data";
 import { getEmptyPackedResults } from "../interfaces/packed-result";
 

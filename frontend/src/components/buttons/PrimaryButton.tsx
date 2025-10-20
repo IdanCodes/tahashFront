@@ -14,7 +14,7 @@ export default function PrimaryButton({
     click: "bg-gray-600/90",
   },
 }: {
-  text?: string;
+  text?: string | number;
   onClick?: MouseEventHandler;
   disabled?: boolean;
   buttonSize?: ButtonSize;

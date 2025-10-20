@@ -1,4 +1,4 @@
-import { EventId } from "../../backend/src/types/comp-event";
+import { EventId } from "../types/comp-event";
 
 /**
  * A {@link CompEvent}'s information for UI.
