@@ -2,15 +2,23 @@ import React, { JSX } from "react";
 import { NavLink } from "react-router-dom";
 import clsx from "clsx";
 import { useUserInfo } from "../context/UserContext";
+import logo from "./assets/ILSpeeddcubinglogo.png";
 
 function Header(): JSX.Element {
   const userInfo = useUserInfo();
 
   return (
-    <div className="mb-2 border-b-4 bg-blue-700 p-4 text-black">
-      <h1 className="mb-3 text-center text-4xl font-bold">
-        ILCubers - Weekly Competition
-      </h1>
+    <div className="flex h-[100px] w-full items-center justify-between bg-gradient-to-br from-blue-700 via-blue-800 to-indigo-800">
+      <div className="group flex items-center gap-5 pl-[1vw]">
+        <img
+          src={logo}
+          alt="ILCubers Logo"
+          className="w-[65px] transition-transform duration-400 ease-in-out group-hover:scale-110"
+        />
+        <h1 className="inline-block text-[clamp(1.5rem,2vw,2.5rem)] whitespace-nowrap text-blue-100 transition-all duration-400 ease-in-out select-none group-hover:tracking-[0.05em]">
+          ILCubers - Weekly Competition
+        </h1>
+      </div>
       <nav className="flex items-center justify-between">
         <div className="flex gap-5">
           <NavbarButton to="/" text="Home" />
