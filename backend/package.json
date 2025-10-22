@@ -22,7 +22,6 @@
     "mongoose": "^8.19.1",
     "prettier": "^3.6.2",
     "process": "^0.11.10",
-    "typescript": "^5.9.3",
     "zod": "^4.1.12"
   },
   "devDependencies": {
@@ -30,6 +29,7 @@
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.3",
     "@types/express-session": "^1.18.2",
-    "tsc-alias": "^1.8.16"
+    "tsc-alias": "^1.8.16",
+    "typescript": "^5.9.3"
   }
 }
