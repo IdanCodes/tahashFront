@@ -6,7 +6,7 @@
   "scripts": {
     "build": "tsc && tsc-alias",
     "start": "tsc && tsc-alias && node ./dist/backend/index.js",
-    "prod": "node ./dist/backend/index.js"
+    "prod": "NODE_ENV=production node ./dist/backend/index.js"
   },
   "keywords": [],
   "author": "",

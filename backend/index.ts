@@ -1,14 +1,19 @@
+import { config } from "dotenv";
+import path from "node:path";
+
+// .env.dev config
+config({
+  quiet: true,
+  path: ".env.dev",
+});
+
 import express from "express";
 import cors from "cors";
 import apiRouter from "./src/apiRouter";
-import { config } from "dotenv";
-import { getEnv } from "./src/config/env";
+import { getEnv, IS_PRODUCTION } from "./src/config/env";
 import mongoose from "mongoose";
 import { connectToDb } from "./src/config/db-config";
 import cookieParser from "cookie-parser";
-
-// .env config
-config({ quiet: true });
 
 // Database
 (async () => await connectToDb())();
