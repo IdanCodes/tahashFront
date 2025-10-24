@@ -10,17 +10,7 @@ DATABASE_COMPOSE_SERVICE = "mongo"
 DATABASE_CONTAINER_NAME = "mongodb"
 DATABASE_VOLUME_NAME = "mongo-data"
 
-# # - Backend
-# BACKEND_CONTAINER_NAME = "backend"
-# BACKEND_DOCKERFILE_DIR = "./backend/"
-# BACKEND_BUILD_NAME = "backend"
-#
-# # -Frontend
-# FRONTEND_CONTAINER_NAME = "frontend"
-# FRONTEND_DOCKERFILE_DIR = "./frontend/"
-# FRONTEND_BUILD_NAME = "frontend"
-
-def run(cmd, check=True, suppressOutput=False):
+def run(cmd, check=True):
     print(f"▶ Running: {cmd}")
     subprocess.run(cmd, shell=True, check=check)
 
