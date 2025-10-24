@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { redirect, useParams } from "react-router-dom";
 import { redirectToError } from "../utils/errorUtils";
 import { errorObject } from "@shared/interfaces/error-object";
@@ -15,16 +15,17 @@ import clsx from "clsx";
 import PrimaryButton from "../components/buttons/PrimaryButton";
 import { formatPackedResult } from "@shared/utils/time-utils";
 
+const hideImageEvents = Object.freeze(["3bld", "4bld", "5bld", "mbld"]);
 function Compete() {
   const params = useParams();
+  const csTimer = useCSTimer();
   const [competeData, setCompeteData] = useState<UserCompeteData>();
   const [activeScramble, setActiveScramble] = useState<number>(0);
   const [scrambleImages, setScrambleImages] = useState<string[]>([]);
-  const csTimer = useCSTimer();
+  const hideImage = useRef<boolean>(false);
 
   const { addLoading, removeLoading } = useLoading();
   const userInfo = useUserInfo();
-  let numScrambles = -1;
 
   /**
    * Initialize an SVG element using its image string
@@ -44,13 +45,13 @@ function Compete() {
   }
 
   async function initCompeteData(competeData: UserCompeteData) {
-    numScrambles = competeData.scrambles.length;
+    hideImage.current = hideImageEvents.includes(competeData.eventData.eventId);
+    setCompeteData(competeData);
 
-    Promise.all(competeData.scrambles.map(scrToSvg)).then((scrImages) => {
-      setCompeteData(competeData);
-      setScrambleImages(scrImages);
-      console.log(scrImages);
-    });
+    if (hideImage.current) return;
+
+    // generate image svgs
+    Promise.all(competeData.scrambles.map(scrToSvg)).then(setScrambleImages);
 
     /**
      * Generate an SVG element from a given scramble
@@ -135,12 +136,14 @@ function Compete() {
                 </div>
 
                 {/*Image*/}
-                <div
-                  className="w-6/10"
-                  dangerouslySetInnerHTML={{
-                    __html: scrambleImages[i],
-                  }}
-                ></div>
+                {!hideImage.current && (
+                  <div
+                    className="w-6/10"
+                    dangerouslySetInnerHTML={{
+                      __html: scrambleImages[i],
+                    }}
+                  ></div>
+                )}
               </div>
 
               {/*scamble-submit divider*/}
