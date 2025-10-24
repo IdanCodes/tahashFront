@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { redirect, useParams, useSearchParams } from "react-router-dom";
+import { redirect, useParams } from "react-router-dom";
 import { redirectToError } from "../utils/errorUtils";
 import { errorObject } from "@shared/interfaces/error-object";
 import { sendGetRequest } from "../utils/API/apiUtils";
@@ -26,6 +26,45 @@ function Compete() {
   const userInfo = useUserInfo();
   let numScrambles = -1;
 
+  /**
+   * Initialize an SVG element using its image string
+   */
+  function initSvgFromString(imgStr: string) {
+    const parent = document.createElement("div");
+    parent.innerHTML = imgStr;
+    const el = parent.querySelector("svg")!;
+    const prevWidth = el.getAttribute("width") ?? "100";
+    const prevHeight = el.getAttribute("height") ?? "100";
+    el.setAttribute("width", "100%");
+    el.setAttribute("height", "100%");
+    el.setAttribute("viewBox", `0 0 ${prevWidth} ${prevHeight}`);
+    el.setAttribute("preserveAspectRatio", "xMidYMid meet");
+
+    return parent.innerHTML;
+  }
+
+  async function initCompeteData(competeData: UserCompeteData) {
+    numScrambles = competeData.scrambles.length;
+
+    Promise.all(competeData.scrambles.map(scrToSvg)).then((scrImages) => {
+      setCompeteData(competeData);
+      setScrambleImages(scrImages);
+      console.log(scrImages);
+    });
+
+    /**
+     * Generate an SVG element from a given scramble
+     */
+    async function scrToSvg(scramble: string) {
+      const imgStr = (await csTimer.getImage(
+        scramble,
+        competeData.eventData.scrType,
+      )) as string;
+
+      return initSvgFromString(imgStr);
+    }
+  }
+
   useEffect(() => {
     addLoading();
 
@@ -46,24 +85,11 @@ function Compete() {
       [HttpHeaders.USER_ID]: userInfo.user.id.toString(),
       [HttpHeaders.EVENT_ID]: eventId,
     }).then((res) => {
-      if (res.code == ResponseCode.Error) {
-        removeLoading();
-        redirectToError(res.data);
-        return;
-      }
+      if (res.code != ResponseCode.Error)
+        return initCompeteData(res.data).then(removeLoading);
 
-      const competeData = res.data as UserCompeteData;
-      setCompeteData(res.data);
-      numScrambles = competeData.scrambles.length;
-      Promise.all(
-        competeData.scrambles.map((scramble) =>
-          csTimer.getImage(scramble, competeData.eventData.scrType),
-        ),
-      ).then((scrImages) => {
-        setScrambleImages(scrImages);
-
-        removeLoading();
-      });
+      removeLoading();
+      redirectToError(res.data);
     });
   }, []);
 
@@ -77,7 +103,7 @@ function Compete() {
     <>
       <CubingIconsSheet />
       <div>
-        {/*Scamble number buttons*/}
+        {/*Scamble number menu*/}
         <div className="mx-auto my-4 box-border flex w-80/100 justify-between gap-6">
           {competeData.scrambles.map((_, i) => (
             <div
@@ -89,7 +115,7 @@ function Compete() {
               )}
               onClick={() => onClickScrambleNum(i)}
             >
-              <p className="absolute px-4 text-center font-bold">{i + 1}.</p>
+              <p className="absolute pl-[1%] text-center font-bold">{i + 1}.</p>
               <p className="ml-2 w-full text-center">
                 {formatPackedResult(competeData.results.times[i])}
               </p>
@@ -102,29 +128,48 @@ function Compete() {
           {competeData.scrambles.map((scramble, i) => (
             <div key={i} className={clsx(activeScramble != i && "hidden")}>
               {/*Scramble & Image*/}
-              <div className="p-1 px-5">
-                <p className="text-center text-xl">Scramble #{i + 1}</p>
+              <div className="flex flex-row justify-between gap-2 px-5 py-2">
                 {/* Scramble */}
-                <div className="text-center text-3xl font-semibold">
+                <div className="w-full text-center text-3xl font-semibold">
                   {scramble}
                 </div>
 
                 {/*Image*/}
                 <div
-                  className="mx-auto flex place-content-center py-4"
+                  className="w-6/10"
                   dangerouslySetInnerHTML={{
                     __html: scrambleImages[i],
                   }}
                 ></div>
               </div>
 
+              {/*scamble-submit divider*/}
               <div className="w-full border-2 border-black"></div>
 
               {/*Submit Section*/}
-              <div className="p-2"></div>
+              <div className="flex flex-row justify-center gap-[10%] p-2">
+                {/*Time Input & Penalty*/}
+                <div className="flex w-full flex-col">
+                  {/*Time Input*/}
+                  <div className="mx-auto w-6/10">
+                    <input
+                      type="text"
+                      className="rounded-xl bg-white px-1 py-2.5 text-4xl"
+                    />
+                  </div>
+
+                  {/*Choose Penalty*/}
+                  <div></div>
+                </div>
+
+                {/*Preview & Submit Button*/}
+                <div className="w-full">
+                  <p className="text-center text-2xl">Preview</p>
+                </div>
+              </div>
 
               {/*Scramble navigation (temporary)*/}
-              <div className="mx-auto my-4 flex w-4/10 justify-between">
+              <div className="mx-auto mt-4 flex hidden justify-center gap-[20%]">
                 <PrimaryButton
                   disabled={activeScramble == 0}
                   text="Previous"
