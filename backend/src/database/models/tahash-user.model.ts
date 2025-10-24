@@ -5,10 +5,7 @@ import { UserEventResult } from "../../types/user-event-result";
 import { EventRecords } from "../../types/event-records";
 import { TimeFormat } from "@shared/constants/time-formats";
 import { packedResultSchema } from "./packed-result.schema";
-import {
-  isFullPackedTimesArr,
-  PackedResult,
-} from "../../interfaces/packed-result";
+import { PackedResult } from "../../interfaces/packed-result";
 import { datediffEpoch } from "@shared/utils/global-utils";
 import {
   getUserDataByUserId,
@@ -16,6 +13,7 @@ import {
 } from "../../utils/wcaApiUtils";
 import { EventSubmissionStatus } from "@shared/constants/event-submission-status";
 import { isErrorObject } from "@shared/interfaces/error-object";
+import { isFullPackedTimesArr } from "@shared/utils/time-utils";
 
 const userInfoSchema = new mongoose.Schema(
   {
@@ -228,9 +226,9 @@ const tahashUserSchema = new Schema<
 
         const recordsResponse = await getWCARecordsOfUser(this.userInfo.id);
         if (isErrorObject(recordsResponse)) {
-          console.error(
-            `User ${this.userInfo.wcaId} encountered an error (get user records) in TahashUserDoc.tryUpdateWcaData().\nError:${recordsResponse.error} - ${recordsResponse.context}`,
-          );
+          // console.error(
+          //   `User ${this.userInfo.wcaId} encountered an error (get user records) in TahashUserDoc.tryUpdateWcaData().\nError:${recordsResponse.error} - ${recordsResponse.context}`,
+          // );
           return false;
         }
 

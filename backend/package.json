@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "tsc && tsc-alias",
-    "start": "tsc && tsc-alias && node ./dist/backend/index.js",
+    "start": "tsc && tsc-alias && cross-env NODE_ENV=development node ./dist/backend/index.js",
     "prod": "NODE_ENV=production node ./dist/backend/index.js"
   },
   "keywords": [],
@@ -29,7 +29,7 @@
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.3",
     "@types/express-session": "^1.18.2",
-    "tsc-alias": "^1.8.16",
-    "typescript": "^5.9.3"
+    "cross-env": "^10.1.0",
+    "tsc-alias": "^1.8.16"
   }
 }

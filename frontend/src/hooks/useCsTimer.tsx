@@ -6,12 +6,9 @@ export function useCSTimer() {
   const msgid = useRef(0);
 
   useEffect(() => {
-    workerRef.current = new Worker(
-      new URL(
-        "/workers/cstimer_module.js?worker_file&type=classic",
-        import.meta.url,
-      ),
-    );
+    workerRef.current = new Worker("/workers/cstimer_module.js", {
+      type: "classic",
+    });
     workerRef.current.onmessage = (e) => {
       const [id, type, ret] = e.data;
       const cb = callbacks.current[id];

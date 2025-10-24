@@ -6,7 +6,6 @@ import {
 } from "@shared/types/api-response";
 import { errorObject } from "@shared/interfaces/error-object";
 
-// const basePath = import.meta.env.PROD ? "/api" : `http://localhost:3000/api`;
 const basePath = "/api";
 
 /**

@@ -1,6 +1,6 @@
-import { getPureCentisArr, PackedResult } from "../interfaces/packed-result";
+import { PackedResult } from "../interfaces/packed-result";
 import { Penalties } from "@shared/constants/penalties";
-import { NULL_TIME_CENTIS } from "@shared/utils/time-utils";
+import { getPureCentisArr, NULL_TIME_CENTIS } from "@shared/utils/time-utils";
 import { NumScrambles, TimeFormat } from "@shared/constants/time-formats";
 import {
   calcMultiBldTotalPoints,
