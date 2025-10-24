@@ -226,9 +226,9 @@ const tahashUserSchema = new Schema<
 
         const recordsResponse = await getWCARecordsOfUser(this.userInfo.id);
         if (isErrorObject(recordsResponse)) {
-          console.error(
-            `User ${this.userInfo.wcaId} encountered an error (get user records) in TahashUserDoc.tryUpdateWcaData().\nError:${recordsResponse.error} - ${recordsResponse.context}`,
-          );
+          // console.error(
+          //   `User ${this.userInfo.wcaId} encountered an error (get user records) in TahashUserDoc.tryUpdateWcaData().\nError:${recordsResponse.error} - ${recordsResponse.context}`,
+          // );
           return false;
         }
 

@@ -126,7 +126,7 @@ export async function getUserDataByUserId(
 export async function getWCARecordsOfUser(
   userId: number,
 ): Promise<Map<EventId, EventRecords<TimeFormat>> | ErrorObject> {
-  console.error("getWCARecordsOfUser not implemented");
+  // console.error("getWCARecordsOfUser not implemented");"
   return errorObject("getWCARecordsOfUser not implemented");
 }
 
