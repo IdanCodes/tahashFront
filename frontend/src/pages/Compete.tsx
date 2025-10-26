@@ -132,6 +132,11 @@ function Compete() {
     <>
       <CubingIconsSheet />
       <div>
+        {/*Event Title*/}
+        <p className="text-center text-4xl font-bold text-blue-950">
+          {competeData.eventData.eventTitle}
+        </p>
+
         {/*Scamble number menu*/}
         <div className="mx-auto my-4 box-border flex w-80/100 justify-between gap-6">
           {competeData.scrambles.map((_, i) => (
@@ -159,8 +164,8 @@ function Compete() {
               {/*Scramble & Image*/}
               <div className="flex flex-row justify-between gap-2 px-5 py-2">
                 {/* Scramble */}
-                <div className="w-full text-center text-3xl font-semibold">
-                  {scramble}
+                <div className="w-full text-center text-3xl font-semibold whitespace-pre-wrap">
+                  {scramble.replaceAll(" ", "  ")}
                 </div>
 
                 {/*Image*/}
