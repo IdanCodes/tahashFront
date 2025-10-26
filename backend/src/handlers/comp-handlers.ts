@@ -11,7 +11,7 @@ import {
 import { HttpHeaders } from "@shared/constants/http-headers";
 import { getEventById, isEventId } from "@shared/types/comp-event";
 import { UserCompeteData } from "@shared/interfaces/user-compete-data";
-import { getEmptyPackedResults } from "../interfaces/packed-result";
+import { getEmptyPackedResults } from "@shared/interfaces/packed-result";
 
 /**
  * Get all event displays and statuses

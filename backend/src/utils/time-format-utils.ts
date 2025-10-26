@@ -1,4 +1,4 @@
-import { PackedResult } from "../interfaces/packed-result";
+import { PackedResult } from "@shared/interfaces/packed-result";
 import { Penalties } from "@shared/constants/penalties";
 import { getPureCentisArr, NULL_TIME_CENTIS } from "@shared/utils/time-utils";
 import { NumScrambles, TimeFormat } from "@shared/constants/time-formats";

@@ -13,7 +13,13 @@ import { CubingIconsSheet } from "../components/CubingIconsSheet";
 import { useCSTimer } from "../hooks/useCsTimer";
 import clsx from "clsx";
 import PrimaryButton from "../components/buttons/PrimaryButton";
-import { formatPackedResult } from "@shared/utils/time-utils";
+import {
+  formatPackedResult,
+  formatTimeParts,
+  tryAnalyzeTimes,
+} from "@shared/utils/time-utils";
+import { PackedResult } from "@shared/interfaces/packed-result";
+import { ButtonSize } from "../components/buttons/ButtonSize";
 
 const hideImageEvents = Object.freeze(["3bld", "4bld", "5bld", "mbld"]);
 function Compete() {
@@ -22,6 +28,8 @@ function Compete() {
   const [competeData, setCompeteData] = useState<UserCompeteData>();
   const [activeScramble, setActiveScramble] = useState<number>(0);
   const [scrambleImages, setScrambleImages] = useState<string[]>([]);
+  const [allTimes, setAllTimes] = useState<PackedResult[]>([]);
+  const [inputValues, setInputValues] = useState<string[]>([]);
   const hideImage = useRef<boolean>(false);
 
   const { addLoading, removeLoading } = useLoading();
@@ -46,6 +54,12 @@ function Compete() {
 
   async function initCompeteData(competeData: UserCompeteData) {
     hideImage.current = hideImageEvents.includes(competeData.eventData.eventId);
+    setAllTimes(competeData.results.times);
+    setInputValues(
+      competeData.results.times.map((pr) =>
+        pr.centis >= 0 ? formatPackedResult(pr) : "",
+      ),
+    );
     setCompeteData(competeData);
 
     if (hideImage.current) return;
@@ -86,8 +100,11 @@ function Compete() {
       [HttpHeaders.USER_ID]: userInfo.user.id.toString(),
       [HttpHeaders.EVENT_ID]: eventId,
     }).then((res) => {
-      if (res.code != ResponseCode.Error)
-        return initCompeteData(res.data).then(removeLoading);
+      if (res.code != ResponseCode.Error) {
+        initCompeteData(res.data).then(removeLoading);
+        onLoadScramble(0);
+        return;
+      }
 
       removeLoading();
       redirectToError(res.data);
@@ -96,8 +113,19 @@ function Compete() {
 
   if (!competeData) return <>no compete data</>;
 
+  function onLoadScramble(scrIndex: number) {}
+
   function onClickScrambleNum(scrIndex: number) {
     setActiveScramble(scrIndex);
+    onLoadScramble(scrIndex);
+  }
+
+  function onInputChange(e: React.ChangeEvent<HTMLInputElement>) {
+    setInputValues((iv) => {
+      const newValues = [...iv];
+      newValues[activeScramble] = e.target.value;
+      return newValues;
+    });
   }
 
   return (
@@ -118,7 +146,7 @@ function Compete() {
             >
               <p className="absolute pl-[1%] text-center font-bold">{i + 1}.</p>
               <p className="ml-2 w-full text-center">
-                {formatPackedResult(competeData.results.times[i])}
+                {formatPackedResult(allTimes[i])}
               </p>
             </div>
           ))}
@@ -145,47 +173,57 @@ function Compete() {
                   ></div>
                 )}
               </div>
-
-              {/*scamble-submit divider*/}
-              <div className="w-full border-2 border-black"></div>
-
-              {/*Submit Section*/}
-              <div className="flex flex-row justify-center gap-[10%] p-2">
-                {/*Time Input & Penalty*/}
-                <div className="flex w-full flex-col">
-                  {/*Time Input*/}
-                  <div className="mx-auto w-6/10">
-                    <input
-                      type="text"
-                      className="rounded-xl bg-white px-1 py-2.5 text-4xl"
-                    />
-                  </div>
-
-                  {/*Choose Penalty*/}
-                  <div></div>
-                </div>
-
-                {/*Preview & Submit Button*/}
-                <div className="w-full">
-                  <p className="text-center text-2xl">Preview</p>
-                </div>
-              </div>
-
-              {/*Scramble navigation (temporary)*/}
-              <div className="mx-auto mt-4 flex hidden justify-center gap-[20%]">
-                <PrimaryButton
-                  disabled={activeScramble == 0}
-                  text="Previous"
-                  onClick={() => setActiveScramble((s) => s - 1)}
-                />
-                <PrimaryButton
-                  disabled={activeScramble >= competeData.scrambles.length - 1}
-                  text="Next"
-                  onClick={() => setActiveScramble((s) => s + 1)}
-                />
-              </div>
             </div>
           ))}
+          {/*scamble-submit divider*/}
+          <div className="w-full border-2 border-black"></div>
+
+          {/*Submit Section*/}
+          <div className="flex flex-row justify-center gap-[15%] p-2">
+            {/*Time Input & Penalty*/}
+            <div className="flex flex-col">
+              {/*Time Input*/}
+              <div className="place-items-center content-center justify-center">
+                <input
+                  type="text"
+                  className="rounded-xl bg-white py-2 text-center text-2xl"
+                  maxLength={12}
+                  onChange={onInputChange}
+                  value={inputValues[activeScramble]}
+                />
+              </div>
+
+              {/*Choose Penalty*/}
+              <div className="m-auto my-2 flex place-items-center gap-[10%]">
+                <PrimaryButton text="+2" buttonSize={ButtonSize.Small} />
+                <PrimaryButton text="DNF" buttonSize={ButtonSize.Small} />
+              </div>
+            </div>
+
+            {/*Preview & Submit Button*/}
+            <div className="flex flex-col">
+              <p className="text-center text-3xl">
+                {formatTimeParts(tryAnalyzeTimes(inputValues[activeScramble]))}
+              </p>
+              <div className="m-auto w-fit">
+                <PrimaryButton text="Submit" buttonSize={ButtonSize.Small} />
+              </div>
+            </div>
+          </div>
+
+          {/*Scramble navigation (temporary)*/}
+          <div className="mx-auto mt-4 flex hidden justify-center gap-[20%]">
+            <PrimaryButton
+              disabled={activeScramble == 0}
+              text="Previous"
+              onClick={() => setActiveScramble((s) => s - 1)}
+            />
+            <PrimaryButton
+              disabled={activeScramble >= competeData.scrambles.length - 1}
+              text="Next"
+              onClick={() => setActiveScramble((s) => s + 1)}
+            />
+          </div>
         </div>
       </div>
     </>

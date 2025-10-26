@@ -1,5 +1,5 @@
 import {centisPerUnit, maxTimeParts, TimeUnit} from "../constants/time-unit";
-import { PackedResult } from "../../backend/src/interfaces/packed-result";
+import { PackedResult } from "../interfaces/packed-result";
 import { SolveResult } from "../interfaces/solve-result";
 import { TimeParts } from "../interfaces/time-parts";
 import {Penalties, Penalty} from "../constants/penalties";
@@ -50,7 +50,7 @@ export function unpackTime(centis: number): TimeParts | null {
  * @param packResults The given {@link PackedResult} array.
  */
 export const unpackResults = (packResults: PackedResult[]): SolveResult[] =>
-  packResults.map((packed) => ({ ...packed, time: unpackTime(packed.centis) }));
+  packResults.map((packed) => ({ ...packed, time: unpackTime(packed.centis)}));
 
 /**
  * Check if a {@link TimeParts} object normalized and does not exceed limits.

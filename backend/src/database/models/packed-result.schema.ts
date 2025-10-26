@@ -1,5 +1,5 @@
 import { Schema } from "mongoose";
-import { PackedResult } from "../../interfaces/packed-result";
+import { PackedResult } from "@shared/interfaces/packed-result";
 
 export const packedResultSchema = new Schema<PackedResult>(
   {

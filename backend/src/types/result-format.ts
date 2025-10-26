@@ -1,4 +1,4 @@
-import { PackedResult } from "../interfaces/packed-result";
+import { PackedResult } from "@shared/interfaces/packed-result";
 import { TimeFormat } from "@shared/constants/time-formats";
 
 /**

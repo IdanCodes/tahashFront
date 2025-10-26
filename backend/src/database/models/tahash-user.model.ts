@@ -5,7 +5,7 @@ import { UserEventResult } from "../../types/user-event-result";
 import { EventRecords } from "../../types/event-records";
 import { TimeFormat } from "@shared/constants/time-formats";
 import { packedResultSchema } from "./packed-result.schema";
-import { PackedResult } from "../../interfaces/packed-result";
+import { PackedResult } from "@shared/interfaces/packed-result";
 import { datediffEpoch } from "@shared/utils/global-utils";
 import {
   getUserDataByUserId,

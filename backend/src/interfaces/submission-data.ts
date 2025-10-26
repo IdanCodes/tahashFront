@@ -1,5 +1,5 @@
 import { SubmissionState } from "../database/comps/submission-state";
-import { PackedResult } from "./packed-result";
+import { PackedResult } from "@shared/interfaces/packed-result";
 
 /**
  * Submission data of an attempt in a Tahash Comp.
