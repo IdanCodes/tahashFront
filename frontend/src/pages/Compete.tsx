@@ -16,21 +16,31 @@ import PrimaryButton from "../components/buttons/PrimaryButton";
 import {
   formatPackedResult,
   formatTimeParts,
+  isLegalTime,
   tryAnalyzeTimes,
+  unpackCentis,
+  unpackResult,
 } from "@shared/utils/time-utils";
 import { PackedResult } from "@shared/interfaces/packed-result";
 import { ButtonSize } from "../components/buttons/ButtonSize";
+import { SolveResult } from "@shared/interfaces/solve-result";
+import { Penalties } from "@shared/constants/penalties";
 
 const hideImageEvents = Object.freeze(["3bld", "4bld", "5bld", "mbld"]);
 function Compete() {
+  const [competeData, setCompeteData] = useState<UserCompeteData>();
+  const [scrambleImages, setScrambleImages] = useState<string[]>([]);
+  const [activeScramble, setActiveScramble] = useState<number>(0);
+  const [currentResult, setCurrentResult] = useState<SolveResult>({
+    penalty: Penalties.None,
+    extraArgs: {},
+    time: null,
+  });
+  const [inputValues, setInputValues] = useState<string[]>([]);
+  const [allTimes, setAllTimes] = useState<PackedResult[]>([]);
+  const hideImage = useRef<boolean>(false);
   const params = useParams();
   const csTimer = useCSTimer();
-  const [competeData, setCompeteData] = useState<UserCompeteData>();
-  const [activeScramble, setActiveScramble] = useState<number>(0);
-  const [scrambleImages, setScrambleImages] = useState<string[]>([]);
-  const [allTimes, setAllTimes] = useState<PackedResult[]>([]);
-  const [inputValues, setInputValues] = useState<string[]>([]);
-  const hideImage = useRef<boolean>(false);
 
   const { addLoading, removeLoading } = useLoading();
   const userInfo = useUserInfo();
@@ -62,10 +72,8 @@ function Compete() {
     );
     setCompeteData(competeData);
 
-    if (hideImage.current) return;
-
-    // generate image svgs
-    Promise.all(competeData.scrambles.map(scrToSvg)).then(setScrambleImages);
+    if (!hideImage.current)
+      Promise.all(competeData.scrambles.map(scrToSvg)).then(setScrambleImages);
 
     /**
      * Generate an SVG element from a given scramble
@@ -102,7 +110,6 @@ function Compete() {
     }).then((res) => {
       if (res.code != ResponseCode.Error) {
         initCompeteData(res.data).then(removeLoading);
-        onLoadScramble(0);
         return;
       }
 
@@ -113,20 +120,28 @@ function Compete() {
 
   if (!competeData) return <>no compete data</>;
 
-  function onLoadScramble(scrIndex: number) {}
-
-  function onClickScrambleNum(scrIndex: number) {
+  function loadScramble(scrIndex: number) {
     setActiveScramble(scrIndex);
-    onLoadScramble(scrIndex);
+    setCurrentResult(unpackResult(allTimes[scrIndex]));
   }
 
   function onInputChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const newTimeStr: string = e.target.value;
     setInputValues((iv) => {
       const newValues = [...iv];
-      newValues[activeScramble] = e.target.value;
+      newValues[activeScramble] = newTimeStr;
       return newValues;
     });
+
+    const newTimeParts = tryAnalyzeTimes(newTimeStr);
+    setCurrentResult((result) => ({
+      penalty: result.penalty,
+      extraArgs: result.extraArgs,
+      time: newTimeParts,
+    }));
   }
+
+  function onSubmitTime() {}
 
   return (
     <>
@@ -147,7 +162,7 @@ function Compete() {
                 activeScramble == i && "bg-gray-500",
                 activeScramble != i && "bg-gray-400 hover:bg-gray-500/80",
               )}
-              onClick={() => onClickScrambleNum(i)}
+              onClick={() => loadScramble(i)}
             >
               <p className="absolute pl-[1%] text-center font-bold">{i + 1}.</p>
               <p className="ml-2 w-full text-center">
@@ -208,10 +223,15 @@ function Compete() {
             {/*Preview & Submit Button*/}
             <div className="flex flex-col">
               <p className="text-center text-3xl">
-                {formatTimeParts(tryAnalyzeTimes(inputValues[activeScramble]))}
+                {formatTimeParts(currentResult.time)}
               </p>
               <div className="m-auto w-fit">
-                <PrimaryButton text="Submit" buttonSize={ButtonSize.Small} />
+                <PrimaryButton
+                  disabled={!currentResult.time}
+                  text="Submit"
+                  buttonSize={ButtonSize.Small}
+                  onClick={onSubmitTime}
+                />
               </div>
             </div>
           </div>
