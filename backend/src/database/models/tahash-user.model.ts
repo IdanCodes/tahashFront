@@ -196,7 +196,7 @@ const tahashUserSchema = new Schema<
         return true;
       },
 
-      getEventResult(eventId: EventId): UserEventResult | undefined {
+      getEventResult: function (eventId: EventId): UserEventResult | undefined {
         return this.eventResults.get(eventId);
       },
 

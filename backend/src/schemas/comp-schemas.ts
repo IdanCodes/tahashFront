@@ -11,7 +11,7 @@ const userIdSchema = z.coerce.number().nonnegative().int();
 const eventIdSchema = z.string();
 const packedResultSchema = z.object({
   penalty: z.enum(Penalties),
-  extraArgs: z.object().nullable(),
+  extraArgs: z.object().optional(),
   centis: z.int().min(-1),
 });
 

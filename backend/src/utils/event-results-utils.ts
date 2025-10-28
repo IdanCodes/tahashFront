@@ -81,7 +81,13 @@ function calculateBO3(results: PackedResult[]): number {
  * @return Same as {@link calcMultiBldTotalPoints}.
  */
 function calculateMultiResult(result: PackedResult<ExtraArgsMbld>): number {
-  return calcMultiBldTotalPoints(result.extraArgs);
+  let extraArgs: ExtraArgsMbld | undefined = result.extraArgs;
+  if (!extraArgs) {
+    console.error("Invalid MBLD extraArgs!");
+    return -1;
+  }
+
+  return calcMultiBldTotalPoints(extraArgs);
 }
 
 /**
@@ -94,14 +100,14 @@ function calculateFMCResult(results: PackedResult<ExtraArgsFmc>[]): number {
   for (let i = 0; i < NumScrambles[TimeFormat.mo3]; i++) {
     if (results[i].penalty == Penalties.DNF) return NULL_TIME_CENTIS; // max 1 dnf
 
-    if (!results[i].extraArgs.fmcSolution) {
+    if (!results[i].extraArgs!.fmcSolution) {
       console.error(
         "ERROR: No FMC solution. Returning NULL_TIME_CENTIS (event-results-utils.ts . calculateFMCResult)",
       );
       return NULL_TIME_CENTIS;
     }
 
-    sum += results[i].extraArgs.fmcSolution.length;
+    sum += results[i].extraArgs!.fmcSolution.length;
   }
 
   return Math.floor(sum / NumScrambles[TimeFormat.mo3]); // calculate and return the mean

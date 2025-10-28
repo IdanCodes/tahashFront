@@ -16,6 +16,7 @@ import PrimaryButton from "../components/buttons/PrimaryButton";
 import {
   formatPackedResult,
   formatTimeParts,
+  isFullPackedTimesArr,
   tryAnalyzeTimes,
   unpackResult,
 } from "@shared/utils/time-utils";
@@ -41,6 +42,7 @@ function Compete() {
 
   const hideImage = useRef<boolean>(false);
   const numScrambles = useRef<number>(0);
+  const finishedEvent = useRef<boolean>(false);
 
   const params = useParams();
   const { addLoading, removeLoading } = useLoading();
@@ -66,13 +68,24 @@ function Compete() {
   async function initCompeteData(competeData: UserCompeteData) {
     hideImage.current = hideImageEvents.includes(competeData.eventData.eventId);
     numScrambles.current = competeData.scrambles.length;
+    finishedEvent.current = competeData.results.finished;
 
-    setAllTimes(competeData.results.times);
+    const times = competeData.results.times;
+    setAllTimes(times);
     setInputValues(
-      competeData.results.times.map((pr) =>
-        pr.centis >= 0 ? formatPackedResult(pr) : "",
-      ),
+      times.map((pr) => (pr.centis >= 0 ? formatPackedResult(pr) : "")),
     );
+    setCurrentResult(unpackResult(times[0]));
+
+    let lastOpened = 0;
+    for (
+      ;
+      lastOpened < numScrambles.current - 1 && times[lastOpened].centis > 0;
+      lastOpened++
+    );
+    setLastOpenScramble(lastOpened);
+    setActiveScramble(lastOpened);
+
     setCompeteData(competeData);
 
     if (!hideImage.current)
@@ -97,7 +110,7 @@ function Compete() {
     const eventId = params.eventId;
     if (!eventId) {
       removeLoading();
-      redirectToError(errorObject(`Invalid Event Id`));
+      redirectToError(errorObject(`Invalid Event Id "${eventId}"`));
       return;
     }
 
@@ -125,6 +138,7 @@ function Compete() {
   if (!competeData) return <>no compete data</>;
 
   function loadScramble(scrIndex: number) {
+    scrIndex = Math.min(Math.max(0, scrIndex), numScrambles.current - 1);
     setActiveScramble(scrIndex);
     setCurrentResult(unpackResult(allTimes[scrIndex]));
     if (scrIndex > lastOpenScramble) setLastOpenScramble(scrIndex);
@@ -146,26 +160,26 @@ function Compete() {
     }));
   }
 
-  async function updateAllTimes(newAllTimes: PackedResult[]) {
-    console.log("Updating all times");
-    for (const t of newAllTimes) {
-      console.log(t);
-    }
+  // returns whether updating was successful
+  async function updateAllTimes(newAllTimes: PackedResult[]): Promise<boolean> {
     const res = await sendPostRequest(RoutePath.Post.UpdateTimes, {
       eventId: competeData!.eventData.eventId,
       times: newAllTimes,
     });
 
-    if (res.code == ResponseCode.Error)
-      return redirectToError(
+    if (res.code == ResponseCode.Error) {
+      redirectToError(
         errorObject(
           "An error occurred when trying to upload results",
           res.data,
         ),
       );
+      return false;
+    }
 
     setAllTimes(newAllTimes);
-    console.log("Finished updating");
+    if (isFullPackedTimesArr(newAllTimes)) finishedEvent.current = true;
+    return true;
   }
 
   function onSubmitTime() {
@@ -185,12 +199,18 @@ function Compete() {
 
     const newAllTimes = [...allTimes];
     newAllTimes[activeScramble] = packResult(currentResult);
-    updateAllTimes(newAllTimes).then((res) => {
+    updateAllTimes(newAllTimes).then((successful) => {
       removeLoading();
+      if (successful) {
+        if (isLastScramble)
+          setCurrentResult(unpackResult(newAllTimes[activeScramble]));
+        else loadScramble(activeScramble + 1);
+      }
     });
   }
 
-  function scrambleIsAccessible(scrIndex: number) {}
+  const isScrambleAccessible = (scrIndex: number) =>
+    scrIndex <= lastOpenScramble;
 
   return (
     <>
@@ -204,20 +224,23 @@ function Compete() {
         {/*Scamble number menu*/}
         <div className="mx-auto my-4 box-border flex w-80/100 justify-between gap-6">
           {competeData.scrambles.map((_, i) => (
-            <div
+            <button
               key={i}
               className={clsx(
-                `my-auto flex w-full cursor-pointer rounded-xl p-2 text-2xl transition-all duration-200 ease-in`,
+                `my-auto flex w-full rounded-xl p-2 text-2xl transition-all duration-200 ease-in`,
+                isScrambleAccessible(i) && `cursor-pointer`,
+                !isScrambleAccessible(i) && "opacity-60",
+                activeScramble !== i && "bg-gray-400 hover:bg-gray-500/80",
                 activeScramble == i && "bg-gray-500",
-                activeScramble != i && "bg-gray-400 hover:bg-gray-500/80",
               )}
               onClick={() => loadScramble(i)}
+              disabled={!isScrambleAccessible(i)}
             >
               <p className="absolute pl-[1%] text-center font-bold">{i + 1}.</p>
               <p className="ml-2 w-full text-center">
                 {formatPackedResult(allTimes[i])}
               </p>
-            </div>
+            </button>
           ))}
         </div>
 
@@ -248,40 +271,44 @@ function Compete() {
           <div className="w-full border-2 border-black"></div>
 
           {/*Submit Section*/}
-          <div className="flex flex-row justify-center gap-[15%] p-2">
+          <div className="mx-auto flex w-6/10 flex-row justify-between gap-[15%] p-2">
             {/*Time Input & Penalty*/}
-            <div className="flex flex-col">
-              {/*Time Input*/}
-              <div className="place-items-center content-center justify-center">
-                <input
-                  type="text"
-                  className="rounded-xl bg-white py-2 text-center text-2xl"
-                  maxLength={12}
-                  onChange={onInputChange}
-                  value={inputValues[activeScramble]}
-                />
-              </div>
+            {!finishedEvent.current && (
+              <div className="flex w-full flex-col">
+                {/*Time Input*/}
+                <div className="place-items-center content-center justify-center">
+                  <input
+                    type="text"
+                    className="rounded-xl bg-white py-2 text-center text-2xl"
+                    maxLength={12}
+                    onChange={onInputChange}
+                    value={inputValues[activeScramble]}
+                  />
+                </div>
 
-              {/*Choose Penalty*/}
-              <div className="m-auto my-2 flex place-items-center gap-[10%]">
-                <PrimaryButton text="+2" buttonSize={ButtonSize.Small} />
-                <PrimaryButton text="DNF" buttonSize={ButtonSize.Small} />
+                {/*Choose Penalty*/}
+                <div className="m-auto my-2 flex place-items-center gap-[10%]">
+                  <PrimaryButton text="+2" buttonSize={ButtonSize.Small} />
+                  <PrimaryButton text="DNF" buttonSize={ButtonSize.Small} />
+                </div>
               </div>
-            </div>
+            )}
 
             {/*Preview & Submit Button*/}
-            <div className="flex flex-col">
+            <div className="flex w-full flex-col">
               <p className="text-center text-3xl">
                 {formatTimeParts(currentResult.time)}
               </p>
-              <div className="m-auto w-fit">
-                <PrimaryButton
-                  disabled={!currentResult.time}
-                  text={isLastScramble ? "Submit" : "Next"}
-                  buttonSize={ButtonSize.Small}
-                  onClick={onSubmitTime}
-                />
-              </div>
+              {!finishedEvent.current && (
+                <div className="m-auto w-fit">
+                  <PrimaryButton
+                    disabled={!currentResult.time}
+                    text={isLastScramble ? "Submit" : "Next"}
+                    buttonSize={ButtonSize.Small}
+                    onClick={onSubmitTime}
+                  />
+                </div>
+              )}
             </div>
           </div>
 
