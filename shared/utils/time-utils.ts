@@ -372,8 +372,7 @@ export const formatPackedResults = (packedResults: PackedResult[]): string[] =>
  */
 export const isFullPackedTimesArr = (packedResults: PackedResult[]) =>
     // if the last result was submitted the event is finished
-    packedResults[packedResults.length - 1].centis > 0 ||
-    packedResults[packedResults.length - 1].extraArgs != null;
+    packedResults[packedResults.length - 1].centis > 0;
 
 /**
  * Convert a centiseconds value to its representing string format.

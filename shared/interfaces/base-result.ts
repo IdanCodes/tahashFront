@@ -3,7 +3,7 @@ import { Penalties, Penalty } from "../constants/penalties";
 /**
  * Represents the result of a solve without the time.
  */
-export interface BaseResult<ArgsType = undefined> {
+export interface BaseResult<ArgsType = null> {
   /**
    * The penalty of the solve.
    */

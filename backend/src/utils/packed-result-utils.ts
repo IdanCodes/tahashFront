@@ -17,7 +17,7 @@ export function getEmptyPackedResults<T extends ExtraArgs | undefined>(
     results.push({
       centis: -1,
       penalty: Penalties.None,
-      extraArgs: createEmptyArgs(compEvent.eventId),
+      extraArgs: createEmptyArgs<T>(compEvent.eventId),
     });
   }
 

@@ -29,19 +29,20 @@ function Compete() {
   const [competeData, setCompeteData] = useState<UserCompeteData>();
   const [scrambleImages, setScrambleImages] = useState<string[]>([]);
   const [activeScramble, setActiveScramble] = useState<number>(0);
+  const [inputValues, setInputValues] = useState<string[]>([]);
+  const [allTimes, setAllTimes] = useState<PackedResult[]>([]);
+  const csTimer = useCSTimer();
+  const [lastOpenScramble, setLastOpenScramble] = useState<number>(0);
   const [currentResult, setCurrentResult] = useState<SolveResult>({
     penalty: Penalties.None,
     extraArgs: {},
     time: null,
   });
-  const [inputValues, setInputValues] = useState<string[]>([]);
-  const [allTimes, setAllTimes] = useState<PackedResult[]>([]);
-  const params = useParams();
-  const csTimer = useCSTimer();
 
   const hideImage = useRef<boolean>(false);
   const numScrambles = useRef<number>(0);
 
+  const params = useParams();
   const { addLoading, removeLoading } = useLoading();
   const userInfo = useUserInfo();
 
@@ -126,6 +127,7 @@ function Compete() {
   function loadScramble(scrIndex: number) {
     setActiveScramble(scrIndex);
     setCurrentResult(unpackResult(allTimes[scrIndex]));
+    if (scrIndex > lastOpenScramble) setLastOpenScramble(scrIndex);
   }
 
   function onInputChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -187,6 +189,8 @@ function Compete() {
       removeLoading();
     });
   }
+
+  function scrambleIsAccessible(scrIndex: number) {}
 
   return (
     <>
