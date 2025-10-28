@@ -1,5 +1,10 @@
 import { SubmissionState } from "../database/comps/submission-state";
 import { PackedResult } from "@shared/interfaces/packed-result";
+import {
+  calcEventResult,
+  generateResultStr,
+} from "../utils/event-results-utils";
+import { CompEvent } from "@shared/types/comp-event";
 
 /**
  * Submission data of an attempt in a Tahash Comp.
@@ -29,4 +34,27 @@ export interface SubmissionData<ArgType = any> {
    * A display string of the attempt's result.
    */
   resultStr: string;
+}
+
+/**
+ * Initialize submission data
+ * @param userId The submitter's id
+ * @param eventData The event to submit
+ * @param times The results for the event
+ */
+export function initSubmissionData(
+  userId: number,
+  eventData: CompEvent,
+  times: PackedResult[],
+) {
+  const eventResult = calcEventResult(eventData, times);
+  const submissionData: SubmissionData = {
+    userId: userId,
+    submissionState: SubmissionState.Pending,
+    times: times,
+    finalResult: eventResult,
+    resultStr: generateResultStr(eventData.eventId, eventResult),
+  };
+
+  return submissionData;
 }

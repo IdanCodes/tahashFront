@@ -43,16 +43,19 @@ export async function sendGetRequest(path: string, headers: HeadersInit = {}) {
 /**
  * Send a POST request to the API
  * @param path The request's path (Not including /api)
+ * @param headers Headers to add to the request
  * @param body The body to send
  */
 export async function sendPostRequest(
   path: string,
   body: object,
+  headers: HeadersInit = {},
 ): Promise<ApiResponse> {
   try {
     const res = await fetch(basePath + path, {
       method: "post",
       headers: {
+        ...headers,
         "Content-Type": "application/json",
       },
       credentials: "include",
@@ -74,6 +77,3 @@ export async function sendPostRequest(
     return errorResponse("Network Error");
   }
 }
-
-// TODO: a method to create a post request's body
-// export function getPostBody(headers: object) {}

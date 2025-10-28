@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { redirect, useParams } from "react-router-dom";
 import { redirectToError } from "../utils/errorUtils";
 import { errorObject } from "@shared/interfaces/error-object";
-import { sendGetRequest } from "../utils/API/apiUtils";
+import { sendGetRequest, sendPostRequest } from "../utils/API/apiUtils";
 import { useLoading } from "../context/LoadingContext";
 import { HttpHeaders } from "@shared/constants/http-headers";
 import { useUserInfo } from "../context/UserContext";
@@ -16,14 +16,12 @@ import PrimaryButton from "../components/buttons/PrimaryButton";
 import {
   formatPackedResult,
   formatTimeParts,
-  isLegalTime,
   tryAnalyzeTimes,
-  unpackCentis,
   unpackResult,
 } from "@shared/utils/time-utils";
 import { PackedResult } from "@shared/interfaces/packed-result";
 import { ButtonSize } from "../components/buttons/ButtonSize";
-import { SolveResult } from "@shared/interfaces/solve-result";
+import { packResult, SolveResult } from "@shared/interfaces/solve-result";
 import { Penalties } from "@shared/constants/penalties";
 
 const hideImageEvents = Object.freeze(["3bld", "4bld", "5bld", "mbld"]);
@@ -38,9 +36,11 @@ function Compete() {
   });
   const [inputValues, setInputValues] = useState<string[]>([]);
   const [allTimes, setAllTimes] = useState<PackedResult[]>([]);
-  const hideImage = useRef<boolean>(false);
   const params = useParams();
   const csTimer = useCSTimer();
+
+  const hideImage = useRef<boolean>(false);
+  const numScrambles = useRef<number>(0);
 
   const { addLoading, removeLoading } = useLoading();
   const userInfo = useUserInfo();
@@ -64,6 +64,8 @@ function Compete() {
 
   async function initCompeteData(competeData: UserCompeteData) {
     hideImage.current = hideImageEvents.includes(competeData.eventData.eventId);
+    numScrambles.current = competeData.scrambles.length;
+
     setAllTimes(competeData.results.times);
     setInputValues(
       competeData.results.times.map((pr) =>
@@ -105,7 +107,6 @@ function Compete() {
     }
 
     sendGetRequest(RoutePath.Get.UserEventData, {
-      [HttpHeaders.USER_ID]: userInfo.user.id.toString(),
       [HttpHeaders.EVENT_ID]: eventId,
     }).then((res) => {
       if (res.code != ResponseCode.Error) {
@@ -117,6 +118,8 @@ function Compete() {
       redirectToError(res.data);
     });
   }, []);
+
+  const isLastScramble: boolean = activeScramble == numScrambles.current - 1;
 
   if (!competeData) return <>no compete data</>;
 
@@ -141,7 +144,49 @@ function Compete() {
     }));
   }
 
-  function onSubmitTime() {}
+  async function updateAllTimes(newAllTimes: PackedResult[]) {
+    console.log("Updating all times");
+    for (const t of newAllTimes) {
+      console.log(t);
+    }
+    const res = await sendPostRequest(RoutePath.Post.UpdateTimes, {
+      eventId: competeData!.eventData.eventId,
+      times: newAllTimes,
+    });
+
+    if (res.code == ResponseCode.Error)
+      return redirectToError(
+        errorObject(
+          "An error occurred when trying to upload results",
+          res.data,
+        ),
+      );
+
+    setAllTimes(newAllTimes);
+    console.log("Finished updating");
+  }
+
+  function onSubmitTime() {
+    if (!currentResult.time)
+      return console.error(
+        "Error: The time to submit is invalid. Try refreshing the page.",
+      );
+
+    if (isLastScramble) {
+      const confirmed = confirm(
+        "Are you sue you want to submit? You will not be able to edit the results.",
+      );
+      if (!confirmed) return;
+    }
+
+    addLoading();
+
+    const newAllTimes = [...allTimes];
+    newAllTimes[activeScramble] = packResult(currentResult);
+    updateAllTimes(newAllTimes).then((res) => {
+      removeLoading();
+    });
+  }
 
   return (
     <>
@@ -190,7 +235,7 @@ function Compete() {
                     dangerouslySetInnerHTML={{
                       __html: scrambleImages[i],
                     }}
-                  ></div>
+                  />
                 )}
               </div>
             </div>
@@ -228,7 +273,7 @@ function Compete() {
               <div className="m-auto w-fit">
                 <PrimaryButton
                   disabled={!currentResult.time}
-                  text="Submit"
+                  text={isLastScramble ? "Submit" : "Next"}
                   buttonSize={ButtonSize.Small}
                   onClick={onSubmitTime}
                 />

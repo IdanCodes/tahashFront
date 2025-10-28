@@ -7,7 +7,7 @@ import {
   ExtraArgsMbld,
 } from "../interfaces/event-extra-args/extra-args-mbld";
 import { ExtraArgsFmc } from "../interfaces/event-extra-args/extra-args-fmc";
-import { CompEvent } from "@shared/types/comp-event";
+import { CompEvent, EventId } from "@shared/types/comp-event";
 
 /**
  * Calculate an average of 5 given the full attempt.
@@ -96,7 +96,7 @@ function calculateFMCResult(results: PackedResult<ExtraArgsFmc>[]): number {
 
     if (!results[i].extraArgs.fmcSolution) {
       console.error(
-        "ERROR: No FMC solution. Returning -1 (time-format-utils.ts . calculateFMCResult)",
+        "ERROR: No FMC solution. Returning NULL_TIME_CENTIS (event-results-utils.ts . calculateFMCResult)",
       );
       return NULL_TIME_CENTIS;
     }
@@ -136,4 +136,17 @@ export function calcEventResult(
     case TimeFormat.multi:
       return calculateMultiResult(results[0]);
   }
+}
+
+/**
+ * Generate a string for an event's result
+ * @param eventId The event's id
+ * @param eventResult The result of the event (value returned from {@link calcEventResult})
+ */
+export function generateResultStr(
+  eventId: EventId,
+  eventResult: number,
+): string {
+  // TODO: implement this
+  return "-RESULT_STR-";
 }

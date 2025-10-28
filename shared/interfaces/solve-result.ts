@@ -14,13 +14,15 @@ export interface SolveResult<ArgsType = any> extends BaseResult<ArgsType> {
   time: TimeParts | null;
 }
 
+export const packResult = (result: SolveResult): PackedResult => ({ ...result, centis: packTime(result.time) });
+
 /**
  * Convert each element in an array of {@link SolveResult} to its respective {@link PackedResult}.
  * @param results The given {@link SolveResult} array.
  * @return The result {@link PackedResult}[]. For every `null` time, uses
  */
 export const packResults = (results: SolveResult[]): PackedResult[] =>
-  results.map((result) => ({ ...result, centis: packTime(result.time) }));
+  results.map(packResult);
 
 /**
  * Check if a {@link SolveResult} array is full of valid solves (valid times).

@@ -12,7 +12,10 @@ import { refreshWcaSession } from "./middleware/auth/refresh-wca-session";
 import { requireAuth } from "./middleware/auth/require-auth";
 import { userHandlers } from "./handlers/user-handlers";
 import { compHandlers } from "./handlers/comp-handlers";
-import { userEventDataSchemas } from "./schemas/comp-schemas";
+import {
+  updateTimesSchemas,
+  userEventDataSchemas,
+} from "./schemas/comp-schemas";
 
 const router = Router();
 
@@ -59,6 +62,13 @@ router.get(
   requireAuth,
   validate(userEventDataSchemas),
   compHandlers.userEventData,
+);
+
+router.post(
+  RoutePath.Post.UpdateTimes,
+  requireAuth,
+  validate(updateTimesSchemas),
+  compHandlers.updateTimes,
 );
 
 /**

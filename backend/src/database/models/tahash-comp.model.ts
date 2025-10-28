@@ -438,12 +438,7 @@ export function createCompSrc(
   );
 
   // construct competition's data (each event is empty)
-
-  // const data: Record<EventId, CompEventResults> = Object.fromEntries(
-  //   ,
-  // );
   const data: CompEventPair[] = [];
-
   allEventIds.forEach((evId) =>
     data.push({ eventId: evId, result: { scrambles: [], submissions: [] } }),
   );

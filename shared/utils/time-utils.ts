@@ -46,7 +46,7 @@ export function unpackCentis(centis: number): TimeParts | null {
 }
 
 export const unpackResult = (packedResult: PackedResult): SolveResult => ({
-    ...packedResult, time: unpackCentis(packedResult.centis)
+    penalty: packedResult.penalty, extraArgs: packedResult.extraArgs, time: unpackCentis(packedResult.centis)
 });
 
 /**

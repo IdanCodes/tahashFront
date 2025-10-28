@@ -29,7 +29,7 @@ const userInfoSchema = new mongoose.Schema(
 const userEventResultsSchema = new Schema(
   {
     finished: Boolean,
-    times: packedResultSchema,
+    times: [packedResultSchema],
   },
   {
     _id: false,
