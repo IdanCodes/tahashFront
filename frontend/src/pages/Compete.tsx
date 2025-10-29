@@ -15,6 +15,7 @@ import clsx from "clsx";
 import PrimaryButton from "../components/buttons/PrimaryButton";
 import {
   formatPackedResult,
+  formatSolveResult,
   formatTimeParts,
   isFullPackedTimesArr,
   tryAnalyzeTimes,
@@ -23,9 +24,15 @@ import {
 import { PackedResult } from "@shared/interfaces/packed-result";
 import { ButtonSize } from "../components/buttons/ButtonSize";
 import { packResult, SolveResult } from "@shared/interfaces/solve-result";
-import { Penalties } from "@shared/constants/penalties";
+import { Penalties, Penalty } from "@shared/constants/penalties";
 
 const hideImageEvents = Object.freeze(["3bld", "4bld", "5bld", "mbld"]);
+const penaltyBtnEnabledColors = {
+  normal: "bg-purple-500",
+  hover: "bg-purple-500/90",
+  click: "bg-purple-600/90",
+};
+
 function Compete() {
   const [competeData, setCompeteData] = useState<UserCompeteData>();
   const [scrambleImages, setScrambleImages] = useState<string[]>([]);
@@ -75,7 +82,6 @@ function Compete() {
     setInputValues(
       times.map((pr) => (pr.centis >= 0 ? formatPackedResult(pr) : "")),
     );
-    setCurrentResult(unpackResult(times[0]));
 
     let lastOpened = 0;
     for (
@@ -85,6 +91,7 @@ function Compete() {
     );
     setLastOpenScramble(lastOpened);
     setActiveScramble(lastOpened);
+    setCurrentResult(unpackResult(times[lastOpened]));
 
     setCompeteData(competeData);
 
@@ -134,12 +141,14 @@ function Compete() {
   }, []);
 
   const isLastScramble: boolean = activeScramble == numScrambles.current - 1;
+  const currPenalty: Penalty = currentResult.penalty ?? Penalties.None;
 
   if (!competeData) return <>no compete data</>;
 
   function loadScramble(scrIndex: number) {
     scrIndex = Math.min(Math.max(0, scrIndex), numScrambles.current - 1);
     setActiveScramble(scrIndex);
+    setCurrPenalty(allTimes[scrIndex].penalty);
     setCurrentResult(unpackResult(allTimes[scrIndex]));
     if (scrIndex > lastOpenScramble) setLastOpenScramble(scrIndex);
   }
@@ -207,6 +216,23 @@ function Compete() {
         else loadScramble(activeScramble + 1);
       }
     });
+  }
+
+  function setCurrPenalty(p: Penalty) {
+    setCurrentResult({ ...currentResult, penalty: p });
+  }
+
+  function togglePlusTwo() {
+    if (currPenalty == Penalties.DNF) return;
+    setCurrPenalty(
+      currPenalty == Penalties.Plus2 ? Penalties.None : Penalties.Plus2,
+    );
+  }
+
+  function toggleDNF() {
+    setCurrPenalty(
+      currPenalty == Penalties.DNF ? Penalties.None : Penalties.DNF,
+    );
   }
 
   const isScrambleAccessible = (scrIndex: number) =>
@@ -288,8 +314,27 @@ function Compete() {
 
                 {/*Choose Penalty*/}
                 <div className="m-auto my-2 flex place-items-center gap-[10%]">
-                  <PrimaryButton text="+2" buttonSize={ButtonSize.Small} />
-                  <PrimaryButton text="DNF" buttonSize={ButtonSize.Small} />
+                  <PrimaryButton
+                    text="+2"
+                    buttonSize={ButtonSize.Small}
+                    onClick={togglePlusTwo}
+                    colors={
+                      currPenalty == Penalties.Plus2
+                        ? penaltyBtnEnabledColors
+                        : undefined
+                    }
+                    disabled={currPenalty == Penalties.DNF}
+                  />
+                  <PrimaryButton
+                    text="DNF"
+                    buttonSize={ButtonSize.Small}
+                    colors={
+                      currPenalty == Penalties.DNF
+                        ? penaltyBtnEnabledColors
+                        : undefined
+                    }
+                    onClick={toggleDNF}
+                  />
                 </div>
               </div>
             )}
@@ -297,7 +342,7 @@ function Compete() {
             {/*Preview & Submit Button*/}
             <div className="flex w-full flex-col">
               <p className="text-center text-3xl">
-                {formatTimeParts(currentResult.time)}
+                {formatSolveResult(currentResult)}
               </p>
               {!finishedEvent.current && (
                 <div className="m-auto w-fit">

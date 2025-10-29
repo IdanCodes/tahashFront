@@ -307,6 +307,8 @@ export function formatTimeWithPenalty(
         : INVALID_TIME_STR;
 }
 
+export const formatSolveResult = (sr: SolveResult): string => formatTimeWithPenalty(sr.time, sr.penalty);
+
 /**
  * Convert a {@link TimeParts} object into centiseconds.
  * @param time The {@link TimeParts} object to convert.
