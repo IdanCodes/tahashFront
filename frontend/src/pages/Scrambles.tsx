@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { EventDisplayAndStatus } from "@shared/types/event-display-and-status";
 import { sendGetRequest } from "../utils/API/apiUtils";
 import { RoutePath } from "@shared/constants/route-path";
@@ -9,10 +9,8 @@ import { useSessionStorage } from "../hooks/useSessionStorage";
 import EventBoxes from "../components/EventBoxes";
 
 function Scrambles() {
-  const [events, setEvents] = useSessionStorage<EventDisplayAndStatus[] | null>(
-    "events",
-  );
-  const { addLoading, removeLoading } = useLoading();
+  const [events, setEvents] = useState<EventDisplayAndStatus[] | null>(null);
+  const { addLoading, removeLoading } = useLoading("Scrambles");
 
   useEffect(() => {
     addLoading();

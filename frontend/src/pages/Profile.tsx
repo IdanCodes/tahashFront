@@ -52,9 +52,9 @@ function ProfilePanel({ userInfo }: { userInfo: UserInfo }) {
 function LogoutButton({ logout }: { logout: () => Promise<void> }) {
   const [disableLogout, setDisableLogout] = useState(false);
   const navigate = useNavigate();
-  const { addLoading, removeLoading } = useLoading();
+  const { addLoading, removeLoading } = useLoading("Profile");
 
-  async function onClick(e: React.MouseEvent<Element, MouseEvent>) {
+  async function onClickLogout(e: React.MouseEvent<Element, MouseEvent>) {
     e.preventDefault();
     setDisableLogout(true);
     addLoading();
@@ -74,7 +74,7 @@ function LogoutButton({ logout }: { logout: () => Promise<void> }) {
         buttonSize={ButtonSize.Large}
         text="Logout"
         disabled={disableLogout}
-        onClick={onClick}
+        onClick={onClickLogout}
       />
     </div>
   );

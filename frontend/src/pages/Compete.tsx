@@ -16,7 +16,6 @@ import PrimaryButton from "../components/buttons/PrimaryButton";
 import {
   formatPackedResult,
   formatSolveResult,
-  formatTimeParts,
   isFullPackedTimesArr,
   tryAnalyzeTimes,
   unpackResult,
@@ -52,25 +51,8 @@ function Compete() {
   const finishedEvent = useRef<boolean>(false);
 
   const params = useParams();
-  const { addLoading, removeLoading } = useLoading();
+  const { addLoading, removeLoading } = useLoading("Compete");
   const userInfo = useUserInfo();
-
-  /**
-   * Initialize an SVG element using its image string
-   */
-  function initSvgFromString(imgStr: string) {
-    const parent = document.createElement("div");
-    parent.innerHTML = imgStr;
-    const el = parent.querySelector("svg")!;
-    const prevWidth = el.getAttribute("width") ?? "100";
-    const prevHeight = el.getAttribute("height") ?? "100";
-    el.setAttribute("width", "100%");
-    el.setAttribute("height", "100%");
-    el.setAttribute("viewBox", `0 0 ${prevWidth} ${prevHeight}`);
-    el.setAttribute("preserveAspectRatio", "xMidYMid meet");
-
-    return parent.innerHTML;
-  }
 
   async function initCompeteData(competeData: UserCompeteData) {
     hideImage.current = hideImageEvents.includes(competeData.eventData.eventId);
@@ -84,11 +66,11 @@ function Compete() {
     );
 
     let lastOpened = 0;
-    for (
-      ;
-      lastOpened < numScrambles.current - 1 && times[lastOpened].centis > 0;
-      lastOpened++
-    );
+    while (
+      lastOpened < numScrambles.current - 1 &&
+      times[lastOpened].centis > 0
+    )
+      lastOpened++;
     setLastOpenScramble(lastOpened);
     setActiveScramble(lastOpened);
     setCurrentResult(unpackResult(times[lastOpened]));
@@ -108,6 +90,23 @@ function Compete() {
       )) as string;
 
       return initSvgFromString(imgStr);
+    }
+
+    /**
+     * Initialize an SVG element using its image string
+     */
+    function initSvgFromString(imgStr: string) {
+      const parent = document.createElement("div");
+      parent.innerHTML = imgStr;
+      const el = parent.querySelector("svg")!;
+      const prevWidth = el.getAttribute("width") ?? "100";
+      const prevHeight = el.getAttribute("height") ?? "100";
+      el.setAttribute("width", "100%");
+      el.setAttribute("height", "100%");
+      el.setAttribute("viewBox", `0 0 ${prevWidth} ${prevHeight}`);
+      el.setAttribute("preserveAspectRatio", "xMidYMid meet");
+
+      return parent.innerHTML;
     }
   }
 
@@ -145,12 +144,25 @@ function Compete() {
 
   if (!competeData) return <>no compete data</>;
 
-  function loadScramble(scrIndex: number) {
+  function loadScramble(scrIndex: number, uploadTimes: boolean = true) {
     scrIndex = Math.min(Math.max(0, scrIndex), numScrambles.current - 1);
     setActiveScramble(scrIndex);
     setCurrPenalty(allTimes[scrIndex].penalty);
     setCurrentResult(unpackResult(allTimes[scrIndex]));
     if (scrIndex > lastOpenScramble) setLastOpenScramble(scrIndex);
+
+    if (!uploadTimes) return;
+    addLoading();
+
+    const newAllTimes = [...allTimes];
+    newAllTimes[activeScramble] = packResult(currentResult);
+    updateAllTimes(newAllTimes).then((successful) => {
+      removeLoading();
+      if (successful) {
+        if (isLastScramble)
+          setCurrentResult(unpackResult(newAllTimes[activeScramble]));
+      } else console.error("err");
+    });
   }
 
   function onInputChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -204,18 +216,7 @@ function Compete() {
       if (!confirmed) return;
     }
 
-    addLoading();
-
-    const newAllTimes = [...allTimes];
-    newAllTimes[activeScramble] = packResult(currentResult);
-    updateAllTimes(newAllTimes).then((successful) => {
-      removeLoading();
-      if (successful) {
-        if (isLastScramble)
-          setCurrentResult(unpackResult(newAllTimes[activeScramble]));
-        else loadScramble(activeScramble + 1);
-      }
-    });
+    loadScramble(activeScramble + 1);
   }
 
   function setCurrPenalty(p: Penalty) {
@@ -355,20 +356,6 @@ function Compete() {
                 </div>
               )}
             </div>
-          </div>
-
-          {/*Scramble navigation (temporary)*/}
-          <div className="mx-auto mt-4 flex hidden justify-center gap-[20%]">
-            <PrimaryButton
-              disabled={activeScramble == 0}
-              text="Previous"
-              onClick={() => setActiveScramble((s) => s - 1)}
-            />
-            <PrimaryButton
-              disabled={activeScramble >= competeData.scrambles.length - 1}
-              text="Next"
-              onClick={() => setActiveScramble((s) => s + 1)}
-            />
           </div>
         </div>
       </div>

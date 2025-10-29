@@ -7,14 +7,14 @@ import { useNavigate } from "react-router-dom";
 // Require user authentication to render children
 function RequireAuth({ children }: { children: ReactNode }) {
   const userInfo = useUserInfo();
-  const { addLoading, removeLoading } = useLoading();
+  const { addLoading, removeLoading } = useLoading("RequireAuth");
   const navigate = useNavigate();
 
   useEffect(() => {
     addLoading();
     userInfo.onLoadCached(() => {
       removeLoading();
-      if (!userInfo.user) navigate(RoutePath.Page.Login);
+      if (!userInfo.isLoggedIn) navigate(RoutePath.Page.Login);
     });
   }, []);
 
