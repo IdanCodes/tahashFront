@@ -71,7 +71,6 @@ export function LoadingProvider({ children }: { children: ReactNode }) {
  */
 export function useLoading(loaderName: string): LoadingContextType {
   const ctx = useContext(LoadingContext);
-  loaderName = window.location.href;
   if (!ctx) throw new Error("useLoading must be used inside a LoadingProvider");
 
   const addLoading = () => ctx.addLoading(loaderName);

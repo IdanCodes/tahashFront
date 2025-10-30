@@ -5,7 +5,6 @@ import {
   isApiResponse,
 } from "@shared/types/api-response";
 import { errorObject } from "@shared/interfaces/error-object";
-import { isAbortError } from "../errorUtils";
 
 const basePath = "/api";
 enum RequestMethod {
@@ -13,6 +12,7 @@ enum RequestMethod {
   POST = "POST",
 }
 interface QueuedRequest {
+  cancelable: boolean;
   method: RequestMethod;
   path: string;
   task: () => Promise<ApiResponse>;
@@ -30,7 +30,6 @@ async function processQueue() {
   if (isProcessing || requestQueue.length === 0) return;
   isProcessing = true;
 
-  console.log("Start process", [...requestQueue]);
   const { task, resolve, reject } = requestQueue.shift()!;
   try {
     const response = await task();
@@ -38,40 +37,34 @@ async function processQueue() {
   } catch (err) {
     reject(err);
   } finally {
-    console.log("Stop process", [...requestQueue]);
     isProcessing = false;
     processQueue().then();
   }
 }
 
 /**
- * A global set to store all active AbortControllers
+ * Clear the cancelable queued requests waiting to run
  */
-const activeAbortControllers = new Set<AbortController>();
-
-export function abortAllActiveRequests() {
-  console.log(`Aborting ${activeAbortControllers.size} requests...`);
-  for (const controller of activeAbortControllers) controller.abort();
-
-  requestQueue.splice(0, requestQueue.length);
-  activeAbortControllers.clear();
+export function cancelPendingRequests() {
+  for (let i = 0; i < requestQueue.length; i++) {
+    if (!requestQueue[i].cancelable) continue;
+    requestQueue[i].resolve(
+      new ApiResponse(ResponseCode.Aborted, "Request Aborted"),
+    );
+    requestQueue.splice(i, 1);
+  }
 }
 
 /**
  * Send a GET request to the API
  * @param path The request's path
  * @param headers Headers to send with the response
- * @param abortable Whether the request should abort when the abort trigger is activated
  * @returns An ApiResponse that matches the response from the server
  */
 export async function _internalSendGetRequest(
   path: string,
   headers: HeadersInit = {},
-  abortable: boolean = true,
 ) {
-  const abortController = new AbortController();
-  if (abortable) activeAbortControllers.add(abortController);
-
   try {
     const res = await fetch(basePath + path, {
       credentials: "include",
@@ -90,18 +83,11 @@ export async function _internalSendGetRequest(
 
     return apiRes;
   } catch (err: any) {
-    if (abortController.signal.aborted) {
-      console.log(`GET request to ${path} aborted`);
-      return new ApiResponse(ResponseCode.Aborted, "Request Aborted");
-    }
-
     console.error(`Network error (GET to ${path}):`, err);
     return new ApiResponse(
       ResponseCode.Error,
       errorObject(`Network Error (GET to ${path})`, err),
     );
-  } finally {
-    if (abortable) activeAbortControllers.delete(abortController);
   }
 }
 
@@ -110,17 +96,12 @@ export async function _internalSendGetRequest(
  * @param path The request's path (Not including /api)
  * @param headers Headers to add to the request
  * @param body The body to send
- * @param abortable Whether the request should abort when the abort trigger is activated
  */
 export async function _internalSendPostRequest(
   path: string,
   body: object,
   headers: HeadersInit = {},
-  abortable: boolean = true,
 ): Promise<ApiResponse> {
-  const abortController = new AbortController();
-  if (abortable) activeAbortControllers.add(abortController);
-
   try {
     const res = await fetch(basePath + path, {
       method: "post",
@@ -130,7 +111,6 @@ export async function _internalSendPostRequest(
       },
       credentials: "include",
       body: JSON.stringify(body),
-      signal: abortable ? abortController.signal : undefined,
     });
 
     if (!res.ok)
@@ -145,46 +125,57 @@ export async function _internalSendPostRequest(
 
     return apiRes;
   } catch (err) {
-    if (isAbortError(err)) {
-      console.log(`POST request to ${path} aborted`);
-      return new ApiResponse(ResponseCode.Aborted, "Request Aborted");
-    }
-
     console.error(`Network error (POST to ${path}):`, err);
     return errorResponse("Network Error");
-  } finally {
-    if (abortable) activeAbortControllers.delete(abortController);
   }
+}
+
+function enqueueRequest(
+  path: string,
+  method: RequestMethod,
+  newRequest: QueuedRequest,
+  overrideExisting: boolean,
+) {
+  const existingIndex = getRequestIndex(path, method);
+  const doOverride =
+    overrideExisting &&
+    existingIndex >= 0 &&
+    requestQueue[existingIndex].cancelable;
+
+  if (doOverride) {
+    requestQueue[existingIndex].resolve(
+      new ApiResponse(ResponseCode.Aborted, "Request Overridden"),
+    );
+    requestQueue[existingIndex] = newRequest;
+  } else requestQueue.push(newRequest);
+
+  processQueue().then();
 }
 
 /**
  * Send a GET request to the API
  * @param path The request's path
  * @param headers Headers to send with the response
- * @param abortable Whether the request should abort when the abort trigger is activated
- * @param overrideExisting If a GET request to this path already exists in the queue, should the new one override it? If false, the new request is added to the request queue.
+ * @param cancelable Whether the request should abort when the abort trigger is activated
+ * @param overrideExisting If a cancelable GET request to this path already exists in the queue, should the new one override it? If false, the new request is added to the request queue.
  * @returns An ApiResponse that matches the response from the server
  */
 export function sendGetRequest(
   path: string,
   headers: HeadersInit = {},
-  abortable: boolean = true,
+  cancelable: boolean = true,
   overrideExisting: boolean = true,
 ): Promise<ApiResponse> {
   return new Promise((resolve, reject) => {
     const newRequest = {
+      cancelable,
       method: RequestMethod.GET,
       path: path,
-      task: () => _internalSendGetRequest(path, headers, abortable),
+      task: () => _internalSendGetRequest(path, headers),
       resolve,
       reject,
     };
-    const existingIndex = getRequestIndex(path, RequestMethod.GET);
-    if (overrideExisting && existingIndex >= 0)
-      requestQueue[existingIndex] = newRequest;
-    else requestQueue.push(newRequest);
-
-    processQueue().then();
+    enqueueRequest(path, RequestMethod.GET, newRequest, overrideExisting);
   });
 }
 
@@ -193,31 +184,27 @@ export function sendGetRequest(
  * @param path The request's path
  * @param headers Headers to send with the response
  * @param body The body to send
- * @param abortable Whether the request should abort when the abort trigger is activated
- * @param overrideExisting If a POST request to this path already exists in the queue, should the new one override it? If false, the new request is added to the request queue.
+ * @param cancelable Whether the request should abort when the abort trigger is activated
+ * @param overrideExisting If a cancelable POST request to this path already exists in the queue, should the new one override it? If false, the new request is added to the request queue.
  * @returns An ApiResponse that matches the response from the server
  */
 export function sendPostRequest(
   path: string,
   body: object,
   headers: HeadersInit = {},
-  abortable: boolean = true,
+  cancelable: boolean = true,
   overrideExisting: boolean = true,
 ): Promise<ApiResponse> {
   return new Promise((resolve, reject) => {
     const newRequest = {
+      cancelable,
       method: RequestMethod.POST,
       path: path,
-      task: () => _internalSendPostRequest(path, body, headers, abortable),
+      task: () => _internalSendPostRequest(path, body, headers),
       resolve,
       reject,
     };
-    const existingIndex = getRequestIndex(path, RequestMethod.POST);
-    if (overrideExisting && existingIndex >= 0)
-      requestQueue[existingIndex] = newRequest;
-    else requestQueue.push(newRequest);
-
-    processQueue().then();
+    enqueueRequest(path, RequestMethod.POST, newRequest, overrideExisting);
   });
 }
 

@@ -12,17 +12,15 @@ function Scrambles() {
   const { addLoading, removeLoading } = useLoading("Scrambles");
 
   useEffect(() => {
+    if (events) return;
     addLoading();
-    if (!events) {
-      sendGetRequest(RoutePath.Get.EventsDisplayAndStatus).then((res) => {
-        removeLoading();
-        console.log("ABORTED:", res.aborted);
-        if (res.aborted) return;
-        if (res.code != ResponseCode.Success) return redirectToError(res.data);
-        setEvents(res.data as EventDisplayAndStatus[]);
-      });
-    } else removeLoading();
-  }, [events]);
+    sendGetRequest(RoutePath.Get.EventsDisplayAndStatus).then((res) => {
+      removeLoading();
+      if (res.aborted) return;
+      if (res.code != ResponseCode.Success) return redirectToError(res.data);
+      setEvents(res.data as EventDisplayAndStatus[]);
+    });
+  }, []);
 
   return (
     <>

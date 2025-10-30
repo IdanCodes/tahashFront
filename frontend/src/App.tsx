@@ -16,14 +16,14 @@ import Scrambles from "./pages/Scrambles";
 import { RoutePath } from "@shared/constants/route-path";
 import RequireAuth from "./components/RequireAuth";
 import Compete from "./pages/Compete";
-import { abortAllActiveRequests } from "./utils/API/apiUtils";
+import { cancelPendingRequests } from "./utils/API/apiUtils";
 
 function AnimatedRoutes(): JSX.Element {
   const location = useLocation();
   const { clearLoaders } = useLoadingEraser();
 
   useEffect(() => {
-    abortAllActiveRequests();
+    cancelPendingRequests();
     clearLoaders();
   }, [location]);
 

@@ -43,7 +43,7 @@ export function UserInfoProvider({ children }: { children: ReactNode }) {
   }
 
   async function refresh() {
-    const res = await sendGetRequest("/user-info");
+    const res = await sendGetRequest("/user-info", {}, false);
     if (res.aborted) return;
     if (!res.isError) return setUser(res.data);
 
