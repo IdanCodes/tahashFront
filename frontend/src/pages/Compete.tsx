@@ -180,7 +180,7 @@ function Compete() {
 
     const newTimeParts = tryAnalyzeTimes(newTimeStr);
     setCurrentResult((result) => ({
-      penalty: result.penalty,
+      penalty: Penalties.None,
       extraArgs: result.extraArgs,
       time: newTimeParts,
     }));
@@ -330,7 +330,9 @@ function Compete() {
                         ? penaltyBtnEnabledColors
                         : undefined
                     }
-                    disabled={currPenalty == Penalties.DNF}
+                    disabled={
+                      currPenalty == Penalties.DNF || !currentResult.time
+                    }
                   />
                   <PrimaryButton
                     text="DNF"
@@ -341,6 +343,7 @@ function Compete() {
                         : undefined
                     }
                     onClick={toggleDNF}
+                    disabled={!currentResult.time}
                   />
                 </div>
               </div>
