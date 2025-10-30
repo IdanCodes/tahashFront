@@ -1,12 +1,25 @@
 import { createContext, ReactNode, useContext, useState } from "react";
 
-interface LoadingContextType {
+interface LoadingProviderType {
   isLoading: boolean;
   addLoading: (loader: string) => void;
   removeLoading: (loader: string) => void;
+  clearLoaders: () => void;
 }
 
-const LoadingContext = createContext<LoadingContextType | undefined>(undefined);
+interface LoadingContextType {
+  isLoading: boolean;
+  addLoading: () => void;
+  removeLoading: () => void;
+}
+
+interface LoadingEraserType {
+  clearLoaders: () => void;
+}
+
+const LoadingContext = createContext<LoadingProviderType | undefined>(
+  undefined,
+);
 
 export function LoadingProvider({ children }: { children: ReactNode }) {
   const [loaderMap, setLoaderMap] = useState<Map<string, number>>(new Map());
@@ -34,12 +47,17 @@ export function LoadingProvider({ children }: { children: ReactNode }) {
     });
   }
 
+  function clearLoaders() {
+    setLoaderMap(new Map<string, number>());
+  }
+
   return (
     <LoadingContext.Provider
       value={{
         isLoading: isLoading,
         addLoading: addLoading,
         removeLoading: removeLoading,
+        clearLoaders: clearLoaders,
       }}
     >
       {children}
@@ -51,8 +69,9 @@ export function LoadingProvider({ children }: { children: ReactNode }) {
  * Use the loading context
  * @param loaderName A string to identify the caller
  */
-export function useLoading(loaderName: string) {
+export function useLoading(loaderName: string): LoadingContextType {
   const ctx = useContext(LoadingContext);
+  loaderName = window.location.href;
   if (!ctx) throw new Error("useLoading must be used inside a LoadingProvider");
 
   const addLoading = () => ctx.addLoading(loaderName);
@@ -61,5 +80,15 @@ export function useLoading(loaderName: string) {
     isLoading: ctx.isLoading,
     addLoading,
     removeLoading,
+  };
+}
+
+export function useLoadingEraser(): LoadingEraserType {
+  const ctx = useContext(LoadingContext);
+  if (!ctx)
+    throw new Error("useLoadingEraser must be used inside a LoadingProvider");
+
+  return {
+    clearLoaders: ctx.clearLoaders,
   };
 }

@@ -28,6 +28,7 @@ function Login() {
     const res = await sendGetRequest(
       `${RoutePath.Get.AuthWcaUrl}?${QueryParams.Redirect}=${redirectUri}`,
     );
+    if (res.aborted) return;
     if (res.code == ResponseCode.Error) return redirectToError(res.data);
 
     // res.code = Success -> data is valid

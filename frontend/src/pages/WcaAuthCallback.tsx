@@ -30,6 +30,8 @@ function WcaAuthCallback() {
       {
         code: authCode,
       },
+      {},
+      false,
     ).then(async (res) => {
       if (res.code != ResponseCode.Success) return redirectToError(res.data);
 

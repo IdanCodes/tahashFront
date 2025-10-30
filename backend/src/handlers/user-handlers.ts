@@ -4,6 +4,7 @@ import { ResponseCode } from "@shared/types/response-code";
 import { isLoggedIn } from "../middleware/auth/require-auth";
 import { SID_COOKIE_NAME } from "../middleware/db-session";
 import { CookieNames } from "@shared/constants/cookie-names";
+import { logoutUser } from "../utils/session-helpers";
 
 // get the user info of a user who's logged in
 // returns: If there was an error, `null`.
@@ -23,12 +24,9 @@ async function userInfo(req: Request, res: Response) {
  * Remove the user's session from the database and destroy the cookie
  * - requireAuth middleware is required
  */
-async function logout(req: Request, res: Response) {
-  req.session.destroy((err) => {
-    if (err) return res.json(errorResponse("Could not log out"));
-
-    res.clearCookie(SID_COOKIE_NAME);
-    res.clearCookie(CookieNames.isLoggedIn);
+function logout(req: Request, res: Response) {
+  logoutUser(req, res, (error) => {
+    if (error) return res.json(errorResponse("Could not log out"));
     res.status(200).json(new ApiResponse(ResponseCode.Success));
   });
 }

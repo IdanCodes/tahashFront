@@ -4,6 +4,9 @@ import { UserInfo } from "@shared/interfaces/user-info";
 import { isLoggedIn } from "../middleware/auth/require-auth";
 import { COOKIE_CONFIG } from "../config/env";
 import { CookieNames } from "@shared/constants/cookie-names";
+import { ApiResponse, errorResponse } from "@shared/types/api-response";
+import { SID_COOKIE_NAME } from "../middleware/db-session";
+import { ResponseCode } from "@shared/types/response-code";
 
 /**
  * Updates the session with new token and user data.
@@ -35,5 +38,19 @@ export function refreshLoginCookie(req: Request, res: Response) {
     expires: req.session.cookie.expires ?? undefined,
     secure: COOKIE_CONFIG.SECURE,
     sameSite: COOKIE_CONFIG.SAMESITE,
+  });
+}
+
+export function logoutUser(
+  req: Request,
+  res: Response,
+  cb: (error?: any) => void,
+) {
+  req.session.destroy((err) => {
+    if (err) return cb(err);
+
+    res.clearCookie(SID_COOKIE_NAME);
+    res.clearCookie(CookieNames.isLoggedIn);
+    return cb();
   });
 }

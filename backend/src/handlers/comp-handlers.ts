@@ -71,6 +71,7 @@ async function userEventData(req: UserEventDataRequest, res: Response) {
     eventData: eventData,
     results: results,
   };
+
   return res
     .status(200)
     .json(new ApiResponse(ResponseCode.Success, competeData));

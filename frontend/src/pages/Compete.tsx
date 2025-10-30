@@ -129,13 +129,16 @@ function Compete() {
     sendGetRequest(RoutePath.Get.UserEventData, {
       [HttpHeaders.EVENT_ID]: eventId,
     }).then((res) => {
-      if (res.code != ResponseCode.Error) {
+      if (res.aborted) return;
+      if (res.successful) {
         initCompeteData(res.data).then(removeLoading);
         return;
       }
 
       removeLoading();
-      redirectToError(res.data);
+      console.log("eq", res.code == ResponseCode.Success);
+      console.log("prop", res.successful);
+      // redirectToError(res.data);
     });
   }, []);
 
@@ -145,6 +148,8 @@ function Compete() {
   if (!competeData) return <>no compete data</>;
 
   function loadScramble(scrIndex: number, uploadTimes: boolean = true) {
+    if (scrIndex == activeScramble) return;
+
     scrIndex = Math.min(Math.max(0, scrIndex), numScrambles.current - 1);
     setActiveScramble(scrIndex);
     setCurrPenalty(allTimes[scrIndex].penalty);
@@ -188,7 +193,8 @@ function Compete() {
       times: newAllTimes,
     });
 
-    if (res.code == ResponseCode.Error) {
+    if (res.aborted) return false;
+    if (res.isError) {
       redirectToError(
         errorObject(
           "An error occurred when trying to upload results",

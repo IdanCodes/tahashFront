@@ -5,7 +5,6 @@ import { RoutePath } from "@shared/constants/route-path";
 import { ResponseCode } from "@shared/types/response-code";
 import { redirectToError } from "../utils/errorUtils";
 import { useLoading } from "../context/LoadingContext";
-import { useSessionStorage } from "../hooks/useSessionStorage";
 import EventBoxes from "../components/EventBoxes";
 
 function Scrambles() {
@@ -17,6 +16,8 @@ function Scrambles() {
     if (!events) {
       sendGetRequest(RoutePath.Get.EventsDisplayAndStatus).then((res) => {
         removeLoading();
+        console.log("ABORTED:", res.aborted);
+        if (res.aborted) return;
         if (res.code != ResponseCode.Success) return redirectToError(res.data);
         setEvents(res.data as EventDisplayAndStatus[]);
       });
