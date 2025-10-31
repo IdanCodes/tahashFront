@@ -24,6 +24,7 @@ import { PackedResult } from "@shared/interfaces/packed-result";
 import { ButtonSize } from "../components/buttons/ButtonSize";
 import { packResult, SolveResult } from "@shared/interfaces/solve-result";
 import { Penalties, Penalty } from "@shared/constants/penalties";
+import LoadingSpinner from "../components/LoadingSpinner";
 
 const hideImageEvents = Object.freeze(["3bld", "4bld", "5bld", "mbld"]);
 
@@ -187,73 +188,53 @@ function PreviewAndSubmitBtn({
   );
 }
 
-function CompetePanel({
-  scrambles,
-  activeScramble,
-  hideImage,
-  scrambleImages,
+function SubmitSection({
   finishedEvent,
   onInputChange,
   currentInput,
-  currentResult,
-  onSubmitTime,
   penalties,
   isLastScramble,
+  onSubmitTime,
+  currentResult,
 }: {
-  scrambles: string[];
-  activeScramble: number;
-  hideImage: boolean;
-  scrambleImages: string[];
   finishedEvent: boolean;
   onInputChange: React.ChangeEventHandler<HTMLInputElement>;
   currentInput: string;
-  currentResult: SolveResult;
-  onSubmitTime: () => void;
   penalties: {
     togglePlusTwo: () => void;
     toggleDNF: () => void;
     currPenalty: Penalty;
   };
   isLastScramble: boolean;
+  onSubmitTime: () => void;
+  currentResult: SolveResult;
 }) {
   const timeIsValid: boolean = currentResult.time !== null;
 
   return (
-    <div className="mx-auto w-8/10 rounded-2xl border-5 border-black bg-gray-400">
-      {/*Scramble & Image*/}
-      <ScrambleAndImage
-        scrText={scrambles[activeScramble]}
-        scrImg={hideImage ? undefined : scrambleImages[activeScramble]}
+    <div className="mx-auto flex w-6/10 flex-row justify-between gap-[15%] p-2">
+      {/*Time Input & Penalty*/}
+      {!finishedEvent && (
+        <div className="flex w-full flex-col">
+          {/*Time Input*/}
+          <TimeInputField
+            onInputChange={onInputChange}
+            currentInput={currentInput}
+          />
+
+          {/*Choose Penalty*/}
+          <PenaltySelector penalties={penalties} timeIsValid={timeIsValid} />
+        </div>
+      )}
+
+      {/*Preview & Submit Button*/}
+      <PreviewAndSubmitBtn
+        finishedEvent={finishedEvent}
+        isLastScramble={isLastScramble}
+        onSubmitTime={onSubmitTime}
+        timeIsValid={timeIsValid}
+        previewStr={formatSolveResult(currentResult)}
       />
-
-      {/*scamble-submit divider*/}
-      <div className="my-2 w-full border-2 border-black" />
-
-      {/*Submit Section*/}
-      <div className="mx-auto flex w-6/10 flex-row justify-between gap-[15%] p-2">
-        {/*Time Input & Penalty*/}
-        {!finishedEvent && (
-          <div className="flex w-full flex-col">
-            {/*Time Input*/}
-            <TimeInputField
-              onInputChange={onInputChange}
-              currentInput={currentInput}
-            />
-
-            {/*Choose Penalty*/}
-            <PenaltySelector penalties={penalties} timeIsValid={timeIsValid} />
-          </div>
-        )}
-
-        {/*Preview & Submit Button*/}
-        <PreviewAndSubmitBtn
-          finishedEvent={finishedEvent}
-          isLastScramble={isLastScramble}
-          onSubmitTime={onSubmitTime}
-          timeIsValid={timeIsValid}
-          previewStr={formatSolveResult(currentResult)}
-        />
-      </div>
     </div>
   );
 }
@@ -266,6 +247,7 @@ function Compete() {
   const [allTimes, setAllTimes] = useState<PackedResult[]>([]);
   const csTimer = useCSTimer();
   const [lastOpenScramble, setLastOpenScramble] = useState<number>(0);
+  const [isUploading, setIsUploading] = useState<boolean>(false);
   const [currentResult, setCurrentResult] = useState<SolveResult>({
     penalty: Penalties.None,
     extraArgs: {},
@@ -286,6 +268,8 @@ function Compete() {
     numScrambles.current = competeData.scrambles.length;
     finishedEvent.current = competeData.results.finished;
 
+    setCompeteData(competeData);
+
     const times = competeData.results.times;
     setAllTimes(times);
     setInputValues(
@@ -301,8 +285,6 @@ function Compete() {
     setLastOpenScramble(lastOpened);
     setActiveScramble(lastOpened);
     setCurrentResult(unpackResult(times[lastOpened]));
-
-    setCompeteData(competeData);
 
     if (!hideImage.current)
       Promise.all(competeData.scrambles.map(scrToSvg)).then(setScrambleImages);
@@ -356,25 +338,41 @@ function Compete() {
     });
   }, []);
 
+  if (!competeData) return <LoadingSpinner />;
+
+  const scrambles = competeData.scrambles;
   const isLastScramble: boolean = activeScramble == numScrambles.current - 1;
   const currPenalty: Penalty = currentResult.penalty ?? Penalties.None;
 
-  if (!competeData) return <>no compete data</>;
-
   function loadScramble(scrIndex: number, upload: boolean = true) {
-    if (scrIndex == activeScramble) return;
+    if (isUploading || scrIndex == activeScramble) return;
 
     scrIndex = Math.min(Math.max(0, scrIndex), numScrambles.current - 1);
+    if (!finishedEvent.current) {
+      const penaltyChanged =
+        allTimes[activeScramble].penalty != currentResult.penalty;
+      const timeChanged =
+        allTimes[activeScramble].centis != packTime(currentResult.time);
+
+      if (isLastScramble && scrIndex != activeScramble) {
+        setInputValues((values) => {
+          const newValues = [...values];
+          newValues[activeScramble] = "";
+          return newValues;
+        });
+      } else {
+        if (upload && (penaltyChanged || timeChanged)) {
+          uploadCurrentResult();
+          if (activeScramble == lastOpenScramble)
+            setLastOpenScramble(activeScramble + 1);
+        }
+      }
+    }
+
     setActiveScramble(scrIndex);
     setCurrPenalty(allTimes[scrIndex].penalty);
     setCurrentResult(unpackResult(allTimes[scrIndex]));
     if (scrIndex > lastOpenScramble) setLastOpenScramble(scrIndex);
-
-    const penaltyChanged =
-      allTimes[activeScramble].penalty != currentResult.penalty;
-    const timeChanged =
-      allTimes[activeScramble].centis != packTime(currentResult.time);
-    if (upload && (penaltyChanged || timeChanged)) uploadCurrentResult();
   }
 
   // returns whether updating was successful
@@ -404,12 +402,12 @@ function Compete() {
    * Update the current result into allTimes and upload it to the server
    */
   function uploadCurrentResult() {
-    addLoading();
+    setIsUploading(true);
 
     const newAllTimes = [...allTimes];
     newAllTimes[activeScramble] = packResult(currentResult);
     updateAllTimes(newAllTimes).then((successful) => {
-      removeLoading();
+      setIsUploading(false);
       if (!successful) console.error("Update all times error");
       else if (isLastScramble)
         setCurrentResult(unpackResult(newAllTimes[activeScramble]));
@@ -486,20 +484,33 @@ function Compete() {
           isScrambleAccessible={isScrambleAccessible}
         />
 
-        {/*Main Panel*/}
-        <CompetePanel
-          scrambles={competeData.scrambles}
-          activeScramble={activeScramble}
-          hideImage={hideImage.current}
-          scrambleImages={scrambleImages}
-          finishedEvent={finishedEvent.current}
-          onInputChange={onInputChange}
-          currentInput={inputValues[activeScramble]}
-          currentResult={currentResult}
-          onSubmitTime={onSubmitTime}
-          penalties={{ togglePlusTwo, toggleDNF, currPenalty }}
-          isLastScramble={isLastScramble}
-        />
+        <div className="mx-auto w-8/10 rounded-2xl border-5 border-black bg-gray-400">
+          {/*Scramble & Image*/}
+          <ScrambleAndImage
+            scrText={scrambles[activeScramble]}
+            scrImg={
+              hideImage.current ? undefined : scrambleImages[activeScramble]
+            }
+          />
+
+          {/*scamble-submit divider*/}
+          <div className="my-2 w-full border-2 border-black" />
+
+          {/*Submit Section*/}
+          {isUploading ? (
+            <LoadingSpinner />
+          ) : (
+            <SubmitSection
+              finishedEvent={finishedEvent.current}
+              onInputChange={onInputChange}
+              currentInput={inputValues[activeScramble]}
+              penalties={{ togglePlusTwo, toggleDNF, currPenalty }}
+              isLastScramble={isLastScramble}
+              onSubmitTime={onSubmitTime}
+              currentResult={currentResult}
+            />
+          )}
+        </div>
       </div>
     </>
   );

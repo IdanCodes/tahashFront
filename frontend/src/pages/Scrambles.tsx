@@ -6,6 +6,7 @@ import { ResponseCode } from "@shared/types/response-code";
 import { redirectToError } from "../utils/errorUtils";
 import { useLoading } from "../context/LoadingContext";
 import EventBoxes from "../components/EventBoxes";
+import LoadingSpinner from "../components/LoadingSpinner";
 
 function Scrambles() {
   const [events, setEvents] = useState<EventDisplayAndStatus[] | null>(null);
@@ -25,13 +26,7 @@ function Scrambles() {
   return (
     <>
       <p className="text-center text-5xl font-bold">Scrambles</p>
-      {events ? (
-        <div>
-          <EventBoxes events={events} />
-        </div>
-      ) : (
-        <></>
-      )}
+      {events ? <EventBoxes events={events} /> : <LoadingSpinner />}
     </>
   );
 }

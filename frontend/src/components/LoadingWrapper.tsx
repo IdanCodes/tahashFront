@@ -2,6 +2,7 @@ import React, { JSX, ReactNode } from "react";
 import { useLoading } from "../context/LoadingContext";
 import { AnimatePresence, motion } from "motion/react";
 import { PageTransition, PageTransitionProps } from "./PageTransition";
+import LoadingSpinner from "./LoadingSpinner";
 
 function LoadingWrapper({ children }: { children: ReactNode }): JSX.Element {
   const { isLoading } = useLoading("LoadingWrapper");
@@ -9,7 +10,8 @@ function LoadingWrapper({ children }: { children: ReactNode }): JSX.Element {
   function LoadingPage() {
     return (
       <div className="flex h-full place-content-center justify-center">
-        <p className="text-5xl">Loading...</p>
+        {/*<p className="text-5xl">Loading...</p>*/}
+        <LoadingSpinner />
       </div>
     );
   }
