@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { EventDisplayAndStatus } from "@shared/types/event-display-and-status";
 import clsx from "clsx";
 import { motion } from "motion/react";
 import { useNavigate } from "react-router-dom";
 import { CubingIconsSheet } from "./CubingIconsSheet";
+import { EventSubmissionStatus } from "@shared/constants/event-submission-status";
 
 function EventBoxIcon({ iconName }: { iconName: string }) {
   return (
@@ -57,9 +58,40 @@ function EventBoxTitle({
   );
 }
 
+function getBoxColors(status: EventSubmissionStatus): {
+  default: string;
+  hover: string;
+  click: string;
+} {
+  switch (status) {
+    case EventSubmissionStatus.NotStarted:
+      return {
+        default: "rgba(0, 0, 0, 0)",
+        hover: "rgba(110, 110, 110, 0.2)",
+        click: "rgb(100, 100, 100, 0.4)",
+      };
+
+    case EventSubmissionStatus.InProgress:
+      return {
+        default: "rgba(214, 236, 116, 0.4)",
+        hover: "hsla(68, 52%, 65%, 0.4)",
+        click: "hsla(65, 81%, 30%, 0.5)",
+      };
+
+    default:
+      return {
+        default: "rgba(45, 226, 70, 0.2)",
+        hover: "hsla(128, 76%, 53%, 0.2)",
+        click: "hsla(130, 85%, 27%, 0.4)",
+      };
+  }
+}
+
 function EventBox({ das }: { das: EventDisplayAndStatus }) {
   const [hovered, setHovered] = useState<boolean>(false);
   const navigate = useNavigate();
+  const status = das.status;
+  let boxColors = getBoxColors(status);
 
   return (
     <>
@@ -67,14 +99,15 @@ function EventBox({ das }: { das: EventDisplayAndStatus }) {
         onHoverStart={() => setHovered(true)}
         onHoverEnd={() => setHovered(false)}
         className="box-content grid size-29 cursor-pointer place-content-center items-center rounded-2xl border-3 border-black"
+        style={{ backgroundColor: boxColors.default }}
         variants={{
           hover: {
             rotate: 3,
             scale: 1.07,
-            backgroundColor: "rgba(110, 110, 110, 0.2)",
+            backgroundColor: boxColors.hover,
           },
           click: {
-            backgroundColor: "rgb(100, 100, 100, 0.4)",
+            backgroundColor: boxColors.click,
           },
         }}
         transition={{
