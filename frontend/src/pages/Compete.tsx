@@ -360,19 +360,16 @@ function Compete() {
           newValues[activeScramble] = "";
           return newValues;
         });
-      } else {
-        if (upload && (penaltyChanged || timeChanged)) {
-          uploadCurrentResult();
-          if (activeScramble == lastOpenScramble)
-            setLastOpenScramble(activeScramble + 1);
-        }
       }
     }
+    loadDisplayData();
 
-    setActiveScramble(scrIndex);
-    setCurrPenalty(allTimes[scrIndex].penalty);
-    setCurrentResult(unpackResult(allTimes[scrIndex]));
-    if (scrIndex > lastOpenScramble) setLastOpenScramble(scrIndex);
+    function loadDisplayData() {
+      setActiveScramble(scrIndex);
+      setCurrPenalty(allTimes[scrIndex].penalty);
+      setCurrentResult(unpackResult(allTimes[scrIndex]));
+      if (scrIndex > lastOpenScramble) setLastOpenScramble(scrIndex);
+    }
   }
 
   // returns whether updating was successful
@@ -401,17 +398,16 @@ function Compete() {
   /**
    * Update the current result into allTimes and upload it to the server
    */
-  function uploadCurrentResult() {
+  async function uploadCurrentResult(): Promise<void> {
     setIsUploading(true);
 
     const newAllTimes = [...allTimes];
     newAllTimes[activeScramble] = packResult(currentResult);
-    updateAllTimes(newAllTimes).then((successful) => {
-      setIsUploading(false);
-      if (!successful) console.error("Update all times error");
-      else if (isLastScramble)
-        setCurrentResult(unpackResult(newAllTimes[activeScramble]));
-    });
+    const successful = await updateAllTimes(newAllTimes);
+    setIsUploading(false);
+    if (!successful) console.error("Update all times error");
+    else if (isLastScramble)
+      setCurrentResult(unpackResult(newAllTimes[activeScramble]));
   }
 
   function setCurrPenalty(p: Penalty) {
