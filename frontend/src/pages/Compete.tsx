@@ -348,17 +348,30 @@ function Compete() {
     if (isUploading || scrIndex == activeScramble) return;
 
     scrIndex = Math.min(Math.max(0, scrIndex), numScrambles.current - 1);
-    if (!finishedEvent.current) {
-      const penaltyChanged =
-        allTimes[activeScramble].penalty != currentResult.penalty;
-      const timeChanged =
-        allTimes[activeScramble].centis != packTime(currentResult.time);
+    if (finishedEvent.current) {
+      loadDisplayData();
+      return;
+    }
 
-      if (isLastScramble && scrIndex != activeScramble) {
-        setInputValues((values) => {
-          const newValues = [...values];
-          newValues[activeScramble] = "";
-          return newValues;
+    const penaltyChanged =
+      allTimes[activeScramble].penalty != currentResult.penalty;
+    const timeChanged =
+      allTimes[activeScramble].centis != packTime(currentResult.time);
+
+    if (isLastScramble && scrIndex != activeScramble) {
+      setInputValues((values) => {
+        const newValues = [...values];
+        newValues[activeScramble] = "";
+        return newValues;
+      });
+    } else {
+      if (upload && (penaltyChanged || timeChanged)) {
+        uploadCurrentResult().then(() => {
+          loadDisplayData();
+          if (activeScramble != lastOpenScramble) return;
+
+          setLastOpenScramble(activeScramble + 1);
+          loadScramble(activeScramble);
         });
       }
     }
