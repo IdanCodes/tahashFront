@@ -1,5 +1,5 @@
 import {centisPerUnit, maxTimeParts, TimeUnit} from "../constants/time-unit";
-import { PackedResult } from "../../backend/src/interfaces/packed-result";
+import { PackedResult } from "../interfaces/packed-result";
 import { SolveResult } from "../interfaces/solve-result";
 import { TimeParts } from "../interfaces/time-parts";
 import {Penalties, Penalty} from "../constants/penalties";
@@ -32,7 +32,7 @@ export const PLUS_2_SUFFIX = "+";
  * - If centis is non-negative, returns its respective {@link TimeParts}.
  * - Otherwise, returns `null`.
  */
-export function unpackTime(centis: number): TimeParts | null {
+export function unpackCentis(centis: number): TimeParts | null {
   if (centis < 0) return null;
 
   const hours = Math.floor(centis / centisPerUnit[TimeUnit.Hours]);
@@ -45,12 +45,16 @@ export function unpackTime(centis: number): TimeParts | null {
   return { centis, seconds, minutes, hours };
 }
 
+export const unpackResult = (packedResult: PackedResult): SolveResult => ({
+    penalty: packedResult.penalty, extraArgs: packedResult.extraArgs, time: unpackCentis(packedResult.centis)
+});
+
 /**
  * Convert each element in an array of {@link PackedResult} to its respective {@link SolveResult}.
  * @param packResults The given {@link PackedResult} array.
  */
 export const unpackResults = (packResults: PackedResult[]): SolveResult[] =>
-  packResults.map((packed) => ({ ...packed, time: unpackTime(packed.centis) }));
+  packResults.map(unpackResult);
 
 /**
  * Check if a {@link TimeParts} object normalized and does not exceed limits.
@@ -79,7 +83,7 @@ function isValidTime(time: TimeParts): boolean {
  * @param time The {@link TimeParts} object to check.
  * @returns `true` if the time is valid and normalized, otherwise `false`.
  */
-function isLegalTime(time: TimeParts | null): boolean {
+export function isLegalTime(time: TimeParts | null): boolean {
     if (!time) return false;
     const { hours, minutes, seconds, centis } = time;
 
@@ -303,6 +307,8 @@ export function formatTimeWithPenalty(
         : INVALID_TIME_STR;
 }
 
+export const formatSolveResult = (sr: SolveResult): string => formatTimeWithPenalty(sr.time, sr.penalty);
+
 /**
  * Convert a {@link TimeParts} object into centiseconds.
  * @param time The {@link TimeParts} object to convert.
@@ -363,20 +369,19 @@ export const formatPackedResults = (packedResults: PackedResult[]): string[] =>
     packedResults.map((pr) => formatCentisWithPenalty(pr.centis, pr.penalty));
 
 /**
- * Check if a {@link PackedResult} array is full of valid solves.
+ * Check if a {@link PackedResult} array is full of valid times.
  * @param packedResults
  */
 export const isFullPackedTimesArr = (packedResults: PackedResult[]) =>
     // if the last result was submitted the event is finished
-    packedResults[packedResults.length - 1].centis > 0 ||
-    packedResults[packedResults.length - 1].extraArgs != null;
+    packedResults[packedResults.length - 1].centis > 0;
 
 /**
  * Convert a centiseconds value to its representing string format.
  * @param centis The amount of centiseconds.
  */
 export const formatCentis = (centis: number): string =>
-    formatTimeParts(unpackTime(centis));
+    formatTimeParts(unpackCentis(centis));
 
 /**
  * Convert a centiseconds value to its representing string format.
@@ -386,7 +391,7 @@ export const formatCentis = (centis: number): string =>
 export const formatCentisWithPenalty = (
     centis: number,
     penalty: Penalty,
-): string => formatTimeWithPenalty(unpackTime(centis), penalty);
+): string => formatTimeWithPenalty(unpackCentis(centis), penalty);
 
 /**
  * Convert a packed result to its representing string format.

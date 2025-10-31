@@ -212,10 +212,11 @@ export function getEventById(eventId: EventId): CompEvent | undefined {
  */
 export function createEmptyArgs<T extends ExtraArgs>(
   eventId: EventId,
-): T | undefined {
-  if (eventId === "fmc") return { fmcSolution: [] } as T;
-  else if (eventId === "mbld") return { numSuccess: -1, numAttempt: -1 } as T;
-  return undefined;
+): T {
+    let result: object = {};
+  if (eventId === "fmc") result = { fmcSolution: [] };
+  else if (eventId === "mbld") result ={ numSuccess: -1, numAttempt: -1 };
+  return result as T;
 }
 
 /**

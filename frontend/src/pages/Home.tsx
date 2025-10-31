@@ -7,7 +7,7 @@ import { RoutePath } from "@shared/constants/route-path";
 
 function Home(): JSX.Element {
   const navigate = useNavigate();
-  const { addLoading, removeLoading } = useLoading();
+  const { addLoading, removeLoading } = useLoading("Home");
 
   return (
     <>

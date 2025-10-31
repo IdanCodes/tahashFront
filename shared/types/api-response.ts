@@ -1,4 +1,5 @@
 import {ResponseCode} from "./response-code";
+import {ErrorObject} from "../interfaces/error-object";
 
 /**
  * A response from the API
@@ -15,8 +16,16 @@ export class ApiResponse {
         this.data = data;
     }
 
-    get hasError() {
-        return this.code == ResponseCode.Error;
+    get successful() {
+        return this.code === ResponseCode.Success;
+    }
+
+    get isError() {
+        return this.code === ResponseCode.Error;
+    }
+
+    get aborted() {
+        return this.code === ResponseCode.Aborted;
     }
 }
 

@@ -13,3 +13,5 @@ export function redirectToError(error: object): void {
 
   window.location.href = `/error?text=${encodeURIComponent(text)}${data}`;
 }
+
+export const isAbortError = (err: any): boolean => err.name === "AbortError";

@@ -63,11 +63,11 @@ async function sendWCARequest<T>(
 ): Promise<ErrorObject | T> {
   const reqUrl = `${WCA_BASE_URL}${path}`;
   const httpRes: Response = await fetch(reqUrl, options);
-  if (!httpRes.ok)
-    return errorObject(
-      `HTTP Error: "${httpRes.statusText}"`,
-      await httpRes.json(),
-    );
+  if (!httpRes.ok) {
+    const body = await httpRes.json();
+    console.log(`${options.method} request to ${path}`, body);
+    return errorObject(`HTTP Error: "${httpRes.statusText}"`, body);
+  }
 
   const data: any = await httpRes.json();
   if (data !== null && "error" in data)

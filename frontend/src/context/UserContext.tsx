@@ -8,9 +8,8 @@ import {
   useState,
 } from "react";
 import { sendGetRequest } from "../utils/API/apiUtils";
-import { ResponseCode } from "@shared/types/response-code";
 import { useLocalStorage } from "../hooks/useLocalStorage";
-import { getCookie } from "react-use-cookie";
+import { getCookie, removeCookie } from "react-use-cookie";
 import { CookieNames } from "@shared/constants/cookie-names";
 
 interface UserInfoContextType {
@@ -44,8 +43,9 @@ export function UserInfoProvider({ children }: { children: ReactNode }) {
   }
 
   async function refresh() {
-    const res = await sendGetRequest("/user-info");
-    if (res.code == ResponseCode.Success) return setUser(res.data);
+    const res = await sendGetRequest("/user-info", {}, false);
+    if (res.aborted) return;
+    if (!res.isError) return setUser(res.data);
 
     console.error(
       "UserInfoProvider.refreshSync: Error refreshing user info!",
@@ -78,6 +78,7 @@ export function UserInfoProvider({ children }: { children: ReactNode }) {
     onLoadCachedCbs.current = [];
 
     if ((!isLoggedIn() && user) || (isLoggedIn() && !user)) {
+      removeCookie(CookieNames.isLoggedIn);
       refresh().then();
       return;
     }

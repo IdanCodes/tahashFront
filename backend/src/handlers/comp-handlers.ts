@@ -5,17 +5,20 @@ import { ApiResponse, errorResponse } from "@shared/types/api-response";
 import { ResponseCode } from "@shared/types/response-code";
 import { getEventsDisplayAndStatus } from "@shared/types/event-display-and-status";
 import {
+  UpdateTimesBodyInput,
+  UpdateTimesRequest,
   UserEventDataHeadersInput,
   UserEventDataRequest,
 } from "../schemas/comp-schemas";
 import { HttpHeaders } from "@shared/constants/http-headers";
-import { getEventById, isEventId } from "@shared/types/comp-event";
+import { getEventById } from "@shared/types/comp-event";
 import { UserCompeteData } from "@shared/interfaces/user-compete-data";
-import { getEmptyPackedResults } from "../interfaces/packed-result";
+import { getEmptyPackedResults } from "../utils/packed-result-utils";
+import { initSubmissionData } from "../interfaces/submission-data";
 
 /**
  * Get all event displays and statuses
- * - requireLogin
+ * requireLogin
  */
 async function eventsDisplayAndStatus(req: Request, res: Response) {
   const displayInfos =
@@ -35,17 +38,19 @@ async function eventsDisplayAndStatus(req: Request, res: Response) {
 
 /**
  * headers:
- * userId: number
- * eventId: string
+ * - eventId: string
  * response:
+ * - The requesting user's UserCompeteData
  *
+ * requireLogin
  */
 async function userEventData(req: UserEventDataRequest, res: Response) {
-  const { [HttpHeaders.USER_ID]: userId, [HttpHeaders.EVENT_ID]: eventId } =
+  const { [HttpHeaders.EVENT_ID]: eventId } =
     req.headers as unknown as UserEventDataHeadersInput;
 
   const eventData = getEventById(eventId);
-  if (!eventData) return res.json(errorResponse(`Invalid event id ${eventId}`));
+  if (!eventData)
+    return res.json(errorResponse(`Invalid event id "${eventId}"`));
 
   const activeComp = CompManager.getInstance().getActiveComp();
   const eventScrambles = activeComp.getEventScrambles(eventId);
@@ -54,6 +59,7 @@ async function userEventData(req: UserEventDataRequest, res: Response) {
       errorResponse(`Event \"${eventId}\" does not exist in the active comp`),
     );
 
+  const userId = req.session.userSession!.userInfo.id;
   const userDoc = await UserManager.getInstance().getUserById(userId);
   const results = userDoc.getEventResult(eventId) ?? {
     finished: false,
@@ -65,12 +71,52 @@ async function userEventData(req: UserEventDataRequest, res: Response) {
     eventData: eventData,
     results: results,
   };
+
   return res
     .status(200)
     .json(new ApiResponse(ResponseCode.Success, competeData));
 }
 
+/**
+ * body:
+ * - eventId: string
+ * - times: PackedResult[]
+ *
+ * requireLogin
+ */
+export async function updateTimes(req: UpdateTimesRequest, res: Response) {
+  const { eventId, times } = req.body as UpdateTimesBodyInput;
+
+  const eventData = getEventById(eventId);
+  if (!eventData)
+    return res.json(errorResponse(`Invalid event id "${eventId}"`));
+
+  if (times.length != eventData.getNumScrambles())
+    return res.json(
+      errorResponse(
+        `Number of times (${times.length}) does not match event's number of scrambles (${eventData.getNumScrambles()})`,
+      ),
+    );
+
+  const userId = req.session.userSession!.userInfo.id;
+  const userDoc = await UserManager.getInstance().getUserById(userId);
+  userDoc.setEventTimes(eventId, times);
+  await userDoc.save();
+
+  res.json(new ApiResponse(ResponseCode.Success, "Saved successfully!"));
+
+  if (userDoc.finishedEvent(eventId)) {
+    const currComp = CompManager.getInstance().getActiveComp();
+
+    const submissionData = initSubmissionData(userId, eventData, times);
+    currComp.submitResults(eventId, userId, submissionData);
+
+    await currComp.save();
+  }
+}
+
 export const compHandlers = {
   eventsDisplayAndStatus,
   userEventData,
+  updateTimes,
 };

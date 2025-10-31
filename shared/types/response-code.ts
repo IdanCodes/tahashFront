@@ -4,4 +4,5 @@
 export enum ResponseCode {
     Error,
     Success,
+    Aborted,
 }

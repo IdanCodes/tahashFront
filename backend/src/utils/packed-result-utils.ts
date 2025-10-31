@@ -1,17 +1,7 @@
+import { CompEvent, createEmptyArgs } from "@shared/types/comp-event";
+import { PackedResult } from "@shared/interfaces/packed-result";
 import { ExtraArgs } from "@shared/types/extra-args";
 import { Penalties } from "@shared/constants/penalties";
-import { BaseResult } from "@shared/interfaces/base-result";
-import { CompEvent, createEmptyArgs } from "@shared/types/comp-event";
-
-/**
- * Packed result - smaller size.
- */
-export interface PackedResult<ArgsType = any> extends BaseResult<ArgsType> {
-  /**
-   * The time of the solve represented in centiseconds.
-   */
-  centis: number;
-}
 
 /**
  * Get an empty instance of a {@link PackedResult}[] for an event.
@@ -27,7 +17,7 @@ export function getEmptyPackedResults<T extends ExtraArgs | undefined>(
     results.push({
       centis: -1,
       penalty: Penalties.None,
-      extraArgs: createEmptyArgs(compEvent.eventId) as T,
+      extraArgs: createEmptyArgs<T>(compEvent.eventId),
     });
   }
 

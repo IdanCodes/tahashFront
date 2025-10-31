@@ -4,7 +4,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { PageTransition, PageTransitionProps } from "./PageTransition";
 
 function LoadingWrapper({ children }: { children: ReactNode }): JSX.Element {
-  const { isLoading } = useLoading();
+  const { isLoading } = useLoading("LoadingWrapper");
 
   function LoadingPage() {
     return (
