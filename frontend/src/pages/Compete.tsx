@@ -1,12 +1,11 @@
 import React, { useEffect, useRef, useState } from "react";
-import { redirect, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { redirectToError } from "../utils/errorUtils";
 import { errorObject } from "@shared/interfaces/error-object";
 import { sendGetRequest, sendPostRequest } from "../utils/API/apiUtils";
 import { useLoading } from "../context/LoadingContext";
 import { HttpHeaders } from "@shared/constants/http-headers";
 import { useUserInfo } from "../context/UserContext";
-import { ResponseCode } from "@shared/types/response-code";
 import { RoutePath } from "@shared/constants/route-path";
 import { UserCompeteData } from "@shared/interfaces/user-compete-data";
 import { CubingIconsSheet } from "../components/CubingIconsSheet";
@@ -17,6 +16,7 @@ import {
   formatPackedResult,
   formatSolveResult,
   isFullPackedTimesArr,
+  packTime,
   tryAnalyzeTimes,
   unpackResult,
 } from "@shared/utils/time-utils";
@@ -31,6 +31,44 @@ const penaltyBtnEnabledColors = {
   hover: "bg-purple-500/90",
   click: "bg-purple-600/90",
 };
+
+function ScramblesMenu({
+  scrambles,
+  activeScramble,
+  allTimes,
+  loadScramble,
+  isScrambleAccessible,
+}: {
+  scrambles: string[];
+  activeScramble: number;
+  allTimes: PackedResult[];
+  loadScramble: (scrIndex: number) => void;
+  isScrambleAccessible: (scrIndex: number) => boolean;
+}) {
+  return (
+    <div className="mx-auto my-4 box-border flex w-80/100 justify-between gap-6">
+      {scrambles.map((_, i) => (
+        <button
+          key={i}
+          className={clsx(
+            `my-auto flex w-full rounded-xl p-2 text-2xl transition-all duration-200 ease-in`,
+            isScrambleAccessible(i) && `cursor-pointer`,
+            !isScrambleAccessible(i) && "opacity-60",
+            activeScramble !== i && "bg-gray-400 hover:bg-gray-500/80",
+            activeScramble == i && "bg-gray-500",
+          )}
+          onClick={() => loadScramble(i)}
+          disabled={!isScrambleAccessible(i)}
+        >
+          <p className="absolute pl-[1%] text-center font-bold">{i + 1}.</p>
+          <p className="ml-2 w-full text-center">
+            {formatPackedResult(allTimes[i])}
+          </p>
+        </button>
+      ))}
+    </div>
+  );
+}
 
 function Compete() {
   const [competeData, setCompeteData] = useState<UserCompeteData>();
@@ -53,6 +91,7 @@ function Compete() {
   const params = useParams();
   const { addLoading, removeLoading } = useLoading("Compete");
   const userInfo = useUserInfo();
+  const navigate = useNavigate();
 
   async function initCompeteData(competeData: UserCompeteData) {
     hideImage.current = hideImageEvents.includes(competeData.eventData.eventId);
@@ -114,15 +153,9 @@ function Compete() {
     addLoading();
 
     const eventId = params.eventId;
-    if (!eventId) {
+    if (!eventId || !userInfo.user) {
       removeLoading();
-      redirectToError(errorObject(`Invalid Event Id "${eventId}"`));
-      return;
-    }
-
-    if (!userInfo.user) {
-      removeLoading();
-      redirect(RoutePath.Page.HomeRedirect);
+      navigate(RoutePath.Page.Scrambles);
       return;
     }
 
@@ -130,15 +163,8 @@ function Compete() {
       [HttpHeaders.EVENT_ID]: eventId,
     }).then((res) => {
       if (res.aborted) return;
-      if (res.successful) {
-        initCompeteData(res.data).then(removeLoading);
-        return;
-      }
-
-      removeLoading();
-      console.log("eq", res.code == ResponseCode.Success);
-      console.log("prop", res.successful);
-      // redirectToError(res.data);
+      else if (res.isError) return redirectToError(res.data);
+      initCompeteData(res.data).then(removeLoading);
     });
   }, []);
 
@@ -147,7 +173,7 @@ function Compete() {
 
   if (!competeData) return <>no compete data</>;
 
-  function loadScramble(scrIndex: number, uploadTimes: boolean = true) {
+  function loadScramble(scrIndex: number, upload: boolean = true) {
     if (scrIndex == activeScramble) return;
 
     scrIndex = Math.min(Math.max(0, scrIndex), numScrambles.current - 1);
@@ -156,17 +182,26 @@ function Compete() {
     setCurrentResult(unpackResult(allTimes[scrIndex]));
     if (scrIndex > lastOpenScramble) setLastOpenScramble(scrIndex);
 
-    if (!uploadTimes) return;
+    const penaltyChanged =
+      allTimes[activeScramble].penalty != currentResult.penalty;
+    const timeChanged =
+      allTimes[activeScramble].centis != packTime(currentResult.time);
+    if (upload && (penaltyChanged || timeChanged)) uploadCurrentResult();
+  }
+
+  /**
+   * Update the current result into allTimes and upload it to the server
+   */
+  function uploadCurrentResult() {
     addLoading();
 
     const newAllTimes = [...allTimes];
     newAllTimes[activeScramble] = packResult(currentResult);
     updateAllTimes(newAllTimes).then((successful) => {
       removeLoading();
-      if (successful) {
-        if (isLastScramble)
-          setCurrentResult(unpackResult(newAllTimes[activeScramble]));
-      } else console.error("err");
+      if (!successful) console.error("Update all times error");
+      else if (isLastScramble)
+        setCurrentResult(unpackResult(newAllTimes[activeScramble]));
     });
   }
 
@@ -255,27 +290,13 @@ function Compete() {
         </p>
 
         {/*Scamble number menu*/}
-        <div className="mx-auto my-4 box-border flex w-80/100 justify-between gap-6">
-          {competeData.scrambles.map((_, i) => (
-            <button
-              key={i}
-              className={clsx(
-                `my-auto flex w-full rounded-xl p-2 text-2xl transition-all duration-200 ease-in`,
-                isScrambleAccessible(i) && `cursor-pointer`,
-                !isScrambleAccessible(i) && "opacity-60",
-                activeScramble !== i && "bg-gray-400 hover:bg-gray-500/80",
-                activeScramble == i && "bg-gray-500",
-              )}
-              onClick={() => loadScramble(i)}
-              disabled={!isScrambleAccessible(i)}
-            >
-              <p className="absolute pl-[1%] text-center font-bold">{i + 1}.</p>
-              <p className="ml-2 w-full text-center">
-                {formatPackedResult(allTimes[i])}
-              </p>
-            </button>
-          ))}
-        </div>
+        <ScramblesMenu
+          scrambles={competeData.scrambles}
+          activeScramble={activeScramble}
+          allTimes={allTimes}
+          loadScramble={loadScramble}
+          isScrambleAccessible={isScrambleAccessible}
+        />
 
         {/*Main Panel*/}
         <div className="mx-auto w-8/10 rounded-2xl border-5 border-black bg-gray-400">
