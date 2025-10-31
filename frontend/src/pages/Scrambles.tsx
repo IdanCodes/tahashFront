@@ -27,7 +27,7 @@ function Scrambles() {
 
   return (
     <>
-      <p className="text-center text-5xl font-bold">Scrambles</p>
+      <p className="text-center text-5xl font-bold p-4">Scrambles</p>
       {events ? (
         <div>
           <EventBoxes events={events} />
