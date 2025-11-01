@@ -1,4 +1,4 @@
-# Local Docker Deploy
+# Docker deploy
 services:
   # mongo container
   mongo:
@@ -20,15 +20,16 @@ services:
       context: ../backend
       dockerfile: Dockerfile
     container_name: backend
+    environment: # Environment variables
+      - NODE_ENV=production
+      - MONGO_SERVICE=mongodb
+    image: idoshahar/tahash-backend:v0.1
     ports:
       - "3000:3000"
     volumes:
       - backend-data:/app/data
     env_file:
       - .env.prod
-    environment: # Environment variables
-      - NODE_ENV=production
-      - MONGO_SERVICE=mongodb
     depends_on:
       - mongo
 
@@ -36,11 +37,12 @@ services:
     build:
       context: ../.
       dockerfile: frontend/Dockerfile
+    environment: # Environment variables
+      - NODE_ENV=production
+    image: idoshahar/tahash-frontend:v0.1
     container_name: frontend
     ports:
       - "8080:8080"
-    environment: # Environment variables
-      - NODE_ENV=production
     volumes:
       - ../frontend:/app
       - ../shared:/shared
