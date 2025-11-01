@@ -10,19 +10,19 @@ function Header(): JSX.Element {
   const userInfo = useUserInfo();
 
   return (
-    <div className="flex h-[100px] w-full items-center justify-between bg-gradient-to-br from-blue-700 via-blue-800 to-indigo-800">
-      <div className="group flex items-center gap-5 pl-[1vw]">
+    <div className="flex h-auto w-full flex-col items-center justify-center gap-4 bg-gradient-to-br from-blue-700 via-blue-800 to-indigo-800 p-4 lg:h-[100px] lg:flex-row lg:justify-between lg:gap-0 lg:p-[1vw]">
+      <div className="group flex items-center gap-3 lg:flex-row lg:items-center lg:gap-5">
         <img
           src={logo}
           alt="ILCubers Logo"
-          className="w-[65px] transition-transform duration-200 ease-in-out group-hover:scale-110"
+          className="w-[65px] transition-transform duration-200 ease-in-out group-hover:scale-110 lg:w-[55px]"
         />
-        <h1 className="inline-block text-[clamp(1.5rem,2vw,2.5rem)] tracking-[0.03em] whitespace-nowrap text-blue-100 transition-all duration-200 ease-in-out select-none group-hover:tracking-[0.05em]">
+        <h1 className="inline-block text-[clamp(1.6rem,2.5vw,2.5rem)] tracking-[0.03em] whitespace-nowrap text-blue-100 transition-all duration-200 ease-in-out select-none group-hover:tracking-[0.05em]">
           ILCubers - Weekly Competition
         </h1>
       </div>
 
-      <nav className="pr-[2vw]">
+      <nav className="pr-[2vw] lg:pr-0 lg:p-[2vw]">
         <ul className="flex list-none gap-5 text-center font-extrabold text-blue-100">
           <li>
             <NavbarButton to="/" text="Home" />
