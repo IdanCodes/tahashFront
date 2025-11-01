@@ -109,6 +109,7 @@ export async function updateTimes(req: UpdateTimesRequest, res: Response) {
     const currComp = CompManager.getInstance().getActiveComp();
 
     const submissionData = initSubmissionData(userId, eventData, times);
+    console.log("Submission data:", submissionData);
     currComp.submitResults(eventId, userId, submissionData);
 
     await currComp.save();

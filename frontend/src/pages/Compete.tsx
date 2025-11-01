@@ -96,18 +96,35 @@ function ScrambleAndImage({
 function TimeInputField({
   onInputChange,
   currentInput,
+  onSubmitTime,
+  activeScramble,
 }: {
   onInputChange: React.ChangeEventHandler<HTMLInputElement>;
   currentInput: string;
+  onSubmitTime: () => void;
+  activeScramble: number;
 }) {
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key == "Enter") onSubmitTime();
+  };
+
+  useEffect(() => {
+    inputRef.current?.focus();
+  }, [activeScramble]);
+
   return (
     <div className="place-items-center content-center justify-center">
       <input
+        ref={inputRef}
         type="text"
-        className="rounded-xl bg-white py-2 text-center text-2xl"
+        className="rounded-xl bg-white py-2 text-center text-2xl focus:outline-2 focus:outline-black"
         maxLength={12}
         onChange={onInputChange}
         value={currentInput}
+        autoFocus
+        onKeyDown={handleKeyDown}
       />
     </div>
   );
@@ -196,6 +213,7 @@ function SubmitSection({
   isLastScramble,
   onSubmitTime,
   currentResult,
+  activeScramble,
 }: {
   finishedEvent: boolean;
   onInputChange: React.ChangeEventHandler<HTMLInputElement>;
@@ -208,6 +226,7 @@ function SubmitSection({
   isLastScramble: boolean;
   onSubmitTime: () => void;
   currentResult: SolveResult;
+  activeScramble: number;
 }) {
   const timeIsValid: boolean = currentResult.time !== null;
 
@@ -220,6 +239,8 @@ function SubmitSection({
           <TimeInputField
             onInputChange={onInputChange}
             currentInput={currentInput}
+            onSubmitTime={onSubmitTime}
+            activeScramble={activeScramble}
           />
 
           {/*Choose Penalty*/}
@@ -364,17 +385,17 @@ function Compete() {
         newValues[activeScramble] = "";
         return newValues;
       });
-    } else {
-      if (upload && (penaltyChanged || timeChanged)) {
-        uploadCurrentResult().then(() => {
-          loadDisplayData();
-          if (activeScramble != lastOpenScramble) return;
+    } else if (upload && (penaltyChanged || timeChanged)) {
+      uploadCurrentResult().then(() => {
+        loadDisplayData();
+        if (activeScramble != lastOpenScramble) return;
 
-          setLastOpenScramble(activeScramble + 1);
-          loadScramble(activeScramble);
-        });
-      }
+        setLastOpenScramble(activeScramble + 1);
+        loadScramble(activeScramble);
+      });
+      return;
     }
+
     loadDisplayData();
 
     function loadDisplayData() {
@@ -443,7 +464,7 @@ function Compete() {
     }));
   }
 
-  function onSubmitTime() {
+  function nextScramble() {
     if (!currentResult.time)
       return console.error(
         "Error: The time to submit is invalid. Try refreshing the page.",
@@ -515,8 +536,9 @@ function Compete() {
               currentInput={inputValues[activeScramble]}
               penalties={{ togglePlusTwo, toggleDNF, currPenalty }}
               isLastScramble={isLastScramble}
-              onSubmitTime={onSubmitTime}
+              onSubmitTime={nextScramble}
               currentResult={currentResult}
+              activeScramble={activeScramble}
             />
           )}
         </div>
