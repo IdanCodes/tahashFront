@@ -28,6 +28,37 @@ import LoadingSpinner from "../components/LoadingSpinner";
 
 const hideImageEvents = Object.freeze(["3bld", "4bld", "5bld", "mbld"]);
 
+function ScrambleMenuButton({
+  isAccessible,
+  isActiveScramble,
+  loadScramble,
+  resultStr,
+  scrNumber,
+}: {
+  isAccessible: boolean;
+  isActiveScramble: boolean;
+  loadScramble: () => void;
+  resultStr: string;
+  scrNumber: number;
+}) {
+  return (
+    <button
+      className={clsx(
+        `my-auto flex w-full rounded-xl p-2 text-2xl transition-all duration-200 ease-in`,
+        isAccessible && `cursor-pointer`,
+        !isAccessible && "opacity-60",
+        isActiveScramble && "bg-gray-500",
+        !isActiveScramble && "bg-gray-400 hover:bg-gray-500/80",
+      )}
+      onClick={() => loadScramble()}
+      disabled={!isAccessible}
+    >
+      <p className="absolute pl-[1%] text-center font-bold">{scrNumber}.</p>
+      <p className="ml-2 w-full text-center">{resultStr}</p>
+    </button>
+  );
+}
+
 function ScramblesMenu({
   scrambles,
   activeScramble,
@@ -44,23 +75,14 @@ function ScramblesMenu({
   return (
     <div className="mx-auto my-4 box-border flex w-80/100 justify-between gap-6">
       {scrambles.map((_, i) => (
-        <button
+        <ScrambleMenuButton
           key={i}
-          className={clsx(
-            `my-auto flex w-full rounded-xl p-2 text-2xl transition-all duration-200 ease-in`,
-            isScrambleAccessible(i) && `cursor-pointer`,
-            !isScrambleAccessible(i) && "opacity-60",
-            activeScramble !== i && "bg-gray-400 hover:bg-gray-500/80",
-            activeScramble == i && "bg-gray-500",
-          )}
-          onClick={() => loadScramble(i)}
-          disabled={!isScrambleAccessible(i)}
-        >
-          <p className="absolute pl-[1%] text-center font-bold">{i + 1}.</p>
-          <p className="ml-2 w-full text-center">
-            {formatPackedResult(allTimes[i])}
-          </p>
-        </button>
+          isAccessible={isScrambleAccessible(i)}
+          isActiveScramble={activeScramble == i}
+          loadScramble={() => loadScramble(i)}
+          resultStr={formatPackedResult(allTimes[i])}
+          scrNumber={i + 1}
+        />
       ))}
     </div>
   );
