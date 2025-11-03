@@ -48,12 +48,13 @@ export function initSubmissionData(
   times: PackedResult[],
 ) {
   const eventResult = calcEventResult(eventData, times);
+  const resultStr = generateResultStr(eventData, times);
   const submissionData: SubmissionData = {
     userId: userId,
     submissionState: SubmissionState.Pending,
     times: times,
     finalResult: eventResult,
-    resultStr: generateResultStr(eventData.eventId, eventResult),
+    resultStr: resultStr,
   };
 
   return submissionData;
