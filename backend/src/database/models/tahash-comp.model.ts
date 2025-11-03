@@ -13,6 +13,7 @@ const compEventResultsSchema = new Schema<CompEventResults>(
         userId: Number,
         submissionState: Number,
         times: [packedResultSchema],
+        finalResult: Number,
         resultStr: String,
       },
     ],
