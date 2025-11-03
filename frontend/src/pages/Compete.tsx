@@ -25,6 +25,7 @@ import { ButtonSize } from "../components/buttons/ButtonSize";
 import { packResult, SolveResult } from "@shared/interfaces/solve-result";
 import { Penalties, Penalty } from "@shared/constants/penalties";
 import LoadingSpinner from "../components/LoadingSpinner";
+import { generateResultStr } from "@shared/utils/event-results-utils";
 
 const hideImageEvents = Object.freeze(["3bld", "4bld", "5bld", "mbld"]);
 
@@ -282,6 +283,14 @@ function SubmitSection({
   );
 }
 
+function AttemptResultLabel({ resultStr }: { resultStr: string }) {
+  return (
+    <div>
+      <p className="text-center text-3xl">Result: {resultStr}</p>
+    </div>
+  );
+}
+
 function Compete() {
   const [competeData, setCompeteData] = useState<UserCompeteData>();
   const [scrambleImages, setScrambleImages] = useState<string[]>([]);
@@ -300,6 +309,7 @@ function Compete() {
   const hideImage = useRef<boolean>(false);
   const numScrambles = useRef<number>(0);
   const finishedEvent = useRef<boolean>(false);
+  const attemptResultStr = useRef<string | undefined>(undefined);
 
   const params = useParams();
   const { addLoading, removeLoading } = useLoading("Compete");
@@ -310,6 +320,13 @@ function Compete() {
     hideImage.current = hideImageEvents.includes(competeData.eventData.eventId);
     numScrambles.current = competeData.scrambles.length;
     finishedEvent.current = competeData.results.finished;
+
+    if (finishedEvent.current) {
+      attemptResultStr.current = generateResultStr(
+        competeData.eventData,
+        competeData.results.times,
+      );
+    }
 
     setCompeteData(competeData);
 
@@ -329,8 +346,10 @@ function Compete() {
     setActiveScramble(lastOpened);
     setCurrentResult(unpackResult(times[lastOpened]));
 
-    if (!hideImage.current)
-      Promise.all(competeData.scrambles.map(scrToSvg)).then(setScrambleImages);
+    if (!hideImage.current) {
+      const scrImages = await Promise.all(competeData.scrambles.map(scrToSvg));
+      setScrambleImages(scrImages);
+    }
 
     /**
      * Generate an SVG element from a given scramble
@@ -529,6 +548,11 @@ function Compete() {
         <p className="text-center text-4xl font-bold text-blue-950">
           {competeData.eventData.eventTitle}
         </p>
+
+        {/* Result String */}
+        {attemptResultStr.current && (
+          <AttemptResultLabel resultStr={attemptResultStr.current} />
+        )}
 
         {/*Scamble number menu*/}
         <ScramblesMenu

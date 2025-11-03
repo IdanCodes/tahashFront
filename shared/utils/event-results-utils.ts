@@ -1,18 +1,18 @@
-import { PackedResult } from "@shared/interfaces/packed-result";
-import { Penalties } from "@shared/constants/penalties";
+import { PackedResult } from "../interfaces/packed-result";
+import { Penalties } from "../constants/penalties";
 import {
   DNF_STRING,
   formatCentis,
   getPureCentisArr,
   NULL_TIME_CENTIS,
-} from "@shared/utils/time-utils";
-import { NumScrambles, TimeFormat } from "@shared/constants/time-formats";
+} from "./time-utils";
+import { NumScrambles, TimeFormat } from "../constants/time-formats";
 import {
   calcMultiBldTotalPoints,
   ExtraArgsMbld,
 } from "../interfaces/event-extra-args/extra-args-mbld";
 import { ExtraArgsFmc } from "../interfaces/event-extra-args/extra-args-fmc";
-import { CompEvent, EventId } from "@shared/types/comp-event";
+import { CompEvent } from "../types/comp-event";
 
 /**
  * Calculate an average of 5 given the full attempt.
@@ -125,7 +125,7 @@ function calculateFMCResult(results: PackedResult<ExtraArgsFmc>[]): number {
  * @param results The attempts.
  * @return
  * - If the event id was not found, returns -1.
- * - Otherwise, returns the result.
+ * - Otherwise, returns the result (in centiseconds for timed events).
  */
 export function calcEventResult(
   compEvent: CompEvent,
@@ -175,7 +175,12 @@ export function generateResultStr(
     case "mbld":
       return getMbldResultStr(results);
 
+      case "fmc":
+          return `${calcEventResult(compEvent, results)}`;
+
     default:
-      return `${calcEventResult(compEvent, results)}`;
+        const centis = calcEventResult(compEvent, results);
+        return formatCentis(centis);
+
   }
 }

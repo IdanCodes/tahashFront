@@ -3,7 +3,7 @@ import { PackedResult } from "@shared/interfaces/packed-result";
 import {
   calcEventResult,
   generateResultStr,
-} from "../utils/event-results-utils";
+} from "@shared/utils/event-results-utils";
 import { CompEvent } from "@shared/types/comp-event";
 
 /**
