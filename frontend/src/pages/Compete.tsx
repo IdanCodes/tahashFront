@@ -409,9 +409,12 @@ function Compete() {
       });
     } else if (upload && (penaltyChanged || timeChanged)) {
       uploadCurrentResult().then(() => {
-        loadDisplayData();
-        if (activeScramble != lastOpenScramble) return;
+        if (activeScramble == numScrambles.current - 1)
+          return window.location.reload();
 
+        loadDisplayData();
+
+        if (activeScramble != lastOpenScramble) return;
         setLastOpenScramble(activeScramble + 1);
         loadScramble(activeScramble);
       });
