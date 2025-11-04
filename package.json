@@ -4,6 +4,7 @@
   "description": "",
   "main": "dist/index.js",
   "scripts": {
+    "dev": "vite",
     "backend": "./backend/npm start",
     "build": "./backend/tsc"
   },
@@ -12,8 +13,10 @@
   },
   "devDependencies": {
     "@types/node": "^24.7.0",
+    "@vitejs/plugin-react": "^5.0.4",
     "cstimer_module": "^0.1.4",
-    "typescript": "^5.5.3"
+    "typescript": "^5.5.3",
+    "vite": "^7.1.11"
   },
   "private": true
 }

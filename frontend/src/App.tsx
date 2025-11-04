@@ -100,13 +100,18 @@ function AnimatedRoutes(): JSX.Element {
 function App(): JSX.Element {
   return (
     <BrowserRouter>
-      <div className="min-h-full bg-gray-300/90">
+      <div className="min-h-screen bg-gradient-to-tl from-blue-700/90 via-blue-600/90 to-blue-600">
         <LoadingProvider>
           <UserInfoProvider>
             <Header />
-            <LoadingWrapper>
-              <AnimatedRoutes />
-            </LoadingWrapper>
+
+            <div className="align-start flex justify-center pb-6">
+              <div className="min-h-[calc(100vh-5rem)] w-[90%] overflow-hidden rounded-b-2xl border border-t-0 border-white/20 bg-white/80 shadow-xl backdrop-blur-md">
+                <LoadingWrapper>
+                  <AnimatedRoutes />
+                </LoadingWrapper>
+              </div>
+            </div>
           </UserInfoProvider>
         </LoadingProvider>
       </div>

@@ -1,0 +1,19 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+body {
+  font-family: 'Inter', sans-serif;
+}
+
+
+.underline-hover {
+  background-image: linear-gradient(currentColor, currentColor),
+                    linear-gradient(currentColor, currentColor);
+  background-size: 0% 2px, 0% 2px;
+  background-repeat: no-repeat;
+  background-position: 0 100%, 100% 0;
+  transition: background-size 0.4s ease, color 0.4s ease;
+}
+
+.underline-hover:hover {
+  background-size: 100% 2px, 100% 2px;
+}
