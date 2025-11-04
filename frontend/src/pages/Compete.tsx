@@ -26,6 +26,7 @@ import { packResult, SolveResult } from "@shared/interfaces/solve-result";
 import { Penalties, Penalty } from "@shared/constants/penalties";
 import LoadingSpinner from "../components/LoadingSpinner";
 import { generateResultStr } from "@shared/utils/event-results-utils";
+import { getTimeFormatName, TimeFormat } from "@shared/constants/time-formats";
 
 const hideImageEvents = Object.freeze(["3bld", "4bld", "5bld", "333mbf"]);
 
@@ -283,10 +284,18 @@ function SubmitSection({
   );
 }
 
-function AttemptResultLabel({ resultStr }: { resultStr: string }) {
+function AttemptResultLabel({
+  timeFormat,
+  resultStr,
+}: {
+  timeFormat: TimeFormat;
+  resultStr: string;
+}) {
   return (
     <div>
-      <p className="text-center text-3xl">Result: {resultStr}</p>
+      <p className="text-center text-3xl">
+        {getTimeFormatName(timeFormat)}: {resultStr}
+      </p>
     </div>
   );
 }
@@ -551,7 +560,10 @@ function Compete() {
 
         {/* Result String */}
         {attemptResultStr.current && (
-          <AttemptResultLabel resultStr={attemptResultStr.current} />
+          <AttemptResultLabel
+            timeFormat={competeData.eventData.timeFormat}
+            resultStr={attemptResultStr.current}
+          />
         )}
 
         {/*Scamble number menu*/}

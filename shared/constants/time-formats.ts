@@ -18,3 +18,10 @@ export const NumScrambles: Record<TimeFormat, number> = {
   [TimeFormat.bo3]: 3,
   [TimeFormat.multi]: -1,
 };
+
+/**
+ * Get a time format's name
+ */
+export function getTimeFormatName(timeFormat: TimeFormat): "Average" | "Mean" | "Best" | "Result" {
+    return timeFormat === TimeFormat.ao5 ? "Average" : (timeFormat === TimeFormat.mo3 ? "Mean" : (timeFormat === TimeFormat.bo3 ? "Best" : "Result"));
+}

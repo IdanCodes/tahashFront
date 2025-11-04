@@ -105,15 +105,15 @@ export async function updateTimes(req: UpdateTimesRequest, res: Response) {
 
   res.json(new ApiResponse(ResponseCode.Success, "Saved successfully!"));
 
-  if (userDoc.finishedEvent(eventId)) {
-    const currComp = CompManager.getInstance().getActiveComp();
+  if (!userDoc.finishedEvent(eventId)) return;
 
-    const submissionData = initSubmissionData(userId, eventData, times);
-    console.log("Submission data:", submissionData);
-    currComp.submitResults(eventId, userId, submissionData);
+  const currComp = CompManager.getInstance().getActiveComp();
 
-    await currComp.save();
-  }
+  const submissionData = initSubmissionData(userId, eventData, times);
+  console.log("Submission data:", submissionData);
+  currComp.submitResults(eventId, userId, submissionData);
+
+  await currComp.save();
 }
 
 export const compHandlers = {
