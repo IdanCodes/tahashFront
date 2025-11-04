@@ -14,7 +14,7 @@ export function createMongoSession(): RequestHandler {
     rolling: true, // update expiry of the cookie even when not changed
     name: SID_COOKIE_NAME,
     cookie: {
-      maxAge: 24 * 60 * 60 * 1000, // 1 day
+      maxAge: 3 * 24 * 60 * 60 * 1000, // 3 days
       httpOnly: true,
       secure: COOKIE_CONFIG.SECURE,
       sameSite: COOKIE_CONFIG.SAMESITE,

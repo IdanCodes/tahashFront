@@ -1,12 +1,11 @@
 import React, { useEffect, useRef, useState } from "react";
-import { redirect, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { redirectToError } from "../utils/errorUtils";
 import { errorObject } from "@shared/interfaces/error-object";
 import { sendGetRequest, sendPostRequest } from "../utils/API/apiUtils";
 import { useLoading } from "../context/LoadingContext";
 import { HttpHeaders } from "@shared/constants/http-headers";
 import { useUserInfo } from "../context/UserContext";
-import { ResponseCode } from "@shared/types/response-code";
 import { RoutePath } from "@shared/constants/route-path";
 import { UserCompeteData } from "@shared/interfaces/user-compete-data";
 import { CubingIconsSheet } from "../components/CubingIconsSheet";
@@ -17,6 +16,7 @@ import {
   formatPackedResult,
   formatSolveResult,
   isFullPackedTimesArr,
+  packTime,
   tryAnalyzeTimes,
   unpackResult,
 } from "@shared/utils/time-utils";
@@ -24,13 +24,281 @@ import { PackedResult } from "@shared/interfaces/packed-result";
 import { ButtonSize } from "../components/buttons/ButtonSize";
 import { packResult, SolveResult } from "@shared/interfaces/solve-result";
 import { Penalties, Penalty } from "@shared/constants/penalties";
+import LoadingSpinner from "../components/LoadingSpinner";
+import { generateResultStr } from "@shared/utils/event-results-utils";
+import { getTimeFormatName, TimeFormat } from "@shared/constants/time-formats";
 
-const hideImageEvents = Object.freeze(["3bld", "4bld", "5bld", "mbld"]);
-const penaltyBtnEnabledColors = {
-  normal: "bg-purple-500",
-  hover: "bg-purple-500/90",
-  click: "bg-purple-600/90",
-};
+const hideImageEvents = Object.freeze(["3bld", "4bld", "5bld", "333mbf"]);
+
+function ScrambleMenuButton({
+  isAccessible,
+  isActiveScramble,
+  loadScramble,
+  resultStr,
+  scrNumber,
+}: {
+  isAccessible: boolean;
+  isActiveScramble: boolean;
+  loadScramble: () => void;
+  resultStr: string;
+  scrNumber: number;
+}) {
+  return (
+    <button
+      className={clsx(
+        `my-auto flex w-full rounded-xl p-2 text-2xl transition-all duration-200 ease-in`,
+        isAccessible && `cursor-pointer`,
+        !isAccessible && "opacity-60",
+        isActiveScramble && "bg-gray-500",
+        !isActiveScramble && "bg-gray-400 hover:bg-gray-500/80",
+      )}
+      onClick={() => loadScramble()}
+      disabled={!isAccessible}
+    >
+      <p className="absolute pl-[1%] text-center font-bold">{scrNumber}.</p>
+      <p className="ml-2 w-full text-center">{resultStr}</p>
+    </button>
+  );
+}
+
+function ScramblesMenu({
+  scrambles,
+  activeScramble,
+  allTimes,
+  loadScramble,
+  isScrambleAccessible,
+}: {
+  scrambles: string[];
+  activeScramble: number;
+  allTimes: PackedResult[];
+  loadScramble: (scrIndex: number) => void;
+  isScrambleAccessible: (scrIndex: number) => boolean;
+}) {
+  return (
+    <div className="mx-auto my-4 box-border flex w-80/100 justify-between gap-6">
+      {scrambles.map((_, i) => (
+        <ScrambleMenuButton
+          key={i}
+          isAccessible={isScrambleAccessible(i)}
+          isActiveScramble={activeScramble == i}
+          loadScramble={() => loadScramble(i)}
+          resultStr={formatPackedResult(allTimes[i])}
+          scrNumber={i + 1}
+        />
+      ))}
+    </div>
+  );
+}
+
+function ScrambleAndImage({
+  scrText,
+  scrImg,
+}: {
+  scrText: string;
+  scrImg: string | undefined;
+}) {
+  return (
+    <div className="flex flex-row justify-between gap-2 px-5 py-2">
+      {/* Scramble */}
+      <div className="w-full text-center text-3xl font-semibold whitespace-pre-wrap">
+        {scrText.replaceAll(" ", "  ")}
+      </div>
+
+      {/*Image*/}
+      {scrImg && (
+        <div
+          className="w-6/10"
+          dangerouslySetInnerHTML={{
+            __html: scrImg,
+          }}
+        />
+      )}
+    </div>
+  );
+}
+
+function TimeInputField({
+  onInputChange,
+  currentInput,
+  onSubmitTime,
+  activeScramble,
+}: {
+  onInputChange: React.ChangeEventHandler<HTMLInputElement>;
+  currentInput: string;
+  onSubmitTime: () => void;
+  activeScramble: number;
+}) {
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key == "Enter") onSubmitTime();
+  };
+
+  useEffect(() => {
+    inputRef.current?.focus();
+  }, [activeScramble]);
+
+  return (
+    <div className="place-items-center content-center justify-center">
+      <input
+        ref={inputRef}
+        type="text"
+        className="rounded-xl bg-white py-2 text-center text-2xl focus:outline-2 focus:outline-black"
+        maxLength={12}
+        onChange={onInputChange}
+        value={currentInput}
+        autoFocus
+        onKeyDown={handleKeyDown}
+      />
+    </div>
+  );
+}
+
+function PenaltySelector({
+  penalties,
+  timeIsValid,
+}: {
+  penalties: {
+    togglePlusTwo: () => void;
+    toggleDNF: () => void;
+    currPenalty: Penalty;
+  };
+  timeIsValid: boolean;
+}) {
+  const penaltyBtnEnabledColors = {
+    normal: "bg-purple-500",
+    hover: "bg-purple-500/90",
+    click: "bg-purple-600/90",
+  };
+
+  return (
+    <div className="m-auto my-2 flex place-items-center gap-[10%]">
+      <PrimaryButton
+        text="+2"
+        buttonSize={ButtonSize.Small}
+        onClick={penalties.togglePlusTwo}
+        colors={
+          penalties.currPenalty == Penalties.Plus2
+            ? penaltyBtnEnabledColors
+            : undefined
+        }
+        disabled={penalties.currPenalty == Penalties.DNF || !timeIsValid}
+      />
+      <PrimaryButton
+        text="DNF"
+        buttonSize={ButtonSize.Small}
+        colors={
+          penalties.currPenalty == Penalties.DNF
+            ? penaltyBtnEnabledColors
+            : undefined
+        }
+        onClick={penalties.toggleDNF}
+        disabled={!timeIsValid}
+      />
+    </div>
+  );
+}
+
+function PreviewAndSubmitBtn({
+  finishedEvent,
+  isLastScramble,
+  onSubmitTime,
+  timeIsValid,
+  previewStr,
+}: {
+  finishedEvent: boolean;
+  isLastScramble: boolean;
+  onSubmitTime: () => void;
+  timeIsValid: boolean;
+  previewStr: string;
+}) {
+  return (
+    <div className="flex w-full flex-col">
+      <p className="text-center text-3xl">{previewStr}</p>
+      {!finishedEvent && (
+        <div className="m-auto w-fit">
+          <PrimaryButton
+            disabled={!timeIsValid}
+            text={isLastScramble ? "Submit" : "Next"}
+            buttonSize={ButtonSize.Small}
+            onClick={onSubmitTime}
+          />
+        </div>
+      )}
+    </div>
+  );
+}
+
+function SubmitSection({
+  finishedEvent,
+  onInputChange,
+  currentInput,
+  penalties,
+  isLastScramble,
+  onSubmitTime,
+  currentResult,
+  activeScramble,
+}: {
+  finishedEvent: boolean;
+  onInputChange: React.ChangeEventHandler<HTMLInputElement>;
+  currentInput: string;
+  penalties: {
+    togglePlusTwo: () => void;
+    toggleDNF: () => void;
+    currPenalty: Penalty;
+  };
+  isLastScramble: boolean;
+  onSubmitTime: () => void;
+  currentResult: SolveResult;
+  activeScramble: number;
+}) {
+  const timeIsValid: boolean = currentResult.time !== null;
+
+  return (
+    <div className="mx-auto flex w-6/10 flex-row justify-between gap-[15%] p-2">
+      {/*Time Input & Penalty*/}
+      {!finishedEvent && (
+        <div className="flex w-full flex-col">
+          {/*Time Input*/}
+          <TimeInputField
+            onInputChange={onInputChange}
+            currentInput={currentInput}
+            onSubmitTime={onSubmitTime}
+            activeScramble={activeScramble}
+          />
+
+          {/*Choose Penalty*/}
+          <PenaltySelector penalties={penalties} timeIsValid={timeIsValid} />
+        </div>
+      )}
+
+      {/*Preview & Submit Button*/}
+      <PreviewAndSubmitBtn
+        finishedEvent={finishedEvent}
+        isLastScramble={isLastScramble}
+        onSubmitTime={onSubmitTime}
+        timeIsValid={timeIsValid}
+        previewStr={formatSolveResult(currentResult)}
+      />
+    </div>
+  );
+}
+
+function AttemptResultLabel({
+  timeFormat,
+  resultStr,
+}: {
+  timeFormat: TimeFormat;
+  resultStr: string;
+}) {
+  return (
+    <div>
+      <p className="text-center text-3xl">
+        {getTimeFormatName(timeFormat)}: {resultStr}
+      </p>
+    </div>
+  );
+}
 
 function Compete() {
   const [competeData, setCompeteData] = useState<UserCompeteData>();
@@ -40,6 +308,7 @@ function Compete() {
   const [allTimes, setAllTimes] = useState<PackedResult[]>([]);
   const csTimer = useCSTimer();
   const [lastOpenScramble, setLastOpenScramble] = useState<number>(0);
+  const [isUploading, setIsUploading] = useState<boolean>(false);
   const [currentResult, setCurrentResult] = useState<SolveResult>({
     penalty: Penalties.None,
     extraArgs: {},
@@ -49,15 +318,26 @@ function Compete() {
   const hideImage = useRef<boolean>(false);
   const numScrambles = useRef<number>(0);
   const finishedEvent = useRef<boolean>(false);
+  const attemptResultStr = useRef<string | undefined>(undefined);
 
   const params = useParams();
   const { addLoading, removeLoading } = useLoading("Compete");
   const userInfo = useUserInfo();
+  const navigate = useNavigate();
 
   async function initCompeteData(competeData: UserCompeteData) {
     hideImage.current = hideImageEvents.includes(competeData.eventData.eventId);
     numScrambles.current = competeData.scrambles.length;
     finishedEvent.current = competeData.results.finished;
+
+    if (finishedEvent.current) {
+      attemptResultStr.current = generateResultStr(
+        competeData.eventData,
+        competeData.results.times,
+      );
+    }
+
+    setCompeteData(competeData);
 
     const times = competeData.results.times;
     setAllTimes(times);
@@ -75,10 +355,10 @@ function Compete() {
     setActiveScramble(lastOpened);
     setCurrentResult(unpackResult(times[lastOpened]));
 
-    setCompeteData(competeData);
-
-    if (!hideImage.current)
-      Promise.all(competeData.scrambles.map(scrToSvg)).then(setScrambleImages);
+    if (!hideImage.current) {
+      const scrImages = await Promise.all(competeData.scrambles.map(scrToSvg));
+      setScrambleImages(scrImages);
+    }
 
     /**
      * Generate an SVG element from a given scramble
@@ -114,15 +394,9 @@ function Compete() {
     addLoading();
 
     const eventId = params.eventId;
-    if (!eventId) {
+    if (!eventId || !userInfo.user) {
       removeLoading();
-      redirectToError(errorObject(`Invalid Event Id "${eventId}"`));
-      return;
-    }
-
-    if (!userInfo.user) {
-      removeLoading();
-      redirect(RoutePath.Page.HomeRedirect);
+      navigate(RoutePath.Page.Scrambles);
       return;
     }
 
@@ -130,60 +404,59 @@ function Compete() {
       [HttpHeaders.EVENT_ID]: eventId,
     }).then((res) => {
       if (res.aborted) return;
-      if (res.successful) {
-        initCompeteData(res.data).then(removeLoading);
-        return;
-      }
-
-      removeLoading();
-      console.log("eq", res.code == ResponseCode.Success);
-      console.log("prop", res.successful);
-      // redirectToError(res.data);
+      else if (res.isError) return redirectToError(res.data);
+      initCompeteData(res.data).then(removeLoading);
     });
   }, []);
 
+  if (!competeData) return <LoadingSpinner />;
+
+  const scrambles = competeData.scrambles;
   const isLastScramble: boolean = activeScramble == numScrambles.current - 1;
   const currPenalty: Penalty = currentResult.penalty ?? Penalties.None;
 
-  if (!competeData) return <>no compete data</>;
-
-  function loadScramble(scrIndex: number, uploadTimes: boolean = true) {
-    if (scrIndex == activeScramble) return;
+  function loadScramble(scrIndex: number, upload: boolean = true) {
+    if (isUploading || scrIndex == activeScramble) return;
 
     scrIndex = Math.min(Math.max(0, scrIndex), numScrambles.current - 1);
-    setActiveScramble(scrIndex);
-    setCurrPenalty(allTimes[scrIndex].penalty);
-    setCurrentResult(unpackResult(allTimes[scrIndex]));
-    if (scrIndex > lastOpenScramble) setLastOpenScramble(scrIndex);
+    if (finishedEvent.current) {
+      loadDisplayData();
+      return;
+    }
 
-    if (!uploadTimes) return;
-    addLoading();
+    const penaltyChanged =
+      allTimes[activeScramble].penalty != currentResult.penalty;
+    const timeChanged =
+      allTimes[activeScramble].centis != packTime(currentResult.time);
 
-    const newAllTimes = [...allTimes];
-    newAllTimes[activeScramble] = packResult(currentResult);
-    updateAllTimes(newAllTimes).then((successful) => {
-      removeLoading();
-      if (successful) {
-        if (isLastScramble)
-          setCurrentResult(unpackResult(newAllTimes[activeScramble]));
-      } else console.error("err");
-    });
-  }
+    if (isLastScramble && scrIndex != activeScramble) {
+      setInputValues((values) => {
+        const newValues = [...values];
+        newValues[activeScramble] = "";
+        return newValues;
+      });
+    } else if (upload && (penaltyChanged || timeChanged)) {
+      uploadCurrentResult().then(() => {
+        if (activeScramble == numScrambles.current - 1)
+          return window.location.reload();
 
-  function onInputChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const newTimeStr: string = e.target.value;
-    setInputValues((iv) => {
-      const newValues = [...iv];
-      newValues[activeScramble] = newTimeStr;
-      return newValues;
-    });
+        loadDisplayData();
 
-    const newTimeParts = tryAnalyzeTimes(newTimeStr);
-    setCurrentResult((result) => ({
-      penalty: Penalties.None,
-      extraArgs: result.extraArgs,
-      time: newTimeParts,
-    }));
+        if (activeScramble != lastOpenScramble) return;
+        setLastOpenScramble(activeScramble + 1);
+        loadScramble(activeScramble);
+      });
+      return;
+    }
+
+    loadDisplayData();
+
+    function loadDisplayData() {
+      setActiveScramble(scrIndex);
+      setCurrPenalty(allTimes[scrIndex].penalty);
+      setCurrentResult(unpackResult(allTimes[scrIndex]));
+      if (scrIndex > lastOpenScramble) setLastOpenScramble(scrIndex);
+    }
   }
 
   // returns whether updating was successful
@@ -209,7 +482,42 @@ function Compete() {
     return true;
   }
 
-  function onSubmitTime() {
+  /**
+   * Update the current result into allTimes and upload it to the server
+   */
+  async function uploadCurrentResult(): Promise<void> {
+    setIsUploading(true);
+
+    const newAllTimes = [...allTimes];
+    newAllTimes[activeScramble] = packResult(currentResult);
+    const successful = await updateAllTimes(newAllTimes);
+    setIsUploading(false);
+    if (!successful) console.error("Update all times error");
+    else if (isLastScramble)
+      setCurrentResult(unpackResult(newAllTimes[activeScramble]));
+  }
+
+  function setCurrPenalty(p: Penalty) {
+    setCurrentResult({ ...currentResult, penalty: p });
+  }
+
+  function onInputChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const newTimeStr: string = e.target.value;
+    setInputValues((iv) => {
+      const newValues = [...iv];
+      newValues[activeScramble] = newTimeStr;
+      return newValues;
+    });
+
+    const newTimeParts = tryAnalyzeTimes(newTimeStr);
+    setCurrentResult((result) => ({
+      penalty: Penalties.None,
+      extraArgs: result.extraArgs,
+      time: newTimeParts,
+    }));
+  }
+
+  function nextScramble() {
     if (!currentResult.time)
       return console.error(
         "Error: The time to submit is invalid. Try refreshing the page.",
@@ -223,10 +531,6 @@ function Compete() {
     }
 
     loadScramble(activeScramble + 1);
-  }
-
-  function setCurrPenalty(p: Penalty) {
-    setCurrentResult({ ...currentResult, penalty: p });
   }
 
   function togglePlusTwo() {
@@ -254,118 +558,50 @@ function Compete() {
           {competeData.eventData.eventTitle}
         </p>
 
+        {/* Result String */}
+        {attemptResultStr.current && (
+          <AttemptResultLabel
+            timeFormat={competeData.eventData.timeFormat}
+            resultStr={attemptResultStr.current}
+          />
+        )}
+
         {/*Scamble number menu*/}
-        <div className="mx-auto my-4 box-border flex w-80/100 justify-between gap-6">
-          {competeData.scrambles.map((_, i) => (
-            <button
-              key={i}
-              className={clsx(
-                `my-auto flex w-full rounded-xl p-2 text-2xl transition-all duration-200 ease-in`,
-                isScrambleAccessible(i) && `cursor-pointer`,
-                !isScrambleAccessible(i) && "opacity-60",
-                activeScramble !== i && "bg-gray-400 hover:bg-gray-500/80",
-                activeScramble == i && "bg-gray-500",
-              )}
-              onClick={() => loadScramble(i)}
-              disabled={!isScrambleAccessible(i)}
-            >
-              <p className="absolute pl-[1%] text-center font-bold">{i + 1}.</p>
-              <p className="ml-2 w-full text-center">
-                {formatPackedResult(allTimes[i])}
-              </p>
-            </button>
-          ))}
-        </div>
+        <ScramblesMenu
+          scrambles={competeData.scrambles}
+          activeScramble={activeScramble}
+          allTimes={allTimes}
+          loadScramble={loadScramble}
+          isScrambleAccessible={isScrambleAccessible}
+        />
 
-        {/*Main Panel*/}
         <div className="mx-auto w-8/10 rounded-2xl border-5 border-black bg-gray-400">
-          {competeData.scrambles.map((scramble, i) => (
-            <div key={i} className={clsx(activeScramble != i && "hidden")}>
-              {/*Scramble & Image*/}
-              <div className="flex flex-row justify-between gap-2 px-5 py-2">
-                {/* Scramble */}
-                <div className="w-full text-center text-3xl font-semibold whitespace-pre-wrap">
-                  {scramble.replaceAll(" ", "  ")}
-                </div>
+          {/*Scramble & Image*/}
+          <ScrambleAndImage
+            scrText={scrambles[activeScramble]}
+            scrImg={
+              hideImage.current ? undefined : scrambleImages[activeScramble]
+            }
+          />
 
-                {/*Image*/}
-                {!hideImage.current && (
-                  <div
-                    className="w-6/10"
-                    dangerouslySetInnerHTML={{
-                      __html: scrambleImages[i],
-                    }}
-                  />
-                )}
-              </div>
-            </div>
-          ))}
           {/*scamble-submit divider*/}
-          <div className="w-full border-2 border-black"></div>
+          <div className="my-2 w-full border-2 border-black" />
 
           {/*Submit Section*/}
-          <div className="mx-auto flex w-6/10 flex-row justify-between gap-[15%] p-2">
-            {/*Time Input & Penalty*/}
-            {!finishedEvent.current && (
-              <div className="flex w-full flex-col">
-                {/*Time Input*/}
-                <div className="place-items-center content-center justify-center">
-                  <input
-                    type="text"
-                    className="rounded-xl bg-white py-2 text-center text-2xl"
-                    maxLength={12}
-                    onChange={onInputChange}
-                    value={inputValues[activeScramble]}
-                  />
-                </div>
-
-                {/*Choose Penalty*/}
-                <div className="m-auto my-2 flex place-items-center gap-[10%]">
-                  <PrimaryButton
-                    text="+2"
-                    buttonSize={ButtonSize.Small}
-                    onClick={togglePlusTwo}
-                    colors={
-                      currPenalty == Penalties.Plus2
-                        ? penaltyBtnEnabledColors
-                        : undefined
-                    }
-                    disabled={
-                      currPenalty == Penalties.DNF || !currentResult.time
-                    }
-                  />
-                  <PrimaryButton
-                    text="DNF"
-                    buttonSize={ButtonSize.Small}
-                    colors={
-                      currPenalty == Penalties.DNF
-                        ? penaltyBtnEnabledColors
-                        : undefined
-                    }
-                    onClick={toggleDNF}
-                    disabled={!currentResult.time}
-                  />
-                </div>
-              </div>
-            )}
-
-            {/*Preview & Submit Button*/}
-            <div className="flex w-full flex-col">
-              <p className="text-center text-3xl">
-                {formatSolveResult(currentResult)}
-              </p>
-              {!finishedEvent.current && (
-                <div className="m-auto w-fit">
-                  <PrimaryButton
-                    disabled={!currentResult.time}
-                    text={isLastScramble ? "Submit" : "Next"}
-                    buttonSize={ButtonSize.Small}
-                    onClick={onSubmitTime}
-                  />
-                </div>
-              )}
-            </div>
-          </div>
+          {isUploading ? (
+            <LoadingSpinner />
+          ) : (
+            <SubmitSection
+              finishedEvent={finishedEvent.current}
+              onInputChange={onInputChange}
+              currentInput={inputValues[activeScramble]}
+              penalties={{ togglePlusTwo, toggleDNF, currPenalty }}
+              isLastScramble={isLastScramble}
+              onSubmitTime={nextScramble}
+              currentResult={currentResult}
+              activeScramble={activeScramble}
+            />
+          )}
         </div>
       </div>
     </>

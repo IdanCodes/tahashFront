@@ -3,7 +3,7 @@ import { PackedResult } from "@shared/interfaces/packed-result";
 import {
   calcEventResult,
   generateResultStr,
-} from "../utils/event-results-utils";
+} from "@shared/utils/event-results-utils";
 import { CompEvent } from "@shared/types/comp-event";
 
 /**
@@ -48,12 +48,13 @@ export function initSubmissionData(
   times: PackedResult[],
 ) {
   const eventResult = calcEventResult(eventData, times);
+  const resultStr = generateResultStr(eventData, times);
   const submissionData: SubmissionData = {
     userId: userId,
     submissionState: SubmissionState.Pending,
     times: times,
     finalResult: eventResult,
-    resultStr: generateResultStr(eventData.eventId, eventResult),
+    resultStr: resultStr,
   };
 
   return submissionData;

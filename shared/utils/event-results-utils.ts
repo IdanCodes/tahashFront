@@ -1,13 +1,18 @@
-import { PackedResult } from "@shared/interfaces/packed-result";
-import { Penalties } from "@shared/constants/penalties";
-import { getPureCentisArr, NULL_TIME_CENTIS } from "@shared/utils/time-utils";
-import { NumScrambles, TimeFormat } from "@shared/constants/time-formats";
+import { PackedResult } from "../interfaces/packed-result";
+import { Penalties } from "../constants/penalties";
+import {
+  DNF_STRING,
+  formatCentis,
+  getPureCentisArr,
+  NULL_TIME_CENTIS,
+} from "./time-utils";
+import { NumScrambles, TimeFormat } from "../constants/time-formats";
 import {
   calcMultiBldTotalPoints,
   ExtraArgsMbld,
 } from "../interfaces/event-extra-args/extra-args-mbld";
 import { ExtraArgsFmc } from "../interfaces/event-extra-args/extra-args-fmc";
-import { CompEvent, EventId } from "@shared/types/comp-event";
+import { CompEvent } from "../types/comp-event";
 
 /**
  * Calculate an average of 5 given the full attempt.
@@ -18,7 +23,7 @@ function calculateAO5(results: PackedResult[]): number {
   const pureCentis: number[] = getPureCentisArr(results);
 
   let dnfCount: number = 0;
-  let average: number = 0;
+  let sum: number = 0;
   let lowest: number = pureCentis[0];
   let highest: number = pureCentis[0];
 
@@ -30,7 +35,7 @@ function calculateAO5(results: PackedResult[]): number {
 
     if (dnfCount >= maxDNF) return NULL_TIME_CENTIS;
 
-    average += pureCentis[i];
+    sum += pureCentis[i];
 
     lowest = Math.min(lowest, pureCentis[i]);
     highest = Math.max(highest, pureCentis[i]);
@@ -38,11 +43,10 @@ function calculateAO5(results: PackedResult[]): number {
 
   if (dnfCount == 0)
     // don't count highest if there's no DNF
-    average -= highest;
-  average -= lowest;
+    sum -= highest;
+  sum -= lowest;
 
-  average = Math.floor(average / NumScrambles[TimeFormat.ao5]);
-  return average;
+  return Math.floor(sum / 3);
 }
 
 /**
@@ -50,17 +54,16 @@ function calculateAO5(results: PackedResult[]): number {
  * @return The result, in centiseconds.
  */
 function calculateMO3(results: PackedResult[]): number {
-  let mean = 0;
+  let sum = 0;
   const pureCentis: number[] = getPureCentisArr(results);
 
   for (let i = 0; i < NumScrambles[TimeFormat.mo3]; i++) {
     if (results[i].penalty == Penalties.DNF) return NULL_TIME_CENTIS; // max 1 dnf
 
-    mean += pureCentis[i];
+    sum += pureCentis[i];
   }
 
-  mean = Math.floor(mean / NumScrambles[TimeFormat.mo3]); // get the mean
-  return mean;
+  return Math.floor(sum / NumScrambles[TimeFormat.mo3]); // get the mean;
 }
 
 /**
@@ -78,7 +81,8 @@ function calculateBO3(results: PackedResult[]): number {
 
 /**
  * Calculate the result of a MultiBLD attempt.
- * @return Same as {@link calcMultiBldTotalPoints}.
+ * @return If the extra args are valid, same as {@link calcMultiBldTotalPoints}.
+ * Otherwise, `-1`.
  */
 function calculateMultiResult(result: PackedResult<ExtraArgsMbld>): number {
   let extraArgs: ExtraArgsMbld | undefined = result.extraArgs;
@@ -121,13 +125,13 @@ function calculateFMCResult(results: PackedResult<ExtraArgsFmc>[]): number {
  * @param results The attempts.
  * @return
  * - If the event id was not found, returns -1.
- * - Otherwise, returns the result.
+ * - Otherwise, returns the result (in centiseconds for timed events).
  */
 export function calcEventResult(
   compEvent: CompEvent,
   results: PackedResult[],
 ): number {
-  if (compEvent.eventId === "fmc") return calculateFMCResult(results);
+  if (compEvent.eventId === "333fm") return calculateFMCResult(results);
 
   switch (compEvent.timeFormat) {
     case TimeFormat.ao5:
@@ -145,14 +149,38 @@ export function calcEventResult(
 }
 
 /**
+ * Generate a result string from mbld extra args
+ */
+function getMbldResultStr(results: PackedResult[]): string {
+  const extraArgs = results[0]?.extraArgs;
+  const centis = results[0]?.centis;
+  if (!extraArgs || !centis) return "-INVALID MBLD ARGS-";
+  if (calcMultiBldTotalPoints(extraArgs) < 0) return DNF_STRING;
+
+  const timeStr = formatCentis(centis);
+  return `${extraArgs.numSuccess}/${extraArgs.numAttempt} ${timeStr}`;
+}
+
+/**
  * Generate a string for an event's result
- * @param eventId The event's id
- * @param eventResult The result of the event (value returned from {@link calcEventResult})
+ * @param compEvent The event to calculate the results of.
+ * @param results The attempts.
+ * @return A string representation of the result of the attempt.
  */
 export function generateResultStr(
-  eventId: EventId,
-  eventResult: number,
+  compEvent: CompEvent,
+  results: PackedResult[],
 ): string {
-  // TODO: implement this
-  return "-RESULT_STR-";
+  switch (compEvent.eventId) {
+    case "333mbf":
+      return getMbldResultStr(results);
+
+      case "333fm":
+          return `${calcEventResult(compEvent, results)}`;
+
+    default:
+        const centis = calcEventResult(compEvent, results);
+        return formatCentis(centis);
+
+  }
 }

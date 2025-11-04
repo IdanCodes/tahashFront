@@ -1,17 +1,8 @@
-import {
-  getUserDataByUserId,
-  getWCARecordsOfUser,
-} from "../../utils/wcaApiUtils";
 import { EventRecords } from "../../types/event-records";
 import { TimeFormat } from "@shared/constants/time-formats";
 import { EventId } from "@shared/types/comp-event";
 import { UserInfo } from "@shared/interfaces/user-info";
-import { isErrorObject } from "@shared/interfaces/error-object";
-import {
-  ITahashUser,
-  TahashUser,
-  TahashUserDoc,
-} from "../models/tahash-user.model";
+import { TahashUser, TahashUserDoc } from "../models/tahash-user.model";
 import { UserEventResult } from "../../types/user-event-result";
 
 /**

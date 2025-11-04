@@ -10,10 +10,10 @@ export type AO5BestResults = {
    */
   single: PackedResult;
 
-  /**
-   * All 5 attempts of the average that contains the best single.
-   */
-  singleAttempts: PackedResult[];
+  // /**
+  //  * All 5 attempts of the average that contains the best single.
+  //  */
+  // singleAttempts: PackedResult[];
 
   /**
    * Competition number where the best single was achieved.
@@ -28,10 +28,10 @@ export type AO5BestResults = {
    */
   average: number;
 
-  /**
-   * All 5 attempts that formed the best average.
-   */
-  averageAttempts: PackedResult[];
+  // /**
+  //  * All 5 attempts that formed the best average.
+  //  */
+  // averageAttempts: PackedResult[];
 
   /**
    * Competition number where the best average was achieved.
@@ -51,10 +51,10 @@ export type MO3BestResults = {
    */
   single: PackedResult;
 
-  /**
-   * All 3 attempts of the mean that contains the best single.
-   */
-  singleAttempts: PackedResult[];
+  // /**
+  //  * All 3 attempts of the mean that contains the best single.
+  //  */
+  // singleAttempts: PackedResult[];
 
   /**
    * Competition number where the best single was achieved.
@@ -69,10 +69,10 @@ export type MO3BestResults = {
    */
   mean: number;
 
-  /**
-   * All 3 attempts that formed the best mean.
-   */
-  meanAttempts: PackedResult[];
+  // /**
+  //  * All 3 attempts that formed the best mean.
+  //  */
+  // meanAttempts: PackedResult[];
 
   /**
    * Competition number where the best mean was achieved.
@@ -91,7 +91,7 @@ export type BO3BestResults = MO3BestResults;
 /**
  * Best results for the 3x3 Multi-Blind format.
  */
-export type MultiBestResults = {
+export type MbldBestResults = {
   /**
    * Highest multi-blind score achieved (number of points).
    * - `<0`: never succeeded
@@ -113,6 +113,16 @@ export type MultiBestResults = {
   bestComp: number;
 };
 
+export type FMCBestResults = {
+  // Number of moves
+  single: number;
+  singleComp: number;
+
+  // Avg number of moves
+  mean: number;
+  meanComp: number;
+};
+
 /**
  * A mapping from each `TimeFormat` to its corresponding result structure type.
  * Used to infer the type of `bestResults` for a given event.
@@ -120,6 +130,6 @@ export type MultiBestResults = {
 export type ResultFormatMap = {
   [TimeFormat.ao5]: AO5BestResults;
   [TimeFormat.mo3]: MO3BestResults;
-  [TimeFormat.bo3]: BO3BestResults;
-  [TimeFormat.multi]: MultiBestResults;
+  [TimeFormat.bo3]: BO3BestResults | FMCBestResults;
+  [TimeFormat.multi]: MbldBestResults;
 };
