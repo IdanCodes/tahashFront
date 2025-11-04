@@ -49,8 +49,8 @@ function ScrambleMenuButton({
         `my-auto flex w-full rounded-xl p-2 text-2xl transition-all duration-200 ease-in`,
         isAccessible && `cursor-pointer`,
         !isAccessible && "opacity-60",
-        isActiveScramble && "bg-gray-500",
-        !isActiveScramble && "bg-gray-400 hover:bg-gray-500/80",
+        isActiveScramble && "bg-slate-500",
+        !isActiveScramble && "bg-slate-400 hover:bg-slate-500/70",
       )}
       onClick={() => loadScramble()}
       disabled={!isAccessible}
@@ -143,7 +143,7 @@ function TimeInputField({
       <input
         ref={inputRef}
         type="text"
-        className="rounded-xl bg-white py-2 text-center text-2xl focus:outline-2 focus:outline-black"
+        className="rounded-xl bg-white py-2 text-center text-2xl focus:outline-2 focus:outline-slate-400/60"
         maxLength={12}
         onChange={onInputChange}
         value={currentInput}
@@ -258,7 +258,7 @@ function SubmitSection({
     <div className="mx-auto flex w-6/10 flex-row justify-between gap-[15%] p-2">
       {/*Time Input & Penalty*/}
       {!finishedEvent && (
-        <div className="flex w-full flex-col">
+        <div className="flex w-full flex-col items-center">
           {/*Time Input*/}
           <TimeInputField
             onInputChange={onInputChange}
@@ -554,7 +554,7 @@ function Compete() {
       <CubingIconsSheet />
       <div>
         {/*Event Title*/}
-        <p className="text-center text-4xl font-bold text-blue-950">
+        <p className="text-center text-4xl font-bold text-blue-950 p-4">
           {competeData.eventData.eventTitle}
         </p>
 
@@ -575,7 +575,7 @@ function Compete() {
           isScrambleAccessible={isScrambleAccessible}
         />
 
-        <div className="mx-auto w-8/10 rounded-2xl border-5 border-black bg-gray-400">
+        <div className="mx-auto w-8/10 rounded-2xl border-2 border-transparent bg-slate-400/40">
           {/*Scramble & Image*/}
           <ScrambleAndImage
             scrText={scrambles[activeScramble]}
@@ -585,7 +585,7 @@ function Compete() {
           />
 
           {/*scamble-submit divider*/}
-          <div className="my-2 w-full border-2 border-black" />
+          <div className="my-2 w-full border-2 border-slate-500/10" />
 
           {/*Submit Section*/}
           {isUploading ? (

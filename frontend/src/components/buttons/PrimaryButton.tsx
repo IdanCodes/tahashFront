@@ -9,7 +9,7 @@ export default function PrimaryButton({
   buttonSize = ButtonSize.Medium,
   btnType = "button",
   colors = {
-    normal: "bg-gray-500",
+    normal: "bg-slate-500/80",
     hover: "bg-gray-500/90",
     click: "bg-gray-600/90",
   },
