@@ -12,7 +12,20 @@ import { getEnv } from "../config/env";
 import { WcaOAuthTokenResponse } from "@shared/interfaces/wca-api/wcaOAuth";
 import { EventRecords } from "../types/event-records";
 import { TimeFormat } from "@shared/constants/time-formats";
-import { EventId } from "@shared/types/comp-event";
+import { EventId, getEventById } from "@shared/types/comp-event";
+import {
+  WcaEventRanksModel,
+  WcaPersonModel,
+} from "../interfaces/wca-person-model";
+import {
+  AO5BestResults,
+  FMCBestResults,
+  MO3BestResults,
+  MbldBestResults,
+  ResultFormatMap,
+} from "../types/result-format";
+import { Penalties } from "@shared/constants/penalties";
+import { calcMultiBldTotalPoints } from "@shared/interfaces/event-extra-args/extra-args-mbld";
 
 /**
  * WCA OAuth application id (environment variable)
@@ -39,7 +52,7 @@ const WCA_API_PATH = "/api/v0";
  * https://wca-rest-api.robiningelbrecht.be/#section/Introduction
  */
 const WCA_REST_API_PATH =
-  "https://raw.githubusercontent.com/robiningelbrecht/wca-rest-api/master/api/";
+  "https://raw.githubusercontent.com/robiningelbrecht/wca-rest-api/master/api";
 
 /**
  * Get the WCA auth url given the host's base url
@@ -70,19 +83,18 @@ async function sendWCARequest<T>(
 ): Promise<ErrorObject | T> {
   const reqUrl = `${WCA_BASE_URL}${path}`;
   const httpRes: Response = await fetch(reqUrl, options);
+  const body = await httpRes.json();
   if (!httpRes.ok) {
-    const body = await httpRes.json();
     console.log(`${options.method} request to ${path}`, body);
     return errorObject(`HTTP Error: "${httpRes.statusText}"`, body);
   }
 
-  const data: any = await httpRes.json();
-  if (data !== null && "error" in data)
+  if (body !== null && "error" in body)
     return errorObject(
-      `WCA API Error: "${data.error}" - ${data.error_description}`,
+      `WCA API Error: "${body.error}" - ${body.error_description}`,
     );
 
-  return data as T;
+  return body as T;
 }
 
 /**
@@ -131,10 +143,149 @@ export async function getUserDataByUserId(
 /* returns a "records" array of the user's WCA records */
 // TODO: implement getWCARecordsOfUser
 export async function getWCARecordsOfUser(
-  userId: number,
+  wcaId: string,
 ): Promise<Map<EventId, EventRecords<TimeFormat>> | ErrorObject> {
-  // console.error("getWCARecordsOfUser not implemented");"
-  return errorObject("getWCARecordsOfUser not implemented");
+  const wcaPerson = await getWcaPerson(wcaId);
+  if (!wcaPerson) return errorObject("Error retrieving person's records");
+
+  const records: Map<EventId, EventRecords<TimeFormat>> = new Map();
+
+  const { singles, averages } = wcaPerson.rank;
+  extractSingles(records, singles);
+  extractAverages(records, averages);
+
+  return records;
+
+  function extractSingles(
+    records: Map<EventId, EventRecords<TimeFormat>>,
+    singles: WcaEventRanksModel[],
+  ) {
+    for (let i = 0; i < singles.length; i++) {
+      const eventId = singles[i].eventId;
+      const compEvent = getEventById(eventId);
+      if (!compEvent) continue;
+
+      let newRecord: EventRecords<TimeFormat> | undefined = undefined;
+      if (compEvent.timeFormat === TimeFormat.multi) {
+        // Encoding information: https://www.worldcubeassociation.org/export/results
+        const numberFormat = singles[i].best.toString();
+        const DD = Number(numberFormat.substring(1, 3));
+        const TTTTT = Number(numberFormat.substring(3, 8));
+        const MM = Number(numberFormat.substring(8));
+        const difference = 99 - DD;
+        const timeInSeconds = TTTTT;
+        const missed = MM;
+        const solved = difference + missed;
+        const attempted = solved + missed;
+
+        newRecord = {
+          bestPoints: calcMultiBldTotalPoints({
+            numSuccess: solved,
+            numAttempt: attempted,
+          }),
+          timeOfBestAttempt: timeInSeconds / 100.0, // convert to centiseconds
+          bestComp: 0,
+        };
+      } else if (compEvent.eventId === "333fm") {
+        newRecord = {
+          single: singles[i].best,
+          singleComp: 0,
+          mean: -1,
+          meanComp: -1,
+        } as FMCBestResults;
+      } else if (compEvent.timeFormat === TimeFormat.ao5) {
+        newRecord = {
+          single: {
+            centis: singles[i].best,
+            penalty: Penalties.None,
+            extraArgs: undefined,
+          },
+          singleComp: 0,
+          average: -1,
+          averageComp: -1,
+        };
+      } else if (
+        compEvent.timeFormat === TimeFormat.mo3 ||
+        compEvent.timeFormat === TimeFormat.bo3
+      ) {
+        newRecord = {
+          single: {
+            centis: singles[i].best,
+            penalty: Penalties.None,
+            extraArgs: undefined,
+          },
+          singleComp: 0,
+          average: -1,
+          averageComp: -1,
+        };
+      }
+
+      if (newRecord) records.set(singles[i].eventId, newRecord);
+    }
+  }
+
+  function extractAverages(
+    records: Map<EventId, EventRecords<TimeFormat>>,
+    averages: WcaEventRanksModel[],
+  ) {
+    for (let i = 0; i < averages.length; i++) {
+      const eventId = averages[i].eventId;
+      const compEvent = getEventById(eventId);
+      if (!compEvent) continue;
+
+      const existingRecord: EventRecords<TimeFormat> | undefined =
+        records.get(eventId);
+      let newRecord: EventRecords<TimeFormat> | undefined = undefined;
+      if (compEvent.eventId === "333fm") {
+        newRecord = existingRecord
+          ? ({
+              ...existingRecord,
+              mean: averages[i].best,
+              meanComp: 0,
+            } as FMCBestResults)
+          : { single: -1, singleComp: -1, mean: averages[i].best, meanComp: 0 };
+      } else if (compEvent.timeFormat === TimeFormat.ao5) {
+        newRecord = existingRecord
+          ? {
+              ...existingRecord,
+              average: averages[i].best,
+              averageComp: 0,
+            }
+          : {
+              single: {
+                centis: -1,
+                penalty: Penalties.None,
+                extraArgs: undefined,
+              },
+              singleComp: -1,
+              average: averages[i].best,
+              averageComp: 0,
+            };
+      } else if (
+        compEvent.timeFormat === TimeFormat.mo3 ||
+        compEvent.timeFormat === TimeFormat.bo3
+      ) {
+        newRecord = existingRecord
+          ? {
+              ...existingRecord,
+              mean: averages[i].best,
+              meanComp: 0,
+            }
+          : {
+              single: {
+                centis: -1,
+                penalty: Penalties.None,
+                extraArgs: undefined,
+              },
+              singleComp: -1,
+              mean: averages[i].best,
+              meanComp: 0,
+            };
+      }
+
+      if (newRecord) records.set(averages[i].eventId, newRecord);
+    }
+  }
 }
 
 /**
@@ -190,8 +341,28 @@ export async function renewAuthentication(
 
 // -- Helpers for REST API
 
+const fetchWcaRestApi = async (path: string): Promise<object> => {
+  const res = await fetch(WCA_REST_API_PATH + path);
+  if (!res.ok) {
+    console.error("ERROR: REST API ERROR (fetchWcaRestApi).");
+    return errorObject("An error occurred while fetching from REST API.");
+  }
+
+  return await res.json();
+};
+
 /**
- *
- * @param wcaId
+ * Get a WCA person model from the WCA REST API
+ * @param wcaId The person's WCA id
  */
-export async function getWcaPerson(wcaId: string) {}
+export async function getWcaPerson(
+  wcaId: string,
+): Promise<WcaPersonModel | undefined> {
+  const response = await fetchWcaRestApi(`/persons/${wcaId}.json`);
+  if (isErrorObject(response)) {
+    console.error(`REST API Error: Could not fetch person "${wcaId}"`);
+    return undefined;
+  }
+
+  return response as WcaPersonModel;
+}

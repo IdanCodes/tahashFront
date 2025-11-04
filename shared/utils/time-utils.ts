@@ -345,6 +345,26 @@ export function equalTimes(
     );
 }
 
+/**
+ * Compare two packed results
+ * @param p1 The first packed result
+ * @param p2 The second packed result
+ * @return -1: p1 > p2; 0: p1 == p2; 1: p1 < p2;
+ * Edge cases:
+ * - Both DNFs => 0
+ * - One is DNF => The one with DNF is bigger
+ */
+export function comparePackedResults(p1: PackedResult, p2: PackedResult): number {
+    if (p1.penalty === Penalties.DNF)
+        return p2.penalty === Penalties.DNF ? 0 : -1;
+    else if (p2.penalty === Penalties.DNF)
+        return 1;
+
+    const pure1 = getPureCentis(p1);
+    const pure2 = getPureCentis(p2);
+    return pure1 > pure2 ? -1 : (pure1 === pure2 ? 0 : 1);
+}
+
 // -- Packed Result utils
 /**
  * Apply a penalty on a centiseconds value.
