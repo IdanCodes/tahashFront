@@ -27,7 +27,7 @@ import { Penalties, Penalty } from "@shared/constants/penalties";
 import LoadingSpinner from "../components/LoadingSpinner";
 import { generateResultStr } from "@shared/utils/event-results-utils";
 
-const hideImageEvents = Object.freeze(["3bld", "4bld", "5bld", "mbld"]);
+const hideImageEvents = Object.freeze(["3bld", "4bld", "5bld", "333mbf"]);
 
 function ScrambleMenuButton({
   isAccessible,

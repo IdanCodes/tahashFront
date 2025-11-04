@@ -35,6 +35,13 @@ const WCA_BASE_URL = "https://www.worldcubeassociation.org";
 const WCA_API_PATH = "/api/v0";
 
 /**
+ * Unofficial REST API from:
+ * https://wca-rest-api.robiningelbrecht.be/#section/Introduction
+ */
+const WCA_REST_API_PATH =
+  "https://raw.githubusercontent.com/robiningelbrecht/wca-rest-api/master/api/";
+
+/**
  * Get the WCA auth url given the host's base url
  * @param redirectUri The url to redirect to
  */
@@ -180,3 +187,11 @@ export async function renewAuthentication(
 
   return await sendWCARequest<WcaOAuthTokenResponse>("/oauth/token", options);
 }
+
+// -- Helpers for REST API
+
+/**
+ *
+ * @param wcaId
+ */
+export async function getWcaPerson(wcaId: string) {}

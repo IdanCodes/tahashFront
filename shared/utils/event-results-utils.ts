@@ -131,7 +131,7 @@ export function calcEventResult(
   compEvent: CompEvent,
   results: PackedResult[],
 ): number {
-  if (compEvent.eventId === "fmc") return calculateFMCResult(results);
+  if (compEvent.eventId === "333fm") return calculateFMCResult(results);
 
   switch (compEvent.timeFormat) {
     case TimeFormat.ao5:
@@ -172,10 +172,10 @@ export function generateResultStr(
   results: PackedResult[],
 ): string {
   switch (compEvent.eventId) {
-    case "mbld":
+    case "333mbf":
       return getMbldResultStr(results);
 
-      case "fmc":
+      case "333fm":
           return `${calcEventResult(compEvent, results)}`;
 
     default:
