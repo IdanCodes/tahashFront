@@ -5,12 +5,11 @@ import { useUserInfo } from "../context/UserContext";
 import logo from "./assets/ILSpeeddcubinglogo.png";
 import "./animations.css";
 
-
 function Header(): JSX.Element {
   const userInfo = useUserInfo();
 
   return (
-    <div className="flex h-auto w-full flex-col items-center justify-center gap-4 bg-gradient-to-br from-blue-700 via-blue-800 to-indigo-800 p-4 lg:h-[100px] lg:flex-row lg:justify-between lg:gap-0 lg:p-[1vw]">
+    <div className="flex h-auto w-full flex-col items-center justify-center gap-4 bg-gradient-to-br from-blue-700 via-blue-800 to-indigo-800 p-4 lg:h-[100px] lg:flex-row-reverse lg:justify-between lg:gap-0 lg:p-[1vw]">
       <div className="group flex items-center gap-3 lg:flex-row lg:items-center lg:gap-5">
         <img
           src={logo}
@@ -22,7 +21,7 @@ function Header(): JSX.Element {
         </h1>
       </div>
 
-      <nav className="pr-[2vw] lg:pr-0 lg:p-[2vw]">
+      <nav className="pr-[2vw] lg:p-[2vw] lg:pr-0">
         <ul className="flex list-none gap-5 text-center font-extrabold text-blue-100">
           <li>
             <NavbarButton to="/" text="Home" />
