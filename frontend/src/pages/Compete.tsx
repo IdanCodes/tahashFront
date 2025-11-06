@@ -1,4 +1,4 @@
-import React, { use, useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { redirectToError } from "../utils/errorUtils";
 import { errorObject } from "@shared/interfaces/error-object";
@@ -27,6 +27,7 @@ import { Penalties, Penalty } from "@shared/constants/penalties";
 import LoadingSpinner from "../components/LoadingSpinner";
 import { generateResultStr } from "@shared/utils/event-results-utils";
 import { getTimeFormatName, TimeFormat } from "@shared/constants/time-formats";
+import { clamp } from "motion";
 
 const hideImageEvents = Object.freeze(["3bld", "4bld", "5bld", "333mbf"]);
 
@@ -97,34 +98,112 @@ function ScrambleAndImage({
   scrText: string;
   scrImg: string | undefined;
 }) {
-  // const [imgSvg, setImgSvg] = useState<SVGElement | undefined>(undefined);
+  const fontSizeLow = 10;
+  const fontSizeHigh = 40;
   const imgParentRef = useRef<HTMLDivElement | null>(null);
   const textElRef = useRef<HTMLParagraphElement | null>(null);
+  const [fontSize, setFontSize] = useState<{
+    size: number;
+    l: number;
+    h: number;
+    k: number;
+  }>({ size: 25, l: fontSizeLow, h: fontSizeHigh, k: 0 });
+  const [isInitialCheckDone, setIsInitialCheckDone] = useState(false);
+  const resetFontBounds = () => {
+    setFontSize((fs) => ({
+      size: fs.size,
+      l: fontSizeLow,
+      h: fontSizeHigh,
+      k: 0,
+    }));
+  };
 
   useEffect(() => {
-    if (!scrImg || !imgParentRef.current) return;
+    if (!scrImg || !imgParentRef.current || !textElRef.current) return;
 
     const imageHeight = imgParentRef.current.clientHeight;
-    optimizeFontSize(imageHeight).then();
-  }, [scrImg, imgParentRef]);
+    const textHeight = textElRef.current.clientHeight;
 
-  async function optimizeFontSize(imageHeight: number) {
-    if (!textElRef.current || imageHeight == 0) return;
-    console.log("text height", textElRef.current.clientHeight);
-    console.log("image height:", imageHeight);
+    const heightMinDiff = 10;
+    const diff = Math.abs(imageHeight - textHeight);
+    if (diff >= heightMinDiff) optimizeFontSize(imageHeight, textHeight).then();
+  }, [fontSize, scrText]);
+
+  useEffect(() => {
+    function resetOnFinishResize() {
+      const currSize = { w: window.innerWidth, h: window.innerHeight };
+      setTimeout(() => {
+        if (currSize.w == window.innerWidth && currSize.h == window.innerHeight)
+          resetFontBounds();
+      }, 150);
+    }
+
+    window.addEventListener("resize", resetOnFinishResize);
+    resetOnFinishResize();
+
+    return () => {
+      window.removeEventListener("resize", resetOnFinishResize);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!scrImg || isInitialCheckDone) return;
+
+    let frameId: number;
+
+    const waitForInitial = () => {
+      if (imgParentRef.current && imgParentRef.current.clientHeight > 0) {
+        console.log("wait");
+        setIsInitialCheckDone(true);
+        resetFontBounds();
+      } else frameId = requestAnimationFrame(waitForInitial);
+    };
+    frameId = requestAnimationFrame(waitForInitial);
+
+    return () => cancelAnimationFrame(frameId);
+  }, [scrImg, isInitialCheckDone]);
+
+  async function optimizeFontSize(imageHeight: number, textHeight: number) {
+    if (!textElRef.current || !imgParentRef.current) return;
+    const boundsMinDiff = 0.2;
+    const maxIter = 20;
+    if (fontSize.h - fontSize.l < boundsMinDiff || fontSize.k >= maxIter)
+      return;
+
+    await new Promise((res) => requestAnimationFrame(res));
+    setFontSize((fs) => {
+      const mid = (fs.l + fs.h) / 2;
+      if (imageHeight > textHeight) {
+        return {
+          size: (fs.size + fs.h) / 2,
+          l: mid,
+          h: fs.h,
+          k: fs.k + 1,
+        };
+      } else {
+        return {
+          size: (fs.l + fs.size) / 2,
+          l: fs.l,
+          h: mid,
+          k: fs.k + 1,
+        };
+      }
+    });
   }
 
   return (
-    <div className="flex flex-row justify-between gap-2 px-5 py-2">
+    <div className="flex flex-row justify-between gap-[5%] px-5 py-4">
       {/* Scramble */}
-      <div className="w-full text-center font-mono text-3xl font-semibold whitespace-pre-wrap">
-        <p ref={textElRef}>{scrText.replaceAll(" ", "  ")}</p>
+      <div className="w-full text-center font-mono font-semibold whitespace-pre-wrap">
+        <p ref={textElRef} style={{ fontSize: fontSize.size }}>
+          {scrText.replaceAll(" ", "  ")}
+        </p>
       </div>
 
       {/*Image*/}
       {scrImg && (
         <>
-          <div className="w-6/10">
+          <div className="w-4/10 place-content-center">
             <div
               ref={imgParentRef}
               dangerouslySetInnerHTML={{
@@ -407,10 +486,19 @@ function Compete() {
       el.setAttribute("viewBox", `0 0 ${prevWidth} ${prevHeight}`);
       el.setAttribute("preserveAspectRatio", "xMidYMid meet");
 
-      // const pp = document.createElement("div");
-      // pp.appendChild(parent);
-      // return pp.innerHTML;
       return parent.innerHTML;
+    }
+
+    async function getImageHeight() {
+      const imgStr = (await csTimer.getImage(
+        "",
+        competeData.eventData.scrType,
+      )) as string;
+      const parent = document.createElement("div");
+      parent.innerHTML = imgStr;
+      const el = parent.querySelector("svg")!;
+
+      return el.getAttribute("height") ?? "100";
     }
   }
 
