@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { use, useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { redirectToError } from "../utils/errorUtils";
 import { errorObject } from "@shared/interfaces/error-object";
@@ -97,21 +97,42 @@ function ScrambleAndImage({
   scrText: string;
   scrImg: string | undefined;
 }) {
+  // const [imgSvg, setImgSvg] = useState<SVGElement | undefined>(undefined);
+  const imgParentRef = useRef<HTMLDivElement | null>(null);
+  const textElRef = useRef<HTMLParagraphElement | null>(null);
+
+  useEffect(() => {
+    if (!scrImg || !imgParentRef.current) return;
+
+    const imageHeight = imgParentRef.current.clientHeight;
+    optimizeFontSize(imageHeight).then();
+  }, [scrImg, imgParentRef]);
+
+  async function optimizeFontSize(imageHeight: number) {
+    if (!textElRef.current || imageHeight == 0) return;
+    console.log("text height", textElRef.current.clientHeight);
+    console.log("image height:", imageHeight);
+  }
+
   return (
     <div className="flex flex-row justify-between gap-2 px-5 py-2">
       {/* Scramble */}
-      <div className="w-full text-center text-3xl font-semibold whitespace-pre-wrap">
-        {scrText.replaceAll(" ", "  ")}
+      <div className="w-full text-center font-mono text-3xl font-semibold whitespace-pre-wrap">
+        <p ref={textElRef}>{scrText.replaceAll(" ", "  ")}</p>
       </div>
 
       {/*Image*/}
       {scrImg && (
-        <div
-          className="w-6/10"
-          dangerouslySetInnerHTML={{
-            __html: scrImg,
-          }}
-        />
+        <>
+          <div className="w-6/10">
+            <div
+              ref={imgParentRef}
+              dangerouslySetInnerHTML={{
+                __html: scrImg,
+              }}
+            />
+          </div>
+        </>
       )}
     </div>
   );
@@ -386,6 +407,9 @@ function Compete() {
       el.setAttribute("viewBox", `0 0 ${prevWidth} ${prevHeight}`);
       el.setAttribute("preserveAspectRatio", "xMidYMid meet");
 
+      // const pp = document.createElement("div");
+      // pp.appendChild(parent);
+      // return pp.innerHTML;
       return parent.innerHTML;
     }
   }
@@ -408,6 +432,12 @@ function Compete() {
       initCompeteData(res.data).then(removeLoading);
     });
   }, []);
+
+  useEffect(() => {
+    if (hideImage.current) return;
+    // TODO: remove
+    // console.log(document.getElementsByTagName("svg"));
+  }, [scrambleImages, activeScramble]);
 
   if (!competeData) return <LoadingSpinner />;
 
