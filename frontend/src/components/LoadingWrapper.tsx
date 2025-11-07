@@ -9,10 +9,12 @@ function LoadingWrapper({ children }: { children: ReactNode }): JSX.Element {
 
   function LoadingPage() {
     return (
-      <div className="flex h-full place-content-center justify-center">
-        {/*<p className="text-5xl">Loading...</p>*/}
-        <LoadingSpinner />
-      </div>
+      <>
+        <p className="pt-10 text-center text-5xl">Loading...</p>
+        <div className="flex h-full w-full flex-col">
+          <LoadingSpinner />
+        </div>
+      </>
     );
   }
 
@@ -23,31 +25,31 @@ function LoadingWrapper({ children }: { children: ReactNode }): JSX.Element {
 
   return (
     <>
-      <AnimatePresence mode="popLayout">
+      <AnimatePresence mode="wait">
         {isLoading && (
           <PageTransition key="loading">
             <LoadingPage />
           </PageTransition>
         )}
+        <motion.div
+          key="content"
+          {...PageTransitionProps}
+          initial="inactive"
+          animate={isLoading ? "inactive" : "active"}
+          exit="inactive"
+          style={{
+            pointerEvents: isLoading ? "none" : "auto",
+            display: isLoading ? "none" : "block",
+          }}
+          transition={{
+            ...PageTransitionProps.transition,
+            // wait for the loading screen to finish
+            delay: contentDelay,
+          }}
+        >
+          {children}
+        </motion.div>
       </AnimatePresence>
-      <motion.div
-        key="content"
-        {...PageTransitionProps}
-        initial="inactive"
-        animate={isLoading ? "inactive" : "active"}
-        exit="inactive"
-        style={{
-          pointerEvents: isLoading ? "none" : "auto",
-          display: isLoading ? "none" : "block",
-        }}
-        transition={{
-          ...PageTransitionProps.transition,
-          // wait for the loading screen to finish
-          delay: contentDelay,
-        }}
-      >
-        {children}
-      </motion.div>
     </>
   );
 }
