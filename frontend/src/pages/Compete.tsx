@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { redirectToError } from "../utils/errorUtils";
 import { errorObject } from "@shared/interfaces/error-object";
@@ -28,7 +28,7 @@ import LoadingSpinner from "../components/LoadingSpinner";
 import { generateResultStr } from "@shared/utils/event-results-utils";
 import { getTimeFormatName, TimeFormat } from "@shared/constants/time-formats";
 
-const hideImageEvents = Object.freeze(["3bld", "4bld", "5bld", "333mbf"]);
+const hideImageEvents = Object.freeze(["333bf", "444bf", "555bf", "333mbf"]);
 
 function ScrambleMenuButton({
   isAccessible,
@@ -97,21 +97,168 @@ function ScrambleAndImage({
   scrText: string;
   scrImg: string | undefined;
 }) {
+  const fontSizeLow = 10;
+  const fontSizeHigh = 40;
+  const imgParentRef = useRef<HTMLDivElement | null>(null);
+  const textElRef = useRef<HTMLParagraphElement | null>(null);
+  const [isInitialCheckDone, setIsInitialCheckDone] = useState(false);
+  const [fontProps, setFontProps] = useState<{
+    size: number;
+    l: number;
+    h: number;
+    k: number;
+  }>({ size: 30, l: fontSizeLow, h: fontSizeHigh, k: 0 });
+
+  const imageHeight = useMemo<number>(() => {
+    return imgParentRef.current ? imgParentRef.current.clientHeight : 0;
+  }, [imgParentRef.current, fontProps]);
+  const textHeight = useMemo<number>(() => {
+    return textElRef.current ? textElRef.current.clientHeight : 0;
+  }, [textElRef.current, fontProps]);
+
+  const resetFontBounds = () => {
+    setFontProps((fs) => ({
+      size: fs.size,
+      l: fontSizeLow,
+      h: fontSizeHigh,
+      k: 0,
+    }));
+  };
+
+  useEffect(() => {
+    if (imageHeight == 0 || textHeight == 0) return;
+
+    const heightMinDiff = 10;
+    const diff = Math.abs(imageHeight - textHeight);
+    if (diff >= heightMinDiff) optimizeFontSize(imageHeight, textHeight).then();
+  }, [imageHeight, textHeight, fontProps, scrImg]);
+
+  useEffect(() => {
+    function resetOnFinishResize() {
+      const currSize = { w: window.innerWidth, h: window.innerHeight };
+      setTimeout(() => {
+        if (currSize.w == window.innerWidth && currSize.h == window.innerHeight)
+          resetFontBounds();
+      }, 150);
+    }
+
+    window.addEventListener("resize", resetOnFinishResize);
+
+    return () => {
+      window.removeEventListener("resize", resetOnFinishResize);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!scrImg || isInitialCheckDone) return;
+    let frameId: number;
+
+    const waitForInitial = () => {
+      if (
+        imgParentRef.current &&
+        textElRef.current &&
+        imgParentRef.current.clientHeight > 0 &&
+        textElRef.current.clientHeight > 0
+      ) {
+        setIsInitialCheckDone(true);
+        resetFontBounds();
+      } else frameId = requestAnimationFrame(waitForInitial);
+    };
+
+    frameId = requestAnimationFrame(waitForInitial);
+    return () => cancelAnimationFrame(frameId);
+  }, [scrImg, isInitialCheckDone]);
+
+  async function optimizeFontSize(imageHeight: number, textHeight: number) {
+    if (!textElRef.current || !imgParentRef.current) return;
+
+    /**
+     * // 1. Find font bounds
+     *     const minBoundsDiff = 10;
+     *     const boundsDelta = 4;
+     *     console.log(fontProps);
+     *     if (fontProps.h - fontProps.l >= minBoundsDiff) {
+     *       await new Promise((res) => setTimeout(res, 500));
+     *       await new Promise((res) => requestAnimationFrame(res));
+     *       setFontProps((fs) => {
+     *         if (textHeight < imageHeight) {
+     *           return {
+     *             size: Math.min(fs.size + boundsDelta, fontSizeHigh),
+     *             l: fs.size,
+     *             h: fs.h,
+     *             k: 0,
+     *           };
+     *         } else {
+     *           return {
+     *             size: Math.max(fs.size - boundsDelta, fontSizeLow),
+     *             l: fs.size - boundsDelta,
+     *             h: fs.size + boundsDelta,
+     *             k: 0,
+     *           };
+     *         }
+     *       });
+     *       return;
+     *     }
+     */
+
+    // 2. Optimize font size
+    const boundsMinDiff = 0.2;
+    const maxIter = 20;
+    if (fontProps.h - fontProps.l < boundsMinDiff || fontProps.k >= maxIter)
+      return;
+
+    await new Promise((res) => requestAnimationFrame(res));
+    setFontProps((fs) => {
+      const mid = (fs.l + fs.h) / 2;
+      if (imageHeight > textHeight) {
+        return {
+          size: (fs.size + fs.h) / 2,
+          l: (fs.l + mid) / 2,
+          h: fs.h,
+          k: fs.k + 1,
+        };
+      } else {
+        return {
+          size: (fs.l + fs.size) / 2,
+          l: fs.l,
+          h: (mid + fs.h) / 2,
+          k: fs.k + 1,
+        };
+      }
+    });
+  }
+
   return (
-    <div className="flex flex-row justify-between gap-2 px-5 py-2">
+    <div className="flex flex-row justify-between gap-[5%] px-5 py-4">
       {/* Scramble */}
-      <div className="w-full text-center text-3xl font-semibold whitespace-pre-wrap">
-        {scrText.replaceAll(" ", "  ")}
+      <div
+        className="my-auto h-fit w-full text-center whitespace-pre-wrap"
+        ref={textElRef}
+      >
+        <span
+          style={{
+            fontSize: `${fontProps.size}px`,
+            fontFamily: "monospace",
+            fontWeight: "550",
+            transition: "font-size",
+          }}
+          className="box-border w-full"
+        >
+          {scrText}
+        </span>
       </div>
 
       {/*Image*/}
       {scrImg && (
-        <div
-          className="w-6/10"
-          dangerouslySetInnerHTML={{
-            __html: scrImg,
-          }}
-        />
+        <div className="w-6/10 place-content-center">
+          <div
+            ref={imgParentRef}
+            className="w-full"
+            dangerouslySetInnerHTML={{
+              __html: scrImg,
+            }}
+          />
+        </div>
       )}
     </div>
   );
@@ -327,6 +474,7 @@ function Compete() {
 
   async function initCompeteData(competeData: UserCompeteData) {
     hideImage.current = hideImageEvents.includes(competeData.eventData.eventId);
+    console.log(hideImage.current);
     numScrambles.current = competeData.scrambles.length;
     finishedEvent.current = competeData.results.finished;
 
@@ -388,6 +536,18 @@ function Compete() {
 
       return parent.innerHTML;
     }
+
+    async function getImageHeight() {
+      const imgStr = (await csTimer.getImage(
+        "",
+        competeData.eventData.scrType,
+      )) as string;
+      const parent = document.createElement("div");
+      parent.innerHTML = imgStr;
+      const el = parent.querySelector("svg")!;
+
+      return el.getAttribute("height") ?? "100";
+    }
   }
 
   useEffect(() => {
@@ -408,6 +568,12 @@ function Compete() {
       initCompeteData(res.data).then(removeLoading);
     });
   }, []);
+
+  useEffect(() => {
+    if (hideImage.current) return;
+    // TODO: remove
+    // console.log(document.getElementsByTagName("svg"));
+  }, [scrambleImages, activeScramble]);
 
   if (!competeData) return <LoadingSpinner />;
 
