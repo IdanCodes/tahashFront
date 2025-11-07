@@ -575,7 +575,7 @@ function Compete() {
           isScrambleAccessible={isScrambleAccessible}
         />
 
-        <div className="mx-auto w-8/10 rounded-2xl border-2 border-transparent bg-slate-400/40">
+        <div className="mx-auto w-8/10 rounded-2xl border-2 border-transparent bg-slate-400/70">
           {/*Scramble & Image*/}
           <ScrambleAndImage
             scrText={scrambles[activeScramble]}
