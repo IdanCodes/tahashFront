@@ -7,6 +7,7 @@ import { CookieNames } from "@shared/constants/cookie-names";
 import { ApiResponse, errorResponse } from "@shared/types/api-response";
 import { SID_COOKIE_NAME } from "../middleware/db-session";
 import { ResponseCode } from "@shared/types/response-code";
+import { refreshAdminCookie } from "./admin-helpers";
 
 /**
  * Updates the session with new token and user data.
@@ -27,6 +28,7 @@ export function updateAndSaveSession(
   };
 
   refreshLoginCookie(req, res);
+  refreshAdminCookie(req, res);
 }
 
 /**
@@ -51,6 +53,7 @@ export function logoutUser(
 
     res.clearCookie(SID_COOKIE_NAME);
     res.clearCookie(CookieNames.isLoggedIn);
+    res.clearCookie(CookieNames.isAdmin);
     return cb();
   });
 }
