@@ -109,6 +109,8 @@ function ScrambleAndImage({
     k: number;
   }>({ size: 25, l: fontSizeLow, h: fontSizeHigh, k: 0 });
   const [isInitialCheckDone, setIsInitialCheckDone] = useState(false);
+  const [textToImgHeightRatio, setTextToImgHeightRatio] = useState<number>(1);
+
   const resetFontBounds = () => {
     setFontSize((fs) => ({
       size: fs.size,
@@ -121,13 +123,14 @@ function ScrambleAndImage({
   useEffect(() => {
     if (!scrImg || !imgParentRef.current || !textElRef.current) return;
 
-    const imageHeight = imgParentRef.current.clientHeight;
+    const imageHeight =
+      imgParentRef.current.clientHeight * textToImgHeightRatio;
     const textHeight = textElRef.current.clientHeight;
 
     const heightMinDiff = 10;
     const diff = Math.abs(imageHeight - textHeight);
     if (diff >= heightMinDiff) optimizeFontSize(imageHeight, textHeight).then();
-  }, [fontSize, scrText]);
+  }, [fontSize, scrText, textToImgHeightRatio]);
 
   useEffect(() => {
     function resetOnFinishResize() {
@@ -191,8 +194,41 @@ function ScrambleAndImage({
     });
   }
 
+  const minTxtImgRatio = 0.4;
+  const maxTxtImgRatio = 1.6;
+  const deltaTxtImgRatio = 0.1;
+  function incrementTxtImgRatio() {
+    resetFontBounds();
+    setTextToImgHeightRatio((ratio) =>
+      Math.min(ratio + deltaTxtImgRatio, maxTxtImgRatio),
+    );
+  }
+
+  function decreaseTxtImgRatio() {
+    resetFontBounds();
+    setTextToImgHeightRatio((ratio) =>
+      Math.max(ratio - deltaTxtImgRatio, minTxtImgRatio),
+    );
+  }
+
   return (
     <div className="flex flex-row justify-between gap-[5%] px-5 py-4">
+      <div>
+        <button
+          onClick={incrementTxtImgRatio}
+          className="cursor-pointer bg-blue-300 p-4"
+        >
+          +
+        </button>
+        <br />
+        <button
+          onClick={decreaseTxtImgRatio}
+          className="cursor-pointer bg-blue-300 p-4"
+        >
+          -
+        </button>
+      </div>
+
       {/* Scramble */}
       <div className="w-full text-center font-mono font-semibold whitespace-pre-wrap">
         <p ref={textElRef} style={{ fontSize: fontSize.size }}>
