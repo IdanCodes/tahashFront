@@ -103,22 +103,19 @@ function ScrambleAndImage({
   const imgParentRef = useRef<HTMLDivElement | null>(null);
   const textElRef = useRef<HTMLParagraphElement | null>(null);
   const [isInitialCheckDone, setIsInitialCheckDone] = useState(false);
-  const [textToImgHeightRatio, setTextToImgHeightRatio] = useState<number>(1.5);
   const [fontProps, setFontProps] = useState<{
     size: number;
     l: number;
     h: number;
     k: number;
-  }>({ size: 25, l: fontSizeLow, h: fontSizeHigh, k: 0 });
+  }>({ size: fontSizeLow, l: fontSizeLow, h: fontSizeHigh, k: 0 });
 
   const imageHeight = useMemo<number>(() => {
-    return imgParentRef.current
-      ? imgParentRef.current.clientHeight * textToImgHeightRatio
-      : 0;
-  }, [imgParentRef.current, fontProps, textToImgHeightRatio]);
+    return imgParentRef.current ? imgParentRef.current.clientHeight : 0;
+  }, [imgParentRef.current, fontProps]);
   const textHeight = useMemo<number>(() => {
     return textElRef.current ? textElRef.current.clientHeight : 0;
-  }, [textElRef.current, fontProps, textToImgHeightRatio]);
+  }, [textElRef.current, fontProps]);
   const resetFontBounds = () => {
     setFontProps((fs) => ({
       size: fs.size,
@@ -130,13 +127,11 @@ function ScrambleAndImage({
 
   useEffect(() => {
     if (imageHeight == 0 || textHeight == 0) return;
-    console.log("image height:", imageHeight);
-    console.log("text height:", textHeight);
 
     const heightMinDiff = 10;
     const diff = Math.abs(imageHeight - textHeight);
     if (diff >= heightMinDiff) optimizeFontSize(imageHeight, textHeight).then();
-  }, [imageHeight, textHeight, fontProps]);
+  }, [imageHeight, textHeight, fontProps, scrImg]);
 
   useEffect(() => {
     function resetOnFinishResize() {
@@ -159,7 +154,12 @@ function ScrambleAndImage({
     let frameId: number;
 
     const waitForInitial = () => {
-      if (imgParentRef.current && textElRef.current) {
+      if (
+        imgParentRef.current &&
+        textElRef.current &&
+        imgParentRef.current.clientHeight > 0 &&
+        textElRef.current.clientHeight > 0
+      ) {
         setIsInitialCheckDone(true);
         resetFontBounds();
       } else frameId = requestAnimationFrame(waitForInitial);
@@ -167,10 +167,41 @@ function ScrambleAndImage({
 
     frameId = requestAnimationFrame(waitForInitial);
     return () => cancelAnimationFrame(frameId);
-  }, [scrImg, isInitialCheckDone, textToImgHeightRatio]);
+  }, [scrImg, isInitialCheckDone]);
 
   async function optimizeFontSize(imageHeight: number, textHeight: number) {
     if (!textElRef.current || !imgParentRef.current) return;
+
+    /**
+     * // 1. Find font bounds
+     *     const minBoundsDiff = 10;
+     *     const boundsDelta = 4;
+     *     console.log(fontProps);
+     *     if (fontProps.h - fontProps.l >= minBoundsDiff) {
+     *       await new Promise((res) => setTimeout(res, 500));
+     *       await new Promise((res) => requestAnimationFrame(res));
+     *       setFontProps((fs) => {
+     *         if (textHeight < imageHeight) {
+     *           return {
+     *             size: Math.min(fs.size + boundsDelta, fontSizeHigh),
+     *             l: fs.size,
+     *             h: fs.h,
+     *             k: 0,
+     *           };
+     *         } else {
+     *           return {
+     *             size: Math.max(fs.size - boundsDelta, fontSizeLow),
+     *             l: fs.size - boundsDelta,
+     *             h: fs.size + boundsDelta,
+     *             k: 0,
+     *           };
+     *         }
+     *       });
+     *       return;
+     *     }
+     */
+
+    // 2. Optimize font size
     const boundsMinDiff = 0.2;
     const maxIter = 20;
     if (fontProps.h - fontProps.l < boundsMinDiff || fontProps.k >= maxIter)
@@ -197,53 +228,21 @@ function ScrambleAndImage({
     });
   }
 
-  const minTxtImgRatio = 0.4;
-  const maxTxtImgRatio = 1.6;
-  const deltaTxtImgRatio = 0.1;
-  function incrementTxtImgRatio() {
-    resetFontBounds();
-    setTextToImgHeightRatio((ratio) =>
-      Math.min(ratio + deltaTxtImgRatio, maxTxtImgRatio),
-    );
-  }
-
-  function decreaseTxtImgRatio() {
-    resetFontBounds();
-    setTextToImgHeightRatio((ratio) =>
-      Math.max(ratio - deltaTxtImgRatio, minTxtImgRatio),
-    );
-  }
-
   return (
     <div className="flex flex-row justify-between gap-[5%] px-5 py-4">
-      {/* TODO: add these buttons */}
-      {/*<div>*/}
-      {/*  <button*/}
-      {/*    onClick={incrementTxtImgRatio}*/}
-      {/*    className="cursor-pointer bg-blue-300 p-4"*/}
-      {/*  >*/}
-      {/*    +*/}
-      {/*  </button>*/}
-      {/*  <br />*/}
-      {/*  <button*/}
-      {/*    onClick={decreaseTxtImgRatio}*/}
-      {/*    className="cursor-pointer bg-blue-300 p-4"*/}
-      {/*  >*/}
-      {/*    -*/}
-      {/*  </button>*/}
-      {/*</div>*/}
-
       {/* Scramble */}
-      <div className="flex w-full place-content-center">
+      <div
+        className="my-auto h-fit w-full text-center whitespace-pre-wrap"
+        ref={textElRef}
+      >
         <span
-          ref={textElRef}
           style={{
-            fontSize: fontProps.size,
+            fontSize: `${fontProps.size}px`,
             fontFamily: "monospace",
             fontWeight: "550",
             transition: "font-size",
           }}
-          className="text-center whitespace-pre-wrap"
+          className="box-border w-full"
         >
           {scrText}
         </span>
@@ -251,16 +250,15 @@ function ScrambleAndImage({
 
       {/*Image*/}
       {scrImg && (
-        <>
-          <div className="w-4/10 place-content-center">
-            <div
-              ref={imgParentRef}
-              dangerouslySetInnerHTML={{
-                __html: scrImg,
-              }}
-            />
-          </div>
-        </>
+        <div className="w-6/10 place-content-center">
+          <div
+            ref={imgParentRef}
+            className="w-full"
+            dangerouslySetInnerHTML={{
+              __html: scrImg,
+            }}
+          />
+        </div>
       )}
     </div>
   );
