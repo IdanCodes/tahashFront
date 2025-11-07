@@ -27,9 +27,8 @@ import { Penalties, Penalty } from "@shared/constants/penalties";
 import LoadingSpinner from "../components/LoadingSpinner";
 import { generateResultStr } from "@shared/utils/event-results-utils";
 import { getTimeFormatName, TimeFormat } from "@shared/constants/time-formats";
-import { clamp } from "motion";
 
-const hideImageEvents = Object.freeze(["3bld", "4bld", "5bld", "333mbf"]);
+const hideImageEvents = Object.freeze(["333bf", "444bf", "555bf", "333mbf"]);
 
 function ScrambleMenuButton({
   isAccessible,
@@ -108,7 +107,7 @@ function ScrambleAndImage({
     l: number;
     h: number;
     k: number;
-  }>({ size: fontSizeLow, l: fontSizeLow, h: fontSizeHigh, k: 0 });
+  }>({ size: 30, l: fontSizeLow, h: fontSizeHigh, k: 0 });
 
   const imageHeight = useMemo<number>(() => {
     return imgParentRef.current ? imgParentRef.current.clientHeight : 0;
@@ -116,6 +115,7 @@ function ScrambleAndImage({
   const textHeight = useMemo<number>(() => {
     return textElRef.current ? textElRef.current.clientHeight : 0;
   }, [textElRef.current, fontProps]);
+
   const resetFontBounds = () => {
     setFontProps((fs) => ({
       size: fs.size,
@@ -474,6 +474,7 @@ function Compete() {
 
   async function initCompeteData(competeData: UserCompeteData) {
     hideImage.current = hideImageEvents.includes(competeData.eventData.eventId);
+    console.log(hideImage.current);
     numScrambles.current = competeData.scrambles.length;
     finishedEvent.current = competeData.results.finished;
 
