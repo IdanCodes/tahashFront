@@ -18,6 +18,7 @@ interface UserInfoContextType {
   refresh: () => Promise<void>;
   logout: () => Promise<void>;
   isLoggedIn: boolean;
+  isAdmin: boolean;
   onLoadCached: (cb: () => void) => void;
 }
 
@@ -67,6 +68,10 @@ export function UserInfoProvider({ children }: { children: ReactNode }) {
     return getCookie(CookieNames.isLoggedIn) === "true";
   }
 
+  function getIsAdmin() {
+    return getCookie(CookieNames.isAdmin) === "true";
+  }
+
   // initialize user
   useEffect(() => {
     if (!storageInitialized()) {
@@ -104,6 +109,7 @@ export function UserInfoProvider({ children }: { children: ReactNode }) {
           if (storageInitialized() && isLoggedIn()) cb();
           else onLoadCachedCbs.current.push(cb);
         },
+        isAdmin: getIsAdmin(),
       }}
     >
       {children}
