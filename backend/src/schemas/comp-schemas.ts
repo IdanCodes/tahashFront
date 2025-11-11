@@ -5,6 +5,7 @@ import {
 } from "../types/validated-request";
 import { HttpHeaders } from "@shared/constants/http-headers";
 import { Penalties } from "@shared/constants/penalties";
+import { SubmissionState } from "@shared/constants/submission-state";
 
 // components
 const userIdSchema = z.coerce.number().nonnegative().int();
@@ -14,6 +15,8 @@ const packedResultSchema = z.object({
   extraArgs: z.object().optional(),
   centis: z.int().min(-1),
 });
+const compNumberSchema = z.coerce.number().nonnegative().int();
+const submissionStateSchema = z.enum(SubmissionState);
 
 // region Get.UserEventData
 // headers
@@ -51,7 +54,7 @@ export type UpdateTimesRequest = ValidatedRequest<typeof updateTimesSchemas>;
 // endregion
 
 // region Get.EventSubmissions
-
+// headers
 const eventSubmissionsHeadersSchema = z.object({
   [HttpHeaders.EVENT_ID]: eventIdSchema,
 });
@@ -59,6 +62,7 @@ export type EventSubmissionsHeadersInput = z.infer<
   typeof eventSubmissionsHeadersSchema
 >;
 
+// full request
 export const eventSubmissionsSchemas: RequestValidationSchemas = {
   headers: eventSubmissionsHeadersSchema,
 };
@@ -69,7 +73,7 @@ export type EventSubmissionsRequest = ValidatedRequest<
 // endregion
 
 // region Get.EventDisplayInfo
-
+// headers
 const eventDisplayInfoHeadersSchema = z.object({
   [HttpHeaders.EVENT_ID]: eventIdSchema,
 });
@@ -77,11 +81,35 @@ export type EventDisplayInfoHeadersInput = z.infer<
   typeof eventDisplayInfoHeadersSchema
 >;
 
-export const eventDisplayInfoSchema: RequestValidationSchemas = {
+// full request
+export const eventDisplayInfoSchemas: RequestValidationSchemas = {
   headers: eventDisplayInfoHeadersSchema,
 };
 export type EventDisplayInfoRequest = ValidatedRequest<
   typeof eventSubmissionsSchemas
+>;
+
+// endregion
+
+// region Post.UpdateSubmissionState
+
+const updateSubmissionStateBodySchema = z.object({
+  compNumber: compNumberSchema,
+  eventId: eventIdSchema,
+  userId: userIdSchema,
+  submissionState: submissionStateSchema,
+});
+
+export type UpdateSubmissionStateBodyInput = z.infer<
+  typeof updateSubmissionStateBodySchema
+>;
+
+export const updateSubmissionStateSchemas: RequestValidationSchemas = {
+  body: updateSubmissionStateBodySchema,
+};
+
+export type UpdateSubmissionStateRequest = ValidatedRequest<
+  typeof updateSubmissionStateSchemas
 >;
 
 // endregion

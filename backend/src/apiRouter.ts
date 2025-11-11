@@ -13,8 +13,9 @@ import { requireAuth } from "./middleware/auth/require-auth";
 import { userHandlers } from "./handlers/user-handlers";
 import { compHandlers } from "./handlers/comp-handlers";
 import {
-  eventDisplayInfoSchema,
+  eventDisplayInfoSchemas,
   eventSubmissionsSchemas,
+  updateSubmissionStateSchemas,
   updateTimesSchemas,
   userEventDataSchemas,
 } from "./schemas/comp-schemas";
@@ -69,7 +70,7 @@ router.get(
 router.get(
   RoutePath.Get.EventDisplayInfo,
   requireAuth,
-  validate(eventDisplayInfoSchema),
+  validate(eventDisplayInfoSchemas),
   compHandlers.eventDisplayInfo,
 );
 
@@ -95,6 +96,14 @@ router.get(
   requireAdmin,
   validate(eventSubmissionsSchemas),
   compHandlers.eventSubmissions,
+);
+
+router.post(
+  RoutePath.Post.UpdateSubmissionState,
+  requireAuth,
+  requireAdmin,
+  validate(updateSubmissionStateSchemas),
+  compHandlers.updateSubmissionState,
 );
 
 /**

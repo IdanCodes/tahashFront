@@ -43,8 +43,8 @@ export const RoutePath = {
     Post: {
         WcaCodeExchange: "/wca-code-exchange",
         UpdateTimes: "/update-times",
+        UpdateSubmissionState: "/update-submission-state",
 
         UpdateHostname: "/update-hostname",
-        UpdateSubmissionState: "/update-submission-state",
     },
 } as const;

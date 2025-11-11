@@ -131,7 +131,7 @@ export class UserManager {
    * - If the user wasn't found in the database, returns `null`.
    * - Otherwise, returns the requested {@link UserInfo}.
    */
-  async getUserDataById(userId: number): Promise<UserInfo | null> {
+  async getUserInfoById(userId: number): Promise<UserInfo | null> {
     const userDoc: TahashUserDoc | null = await this.getUserDocById(userId);
     return userDoc ? userDoc.userInfo : null;
   }

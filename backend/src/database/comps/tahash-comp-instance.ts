@@ -13,6 +13,7 @@ import {
 import { EventDisplayInfo } from "@shared/interfaces/event-display-info";
 import { CompEventResults } from "../../interfaces/comp-event-results";
 import { SubmissionData } from "@shared/interfaces/submission-data";
+import { SubmissionState } from "@shared/constants/submission-state";
 
 /*
 TODO:
@@ -78,6 +79,14 @@ export class TahashCompInstance implements ITahashComp, TahashCompMethods {
 
   isActive(): boolean {
     return this.srcDoc.isActive();
+  }
+
+  setSubmissionState(
+    eventId: EventId,
+    userId: number,
+    newSubmissionState: SubmissionState,
+  ): boolean {
+    return this.srcDoc.setSubmissionState(eventId, userId, newSubmissionState);
   }
 
   /**

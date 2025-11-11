@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from "react";
-import { SubmissionData } from "@shared/interfaces/submission-data";
 import { sendGetRequest } from "../utils/API/apiUtils";
 import { RoutePath } from "@shared/constants/route-path";
 import { redirectToError } from "../utils/errorUtils";
@@ -11,7 +10,7 @@ import LoadingSpinner from "../components/LoadingSpinner";
 import { useNavigate, useParams } from "react-router-dom";
 import { useUserInfo } from "../context/UserContext";
 import { HttpHeaders } from "@shared/constants/http-headers";
-import { CompEvent } from "@shared/types/comp-event";
+import { SubmissionDataDisplay } from "@shared/interfaces/submission-data-display";
 
 function AdminPanel() {
   const params = useParams();
@@ -88,10 +87,9 @@ function ChooseEventPage() {
 
 function EventPanel({ eventId }: { eventId: string }) {
   const navigate = useNavigate();
-  const [submissions, setSubmissions] = useState<SubmissionData[] | undefined>(
-    undefined,
-  );
-  const [compEvent, setCompEvent] = useState<CompEvent | undefined>(undefined);
+  const [submissions, setSubmissions] = useState<
+    SubmissionDataDisplay[] | undefined
+  >(undefined);
   const [displayInfo, setDisplayInfo] = useState<EventDisplayInfo | undefined>(
     undefined,
   );
@@ -149,7 +147,7 @@ function EventPanel({ eventId }: { eventId: string }) {
 function EventSubmissionsPanel({
   submissions,
 }: {
-  submissions: SubmissionData[];
+  submissions: SubmissionDataDisplay[];
 }) {
   return (
     <>
@@ -158,7 +156,11 @@ function EventSubmissionsPanel({
           No submissions for this event yet
         </p>
       ) : (
-        <div></div>
+        <div>
+          {submissions.map((submission, _) => (
+            <div key={submission.submitterData.id}></div>
+          ))}
+        </div>
       )}
     </>
   );
