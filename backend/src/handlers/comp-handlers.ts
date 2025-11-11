@@ -14,7 +14,7 @@ import { HttpHeaders } from "@shared/constants/http-headers";
 import { getEventById } from "@shared/types/comp-event";
 import { UserCompeteData } from "@shared/interfaces/user-compete-data";
 import { getEmptyPackedResults } from "../utils/packed-result-utils";
-import { initSubmissionData } from "../interfaces/submission-data";
+import { initSubmissionData } from "@shared/interfaces/submission-data";
 
 /**
  * Get all event displays and statuses
@@ -34,6 +34,13 @@ async function eventsDisplayAndStatus(req: Request, res: Response) {
       getEventsDisplayAndStatus(displayInfos, eventStatuses),
     ),
   );
+}
+
+// response contains a CompEvent[] of all the events of the competition
+export function compEventsDisplays(req: Request, res: Response) {
+  const displayInfos =
+    CompManager.getInstance().getActiveComp().eventDisplayInfos;
+  res.json(new ApiResponse(ResponseCode.Success, displayInfos));
 }
 
 /**
@@ -120,4 +127,5 @@ export const compHandlers = {
   eventsDisplayAndStatus,
   userEventData,
   updateTimes,
+  compEventsDisplays,
 };

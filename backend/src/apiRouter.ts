@@ -58,6 +58,12 @@ router.get(
 );
 
 router.get(
+  RoutePath.Get.CompEventsDisplays,
+  requireAuth,
+  compHandlers.compEventsDisplays,
+);
+
+router.get(
   RoutePath.Get.UserEventData,
   requireAuth,
   validate(userEventDataSchemas),

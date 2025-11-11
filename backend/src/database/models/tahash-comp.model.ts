@@ -1,8 +1,8 @@
 import mongoose, { Model, Schema } from "mongoose";
 import { CompEvent, EventId, WCAEvents } from "@shared/types/comp-event";
 import { CompEventResults } from "../../interfaces/comp-event-results";
-import { SubmissionData } from "../../interfaces/submission-data";
-import { SubmissionState } from "../comps/submission-state";
+import { SubmissionData } from "@shared/interfaces/submission-data";
+import { SubmissionState } from "@shared/constants/submission-state";
 import { packedResultSchema } from "./packed-result.schema";
 
 const compEventResultsSchema = new Schema<CompEventResults>(

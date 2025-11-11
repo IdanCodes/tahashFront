@@ -7,10 +7,12 @@ import { redirectToError } from "../utils/errorUtils";
 import { useLoading } from "../context/LoadingContext";
 import EventBoxes from "../components/EventBoxes";
 import LoadingSpinner from "../components/LoadingSpinner";
+import { useNavigate } from "react-router-dom";
 
 function Scrambles() {
   const [events, setEvents] = useState<EventDisplayAndStatus[] | null>(null);
   const { addLoading, removeLoading } = useLoading("Scrambles");
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (events) return;
@@ -25,8 +27,15 @@ function Scrambles() {
 
   return (
     <>
-      <p className="text-center text-5xl font-bold p-4">Scrambles</p>
-      {events ? <EventBoxes events={events} /> : <LoadingSpinner />}
+      <p className="p-4 text-center text-5xl font-bold">Scrambles</p>
+      {events ? (
+        <EventBoxes
+          events={events}
+          handleClickEvent={(eventId) => navigate(`/compete/${eventId}`)}
+        />
+      ) : (
+        <LoadingSpinner />
+      )}
     </>
   );
 }

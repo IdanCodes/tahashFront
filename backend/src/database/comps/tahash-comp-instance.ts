@@ -12,7 +12,7 @@ import {
 } from "@shared/types/comp-event";
 import { EventDisplayInfo } from "@shared/interfaces/event-display-info";
 import { CompEventResults } from "../../interfaces/comp-event-results";
-import { SubmissionData } from "../../interfaces/submission-data";
+import { SubmissionData } from "@shared/interfaces/submission-data";
 
 /*
 TODO:
