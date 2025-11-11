@@ -49,3 +49,39 @@ export const updateTimesSchemas: RequestValidationSchemas = {
 export type UpdateTimesRequest = ValidatedRequest<typeof updateTimesSchemas>;
 
 // endregion
+
+// region Get.EventSubmissions
+
+const eventSubmissionsHeadersSchema = z.object({
+  [HttpHeaders.EVENT_ID]: eventIdSchema,
+});
+export type EventSubmissionsHeadersInput = z.infer<
+  typeof eventSubmissionsHeadersSchema
+>;
+
+export const eventSubmissionsSchemas: RequestValidationSchemas = {
+  headers: eventSubmissionsHeadersSchema,
+};
+export type EventSubmissionsRequest = ValidatedRequest<
+  typeof eventSubmissionsSchemas
+>;
+
+// endregion
+
+// region Get.EventDisplayInfo
+
+const eventDisplayInfoHeadersSchema = z.object({
+  [HttpHeaders.EVENT_ID]: eventIdSchema,
+});
+export type EventDisplayInfoHeadersInput = z.infer<
+  typeof eventDisplayInfoHeadersSchema
+>;
+
+export const eventDisplayInfoSchema: RequestValidationSchemas = {
+  headers: eventDisplayInfoHeadersSchema,
+};
+export type EventDisplayInfoRequest = ValidatedRequest<
+  typeof eventSubmissionsSchemas
+>;
+
+// endregion

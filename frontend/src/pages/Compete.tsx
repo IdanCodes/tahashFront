@@ -115,8 +115,10 @@ function ScrambleAndImage({
   const textHeight = useMemo<number>(() => {
     return textElRef.current ? textElRef.current.clientHeight : 0;
   }, [textElRef.current, fontProps]);
+  const [fontSizeBalanced, setFontSizeBalanced] = useState<boolean>(false);
 
   const resetFontBounds = () => {
+    setFontSizeBalanced(false);
     setFontProps((fs) => ({
       size: fs.size,
       l: fontSizeLow,
@@ -130,7 +132,11 @@ function ScrambleAndImage({
 
     const heightMinDiff = 10;
     const diff = Math.abs(imageHeight - textHeight);
-    if (diff >= heightMinDiff) optimizeFontSize(imageHeight, textHeight).then();
+    const isBalanced = diff < heightMinDiff;
+
+    setFontSizeBalanced(isBalanced);
+    console.log(isBalanced);
+    if (!isBalanced) optimizeFontSize(imageHeight, textHeight).then();
   }, [imageHeight, textHeight, fontProps, scrImg]);
 
   useEffect(() => {
@@ -204,8 +210,10 @@ function ScrambleAndImage({
     // 2. Optimize font size
     const boundsMinDiff = 0.2;
     const maxIter = 20;
-    if (fontProps.h - fontProps.l < boundsMinDiff || fontProps.k >= maxIter)
+    if (fontProps.h - fontProps.l < boundsMinDiff || fontProps.k >= maxIter) {
+      setFontSizeBalanced(true);
       return;
+    }
 
     await new Promise((res) => requestAnimationFrame(res));
     setFontProps((fs) => {
@@ -232,7 +240,11 @@ function ScrambleAndImage({
     <div className="flex flex-row justify-between gap-[5%] px-5 py-4">
       {/* Scramble */}
       <div
-        className="my-auto h-fit w-full text-center whitespace-pre-wrap"
+        className={clsx(
+          "my-auto h-fit w-full text-center whitespace-pre-wrap transition-opacity",
+          !fontSizeBalanced && "opacity-0",
+          fontSizeBalanced && "opacity-100",
+        )}
         ref={textElRef}
       >
         <span
@@ -474,7 +486,6 @@ function Compete() {
 
   async function initCompeteData(competeData: UserCompeteData) {
     hideImage.current = hideImageEvents.includes(competeData.eventData.eventId);
-    console.log(hideImage.current);
     numScrambles.current = competeData.scrambles.length;
     finishedEvent.current = competeData.results.finished;
 
@@ -536,18 +547,6 @@ function Compete() {
 
       return parent.innerHTML;
     }
-
-    async function getImageHeight() {
-      const imgStr = (await csTimer.getImage(
-        "",
-        competeData.eventData.scrType,
-      )) as string;
-      const parent = document.createElement("div");
-      parent.innerHTML = imgStr;
-      const el = parent.querySelector("svg")!;
-
-      return el.getAttribute("height") ?? "100";
-    }
   }
 
   useEffect(() => {
@@ -571,8 +570,6 @@ function Compete() {
 
   useEffect(() => {
     if (hideImage.current) return;
-    // TODO: remove
-    // console.log(document.getElementsByTagName("svg"));
   }, [scrambleImages, activeScramble]);
 
   if (!competeData) return <LoadingSpinner />;

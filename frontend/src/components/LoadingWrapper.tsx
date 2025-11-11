@@ -25,30 +25,31 @@ function LoadingWrapper({ children }: { children: ReactNode }): JSX.Element {
 
   return (
     <>
-      <AnimatePresence mode="wait">
-        {isLoading && (
+      <AnimatePresence mode="popLayout">
+        {isLoading ? (
           <PageTransition key="loading">
             <LoadingPage />
           </PageTransition>
+        ) : (
+          <motion.div
+            key="content"
+            {...PageTransitionProps}
+            initial="inactive"
+            animate={isLoading ? "inactive" : "active"}
+            exit="inactive"
+            style={{
+              pointerEvents: isLoading ? "none" : "auto",
+              display: isLoading ? "none" : "block",
+            }}
+            transition={{
+              ...PageTransitionProps.transition,
+              // wait for the loading screen to finish
+              delay: contentDelay * 1.5,
+            }}
+          >
+            {children}
+          </motion.div>
         )}
-        <motion.div
-          key="content"
-          {...PageTransitionProps}
-          initial="inactive"
-          animate={isLoading ? "inactive" : "active"}
-          exit="inactive"
-          style={{
-            pointerEvents: isLoading ? "none" : "auto",
-            display: isLoading ? "none" : "block",
-          }}
-          transition={{
-            ...PageTransitionProps.transition,
-            // wait for the loading screen to finish
-            delay: contentDelay,
-          }}
-        >
-          {children}
-        </motion.div>
       </AnimatePresence>
     </>
   );

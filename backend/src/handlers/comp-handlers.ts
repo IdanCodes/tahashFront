@@ -5,6 +5,9 @@ import { ApiResponse, errorResponse } from "@shared/types/api-response";
 import { ResponseCode } from "@shared/types/response-code";
 import { getEventsDisplayAndStatus } from "@shared/types/event-display-and-status";
 import {
+  EventDisplayInfoRequest,
+  EventSubmissionsHeadersInput,
+  EventSubmissionsRequest,
   UpdateTimesBodyInput,
   UpdateTimesRequest,
   UserEventDataHeadersInput,
@@ -15,6 +18,7 @@ import { getEventById } from "@shared/types/comp-event";
 import { UserCompeteData } from "@shared/interfaces/user-compete-data";
 import { getEmptyPackedResults } from "../utils/packed-result-utils";
 import { initSubmissionData } from "@shared/interfaces/submission-data";
+import { EventDisplayInfo } from "@shared/interfaces/event-display-info";
 
 /**
  * Get all event displays and statuses
@@ -123,9 +127,44 @@ export async function updateTimes(req: UpdateTimesRequest, res: Response) {
   await currComp.save();
 }
 
+// returns SubmissionData[]
+export function eventSubmissions(req: EventSubmissionsRequest, res: Response) {
+  const { [HttpHeaders.EVENT_ID]: eventId } =
+    req.headers as EventSubmissionsHeadersInput;
+
+  if (!getEventById(eventId))
+    return res.json(errorResponse(`Invalid event id "${eventId}"`));
+
+  const eventSubmissions = CompManager.getInstance()
+    .getActiveComp()
+    .getEventSubmissions(eventId);
+
+  if (!eventSubmissions)
+    return res.json(
+      errorResponse(
+        `This competition does not contain the requested event "${eventId}"`,
+      ),
+    );
+
+  res.json(new ApiResponse(ResponseCode.Success, eventSubmissions));
+}
+
+// response contains DisplayInfo of the event
+function eventDisplayInfo(req: EventDisplayInfoRequest, res: Response) {
+  const { [HttpHeaders.EVENT_ID]: eventId } =
+    req.headers as EventSubmissionsHeadersInput;
+
+  const compEvent = getEventById(eventId);
+  if (!compEvent)
+    return res.json(errorResponse(`Invalid event id "${eventId}"`));
+  res.json(new ApiResponse(ResponseCode.Success, compEvent.displayInfo));
+}
+
 export const compHandlers = {
   eventsDisplayAndStatus,
   userEventData,
   updateTimes,
   compEventsDisplays,
+  eventSubmissions,
+  eventDisplayInfo,
 };

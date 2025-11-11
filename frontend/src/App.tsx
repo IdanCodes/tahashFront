@@ -103,6 +103,16 @@ function AnimatedRoutes(): JSX.Element {
             </RequireAuth>
           }
         />
+        <Route
+          path={RoutePath.Page.AdminPanelEvent}
+          element={
+            <RequireAuth>
+              <PageTransition>
+                <AdminPanel />
+              </PageTransition>
+            </RequireAuth>
+          }
+        />
       </Routes>
     </AnimatePresence>
   );
