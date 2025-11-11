@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { redirectToError } from "../utils/errorUtils";
 import { errorObject } from "@shared/interfaces/error-object";
 import { sendGetRequest, sendPostRequest } from "../utils/API/apiUtils";
-import { useLoading } from "../context/LoadingContext";
+import { useLoading, useLoadingEraser } from "../context/LoadingContext";
 import { HttpHeaders } from "@shared/constants/http-headers";
 import { useUserInfo } from "../context/UserContext";
 import { RoutePath } from "@shared/constants/route-path";
@@ -27,6 +27,8 @@ import { Penalties, Penalty } from "@shared/constants/penalties";
 import LoadingSpinner from "../components/LoadingSpinner";
 import { generateResultStr } from "@shared/utils/event-results-utils";
 import { getTimeFormatName, TimeFormat } from "@shared/constants/time-formats";
+import { motion } from "motion/react";
+import { PageTransitionProps } from "../components/PageTransition";
 
 const hideImageEvents = Object.freeze(["333bf", "444bf", "555bf", "333mbf"]);
 
@@ -93,9 +95,11 @@ function ScramblesMenu({
 function ScrambleAndImage({
   scrText,
   scrImg,
+  setLoading,
 }: {
   scrText: string;
   scrImg: string | undefined;
+  setLoading: (isLoading: boolean) => void;
 }) {
   const fontSizeLow = 10;
   const fontSizeHigh = 40;
@@ -115,7 +119,6 @@ function ScrambleAndImage({
   const textHeight = useMemo<number>(() => {
     return textElRef.current ? textElRef.current.clientHeight : 0;
   }, [textElRef.current, fontProps]);
-  const [fontSizeBalanced, setFontSizeBalanced] = useState<boolean>(false);
 
   const resetFontBounds = () => {
     setFontSizeBalanced(false);
@@ -130,12 +133,11 @@ function ScrambleAndImage({
   useEffect(() => {
     if (imageHeight == 0 || textHeight == 0) return;
 
-    const heightMinDiff = 10;
     const diff = Math.abs(imageHeight - textHeight);
+    const heightMinDiff = 10;
     const isBalanced = diff < heightMinDiff;
 
-    setFontSizeBalanced(isBalanced);
-    console.log(isBalanced);
+    setLoading(!isBalanced);
     if (!isBalanced) optimizeFontSize(imageHeight, textHeight).then();
   }, [imageHeight, textHeight, fontProps, scrImg]);
 
@@ -211,7 +213,7 @@ function ScrambleAndImage({
     const boundsMinDiff = 0.2;
     const maxIter = 20;
     if (fontProps.h - fontProps.l < boundsMinDiff || fontProps.k >= maxIter) {
-      setFontSizeBalanced(true);
+      setLoading(false);
       return;
     }
 
@@ -240,11 +242,7 @@ function ScrambleAndImage({
     <div className="flex flex-row justify-between gap-[5%] px-5 py-4">
       {/* Scramble */}
       <div
-        className={clsx(
-          "my-auto h-fit w-full text-center whitespace-pre-wrap transition-opacity",
-          !fontSizeBalanced && "opacity-0",
-          fontSizeBalanced && "opacity-100",
-        )}
+        className={clsx("my-auto h-fit w-full text-center whitespace-pre-wrap")}
         ref={textElRef}
       >
         <span
@@ -478,6 +476,7 @@ function Compete() {
   const numScrambles = useRef<number>(0);
   const finishedEvent = useRef<boolean>(false);
   const attemptResultStr = useRef<string | undefined>(undefined);
+  const [loadingScrTxt, setLoadingScrTxt] = useState<boolean>(false);
 
   const params = useParams();
   const { addLoading, removeLoading } = useLoading("Compete");
@@ -715,7 +714,21 @@ function Compete() {
   return (
     <>
       <CubingIconsSheet />
-      <div>
+      <motion.div
+        variants={{
+          hide: {
+            opacity: 0,
+          },
+          show: {
+            opacity: 1,
+          },
+        }}
+        animate={loadingScrTxt ? "hide" : "show"}
+        transition={{
+          duration: PageTransitionProps.transition?.duration ?? 0.1,
+        }}
+        initial="hide"
+      >
         {/*Event Title*/}
         <p className="text-center text-4xl font-bold text-blue-950">
           {competeData.eventData.eventTitle}
@@ -745,6 +758,7 @@ function Compete() {
             scrImg={
               hideImage.current ? undefined : scrambleImages[activeScramble]
             }
+            setLoading={hideImage.current ? (_) => {} : setLoadingScrTxt}
           />
 
           {/*scamble-submit divider*/}
@@ -766,7 +780,7 @@ function Compete() {
             />
           )}
         </div>
-      </div>
+      </motion.div>
     </>
   );
 }
