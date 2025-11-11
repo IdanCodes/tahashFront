@@ -121,13 +121,16 @@ function ScrambleAndImage({
   }, [textElRef.current, fontProps]);
 
   const resetFontBounds = () => {
-    setFontSizeBalanced(false);
-    setFontProps((fs) => ({
-      size: fs.size,
-      l: fontSizeLow,
-      h: fontSizeHigh,
-      k: 0,
-    }));
+    setTimeout(
+      () =>
+        setFontProps((fs) => ({
+          size: fs.size,
+          l: fontSizeLow,
+          h: fontSizeHigh,
+          k: 0,
+        })),
+      50,
+    );
   };
 
   useEffect(() => {
@@ -145,8 +148,13 @@ function ScrambleAndImage({
     function resetOnFinishResize() {
       const currSize = { w: window.innerWidth, h: window.innerHeight };
       setTimeout(() => {
-        if (currSize.w == window.innerWidth && currSize.h == window.innerHeight)
+        if (
+          currSize.w == window.innerWidth &&
+          currSize.h == window.innerHeight
+        ) {
+          setLoading(true);
           resetFontBounds();
+        }
       }, 150);
     }
 
@@ -476,7 +484,7 @@ function Compete() {
   const numScrambles = useRef<number>(0);
   const finishedEvent = useRef<boolean>(false);
   const attemptResultStr = useRef<string | undefined>(undefined);
-  const [loadingScrTxt, setLoadingScrTxt] = useState<boolean>(false);
+  const [loadingScrTxt, setLoadingScrTxt] = useState<boolean>(true);
 
   const params = useParams();
   const { addLoading, removeLoading } = useLoading("Compete");
@@ -495,6 +503,7 @@ function Compete() {
       );
     }
 
+    console.log(competeData.eventData);
     setCompeteData(competeData);
 
     const times = competeData.results.times;
@@ -516,7 +525,7 @@ function Compete() {
     if (!hideImage.current) {
       const scrImages = await Promise.all(competeData.scrambles.map(scrToSvg));
       setScrambleImages(scrImages);
-    }
+    } else setLoadingScrTxt(false);
 
     /**
      * Generate an SVG element from a given scramble
@@ -566,10 +575,6 @@ function Compete() {
       initCompeteData(res.data).then(removeLoading);
     });
   }, []);
-
-  useEffect(() => {
-    if (hideImage.current) return;
-  }, [scrambleImages, activeScramble]);
 
   if (!competeData) return <LoadingSpinner />;
 
@@ -714,26 +719,17 @@ function Compete() {
   return (
     <>
       <CubingIconsSheet />
-      <motion.div
-        variants={{
-          hide: {
-            opacity: 0,
-          },
-          show: {
-            opacity: 1,
-          },
-        }}
-        animate={loadingScrTxt ? "hide" : "show"}
-        transition={{
-          duration: PageTransitionProps.transition?.duration ?? 0.1,
-        }}
-        initial="hide"
+      {/*Event Title*/}
+      <div className="flex justify-center gap-2 text-center text-4xl text-blue-950">
+        <p className="font-bold">{competeData.eventData.eventTitle} </p>
+        <span className={`cubing-icon ${competeData.eventData.iconName}`} />
+      </div>
+      <div
+        className={clsx(
+          "transition-opacity",
+          loadingScrTxt ? "opacity-0" : "opacity-100",
+        )}
       >
-        {/*Event Title*/}
-        <p className="text-center text-4xl font-bold text-blue-950">
-          {competeData.eventData.eventTitle}
-        </p>
-
         {/* Result String */}
         {attemptResultStr.current && (
           <AttemptResultLabel
@@ -780,7 +776,7 @@ function Compete() {
             />
           )}
         </div>
-      </motion.div>
+      </div>
     </>
   );
 }
