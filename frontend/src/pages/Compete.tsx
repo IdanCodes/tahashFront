@@ -46,11 +46,11 @@ function ScrambleMenuButton({
   return (
     <button
       className={clsx(
-        `shadow-xl my-auto flex w-full rounded-xl p-2 text-2xl transition-all duration-200 ease-in`,
+        `group relative my-auto flex overflow-hidden rounded-2xl p-2 text-2xl shadow-xl transition-[flex] duration-[400ms] select-none `,
         isAccessible && `cursor-pointer`,
         !isAccessible && "opacity-60",
-        isActiveScramble && "bg-slate-500",
-        !isActiveScramble && "bg-slate-400 hover:bg-slate-500/70",
+        isActiveScramble && "flex-[4] origin-top-left bg-slate-500/90",
+        !isActiveScramble && "flex-[3] bg-slate-400 hover:bg-slate-500/70",
       )}
       onClick={() => loadScramble()}
       disabled={!isAccessible}
