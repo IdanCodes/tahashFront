@@ -192,12 +192,10 @@ function EventSubmissionsPanel({
               <span>Times:</span>
               <div className="flex gap-3">
                 {formatPackedResults(submission.times).map((t, i) => (
-                  <>
-                    <span>
-                      {t}
-                      {i < submission.times.length - 1 ? "," : ""}
-                    </span>
-                  </>
+                  <span key={i}>
+                    {t}
+                    {i < submission.times.length - 1 ? "," : ""}
+                  </span>
                 ))}
               </div>
               <span>Result: {submission.resultStr}</span>
