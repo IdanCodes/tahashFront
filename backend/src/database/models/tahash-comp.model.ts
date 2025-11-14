@@ -1,9 +1,21 @@
 import mongoose, { Model, Schema } from "mongoose";
-import { CompEvent, EventId, WCAEvents } from "@shared/types/comp-event";
+import {
+  CompEvent,
+  EventId,
+  getEventById,
+  WCAEvents,
+} from "@shared/types/comp-event";
 import { CompEventResults } from "../../interfaces/comp-event-results";
 import { SubmissionData } from "@shared/interfaces/submission-data";
 import { SubmissionState } from "@shared/constants/submission-state";
 import { packedResultSchema } from "./packed-result.schema";
+import {
+  EventRecords,
+  getNumericResultOfRecord,
+} from "../../types/event-records";
+import { UserManager } from "../users/user-manager";
+import { submissionDataToRecord } from "@shared/utils/event-results-utils";
+import { TimeFormat } from "@shared/constants/time-formats";
 
 const compEventResultsSchema = new Schema<CompEventResults>(
   {
@@ -163,7 +175,7 @@ export interface TahashCompMethods {
     eventId: EventId,
     userId: number,
     newSubmissionState: SubmissionState,
-  ): boolean;
+  ): Promise<boolean>;
 }
 
 export interface TahashCompStatics {
@@ -243,11 +255,11 @@ export const TahashCompSchema = new Schema<
         return evResults ? [...evResults.submissions] : undefined;
       },
 
-      setSubmissionState(
+      async setSubmissionState(
         eventId: EventId,
         userId: number,
         newSubmissionState: SubmissionState,
-      ): boolean {
+      ): Promise<boolean> {
         const compEventPair = this.data.find((x) => x.eventId === eventId);
         if (!compEventPair) return false; // event doesn't exist in comp
 
@@ -259,6 +271,23 @@ export const TahashCompSchema = new Schema<
 
         results.submissions[submissionIndex].submissionState =
           newSubmissionState;
+
+        if (newSubmissionState === SubmissionState.Approved) {
+          const eventData = getEventById(eventId);
+          if (!eventData) return true;
+
+          const userDoc = await UserManager.getInstance().getUserById(userId);
+          const rec = submissionDataToRecord(
+            eventData,
+            this.compNumber,
+            results.submissions[submissionIndex],
+          );
+          userDoc.updateRecords(
+            new Map<string, EventRecords<TimeFormat>>([[eventId, rec]]),
+          );
+          await userDoc.save();
+        }
+
         return true;
       },
 

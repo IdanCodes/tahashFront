@@ -129,7 +129,7 @@ export type FMCBestResults = {
  */
 export type ResultFormatMap = {
   [TimeFormat.ao5]: AO5BestResults;
-  [TimeFormat.mo3]: MO3BestResults;
-  [TimeFormat.bo3]: BO3BestResults | FMCBestResults;
+  [TimeFormat.mo3]: MO3BestResults | FMCBestResults;
+  [TimeFormat.bo3]: BO3BestResults;
   [TimeFormat.multi]: MbldBestResults;
 };

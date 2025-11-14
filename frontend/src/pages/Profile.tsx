@@ -66,15 +66,11 @@ function LogoutButton({ logout }: { logout: () => Promise<void> }) {
   return (
     <div className="m-3 flex place-content-center justify-center">
       <PrimaryButton
-        colors={{
-          normal: "bg-red-500",
-          hover: "bg-red-400/90",
-          click: "bg-purple-500",
-        }}
         buttonSize={ButtonSize.Large}
         text="Logout"
         disabled={disableLogout}
         onClick={onClickLogout}
+        className="bg-red-500 hover:bg-red-600 active:bg-red-600/90"
       />
     </div>
   );

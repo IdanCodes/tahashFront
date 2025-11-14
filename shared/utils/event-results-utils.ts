@@ -1,18 +1,26 @@
-import { PackedResult } from "../interfaces/packed-result";
-import { Penalties } from "../constants/penalties";
+import {PackedResult} from "../interfaces/packed-result";
+import {Penalties} from "../constants/penalties";
 import {
-  DNF_STRING,
-  formatCentis,
-  getPureCentisArr,
-  NULL_TIME_CENTIS,
+    comparePackedResults,
+    DNF_STRING,
+    formatCentis,
+    getPureCentis,
+    getPureCentisArr,
+    NULL_TIME_CENTIS,
 } from "./time-utils";
-import { NumScrambles, TimeFormat } from "../constants/time-formats";
+import {NumScrambles, TimeFormat} from "../constants/time-formats";
+import {calcMultiBldTotalPoints, ExtraArgsMbld,} from "../interfaces/event-extra-args/extra-args-mbld";
+import {ExtraArgsFmc} from "../interfaces/event-extra-args/extra-args-fmc";
+import {CompEvent} from "../types/comp-event";
+import {SubmissionData} from "../interfaces/submission-data";
+import {EventRecords} from "../../backend/src/types/event-records";
 import {
-  calcMultiBldTotalPoints,
-  ExtraArgsMbld,
-} from "../interfaces/event-extra-args/extra-args-mbld";
-import { ExtraArgsFmc } from "../interfaces/event-extra-args/extra-args-fmc";
-import { CompEvent } from "../types/comp-event";
+    AO5BestResults,
+    BO3BestResults,
+    FMCBestResults,
+    MbldBestResults,
+    MO3BestResults
+} from "../../backend/src/types/result-format";
 
 /**
  * Calculate an average of 5 given the full attempt.
@@ -183,4 +191,109 @@ export function generateResultStr(
         return formatCentis(centis);
 
   }
+}
+
+export function getMinResult(results: PackedResult[]): PackedResult {
+    if (results.length == 0) return { centis: -1, penalty: Penalties.DNF };
+    return results.reduce((min, curr) => {
+        return getPureCentis(curr) < getPureCentis(min) ? curr : min;
+    });
+}
+
+export function getShortestFMCSol(results: PackedResult<ExtraArgsFmc>[]): number {
+    let shortest: number = Infinity;
+    for (let i = 0; i < results.length; i++) {
+        if (results[i].extraArgs !== undefined && results[i].extraArgs!.fmcSolution.length < shortest)
+            shortest = results[i].extraArgs!.fmcSolution.length;
+    }
+
+    return shortest; // can also be infinity
+}
+
+
+export function submissionDataToRecord(compEvent: CompEvent, compNumber: number, sd: SubmissionData): EventRecords<TimeFormat> {
+    const INVALID_SD = {average: -1, averageComp: -1, single: { centis: -1, penalty: Penalties.DNF }, singleComp: -1} as EventRecords<TimeFormat.ao5>;
+
+    if (compEvent.eventId === "333fm") {
+        const shortest = getShortestFMCSol(sd.times);
+        if (!isFinite(shortest)) return INVALID_SD;
+
+        return ({
+            single: shortest,
+            singleComp: compNumber,
+            mean: sd.finalResult,
+            meanComp: compNumber
+        }) as FMCBestResults;
+    }
+    else if (compEvent.timeFormat === TimeFormat.ao5) {
+        return {
+            single: getMinResult(sd.times),
+            singleComp: compNumber,
+            average: sd.finalResult,
+            averageComp: compNumber
+        } as AO5BestResults;
+    }
+    else if (compEvent.timeFormat === TimeFormat.mo3 || compEvent.timeFormat === TimeFormat.bo3) {
+        return {
+            single: getMinResult(sd.times),
+            singleComp: compNumber,
+            mean: sd.finalResult,
+            meanComp: compNumber
+        } as MO3BestResults;
+    }
+    else { // multi
+        if (sd.times.length == 0) return INVALID_SD;
+
+        return {
+            timeOfBestAttempt: getPureCentis(sd.times[0]),
+            bestPoints: calcMultiBldTotalPoints(sd.times[0].extraArgs as ExtraArgsMbld),
+            bestComp: compNumber
+        } as MbldBestResults
+    }
+}
+
+/**
+ * Should auto approve submission?
+ * @param eventData The event of the attempt
+ * @param currRec The user's current record
+ * @param sd The new submission's SubmissionData
+ */
+export function shouldAutoApprove(eventData: CompEvent, currRec: EventRecords<TimeFormat>, sd: SubmissionData): boolean {
+    if (eventData.eventId === "333fm") {
+        currRec = currRec as FMCBestResults;
+        const newSingle = getShortestFMCSol(
+            sd.times as PackedResult<ExtraArgsFmc>[],
+        );
+        const newMean = sd.finalResult;
+
+        return newSingle > currRec.single && newMean > currRec.mean;
+    } else if (eventData.timeFormat === TimeFormat.ao5) {
+        currRec = currRec as AO5BestResults;
+        const newSingle = getMinResult(sd.times);
+        const newAvg = sd.finalResult;
+
+         return comparePackedResults(newSingle, currRec.single) === -1 &&
+            newAvg > currRec.average;
+    } else if (
+        eventData.timeFormat === TimeFormat.mo3 ||
+        eventData.timeFormat === TimeFormat.bo3
+    ) {
+        currRec = currRec as MO3BestResults;
+        const newSingle = getMinResult(sd.times);
+        const newMean = sd.finalResult;
+
+        return comparePackedResults(newSingle, currRec.single) === -1 &&
+            newMean > currRec.mean;
+    } else if (eventData.timeFormat === TimeFormat.multi && sd.times.length > 0) {
+        currRec = currRec as MbldBestResults;
+        const newTime = getPureCentis(sd.times[0]);
+        const newPoints = calcMultiBldTotalPoints(
+            sd.times[0].extraArgs as ExtraArgsMbld,
+        );
+
+        return newPoints > currRec.bestPoints ||
+            (newPoints == currRec.bestPoints && newTime > currRec.timeOfBestAttempt);
+    }
+
+    return false;
 }

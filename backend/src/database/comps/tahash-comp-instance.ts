@@ -81,11 +81,11 @@ export class TahashCompInstance implements ITahashComp, TahashCompMethods {
     return this.srcDoc.isActive();
   }
 
-  setSubmissionState(
+  async setSubmissionState(
     eventId: EventId,
     userId: number,
     newSubmissionState: SubmissionState,
-  ): boolean {
+  ): Promise<boolean> {
     return this.srcDoc.setSubmissionState(eventId, userId, newSubmissionState);
   }
 

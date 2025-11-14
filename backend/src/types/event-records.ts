@@ -1,6 +1,7 @@
 import { TimeFormat } from "@shared/constants/time-formats";
-import { ResultFormatMap } from "./result-format";
+import { BO3BestResults, ResultFormatMap } from "./result-format";
 import { getPureCentis } from "@shared/utils/time-utils";
+import { getMinResult } from "@shared/utils/event-results-utils";
 
 export type EventRecords<T extends TimeFormat> = ResultFormatMap[T];
 
@@ -15,9 +16,7 @@ export function getNumericResultOfRecord(
     case TimeFormat.mo3:
       return (record as EventRecords<TimeFormat.mo3>).mean;
     case TimeFormat.bo3:
-      const time = (record as EventRecords<TimeFormat.bo3>).single;
-      if (typeof time === "number") return time;
-      return getPureCentis(time);
+      return getPureCentis((record as BO3BestResults).single);
     case TimeFormat.multi:
       return (record as EventRecords<TimeFormat.multi>).bestPoints;
     default:

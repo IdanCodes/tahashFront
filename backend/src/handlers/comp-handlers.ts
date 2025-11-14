@@ -24,6 +24,25 @@ import { errorObject } from "@shared/interfaces/error-object";
 import { SubmissionDataDisplay } from "@shared/interfaces/submission-data-display";
 import { getNumericResultOfRecord } from "../types/event-records";
 import { SubmissionState } from "@shared/constants/submission-state";
+import { TimeFormat } from "@shared/constants/time-formats";
+import {
+  getMinResult,
+  getShortestFMCSol,
+  shouldAutoApprove,
+} from "@shared/utils/event-results-utils";
+import { PackedResult } from "@shared/interfaces/packed-result";
+import { ExtraArgsFmc } from "@shared/interfaces/event-extra-args/extra-args-fmc";
+import {
+  AO5BestResults,
+  FMCBestResults,
+  MbldBestResults,
+  MO3BestResults,
+} from "../types/result-format";
+import {
+  calcMultiBldTotalPoints,
+  ExtraArgsMbld,
+} from "@shared/interfaces/event-extra-args/extra-args-mbld";
+import { comparePackedResults, getPureCentis } from "@shared/utils/time-utils";
 
 /**
  * Get all event displays and statuses
@@ -128,20 +147,13 @@ export async function updateTimes(req: UpdateTimesRequest, res: Response) {
   const submissionData = initSubmissionData(userId, eventData, times);
   currComp.submitResults(eventId, userId, submissionData);
 
-  // user's record for this event
-
   const record = userDoc.getEventRecord(eventId);
-  let autoApprove = !record;
-  if (record) {
-    const recordNumericRes = getNumericResultOfRecord(
-      eventData.timeFormat,
-      record,
+  if (record && shouldAutoApprove(eventData, record, submissionData))
+    await currComp.setSubmissionState(
+      eventId,
+      userId,
+      SubmissionState.Approved,
     );
-    autoApprove ||= recordNumericRes < submissionData.finalResult;
-  }
-
-  if (autoApprove)
-    currComp.setSubmissionState(eventId, userId, SubmissionState.Approved);
 
   await currComp.save();
 }

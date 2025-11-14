@@ -322,7 +322,7 @@ const tahashUserSchema = new Schema<
             if (
               newRecords.single.centis > 0 &&
               (comparePackedResults(newRecords.single, oldRecords.single) ===
-                -1 ||
+                1 ||
                 oldRecords.single.centis < 0)
             ) {
               result.single = {
@@ -349,7 +349,7 @@ const tahashUserSchema = new Schema<
             if (
               newRecords.single.centis > 0 &&
               (comparePackedResults(newRecords.single, oldRecords.single) ===
-                -1 ||
+                1 ||
                 oldRecords.single.centis < 0)
             ) {
               result.single = {
