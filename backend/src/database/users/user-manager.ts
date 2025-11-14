@@ -4,6 +4,7 @@ import { EventId } from "@shared/types/comp-event";
 import { UserInfo } from "@shared/interfaces/user-info";
 import { TahashUser, TahashUserDoc } from "../models/tahash-user.model";
 import { UserEventResult } from "../../types/user-event-result";
+import { CompManager } from "../comps/comp-manager";
 
 /**
  * A singleton to manage the "users" collection of the database.
@@ -93,6 +94,8 @@ export class UserManager {
       records: records,
       eventResults: new Map<EventId, UserEventResult>(),
     });
+
+    userDoc.validateCompResults();
 
     if (await userDoc.tryUpdateWcaData()) await userDoc.save();
     else if (saveIfCreated) await userDoc.save();

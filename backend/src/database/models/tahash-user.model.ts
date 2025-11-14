@@ -24,6 +24,7 @@ import {
   MbldBestResults,
   MO3BestResults,
 } from "../../types/result-format";
+import { CompManager } from "../comps/comp-manager";
 
 const userInfoSchema = new mongoose.Schema(
   {
@@ -63,7 +64,7 @@ export interface ITahashUser {
   /**
    * Comp number of the last comp the user competed in.
    */
-  readonly lastComp: number;
+  lastComp: number;
 
   /* array of the user's records */
   readonly records: Map<EventId, EventRecords<TimeFormat>> /*
@@ -138,6 +139,11 @@ export interface TahashUserMethods {
    * @param newRecords The new records to use
    */
   updateRecords(newRecords: Map<EventId, EventRecords<TimeFormat>>): void;
+
+  /**
+   * If the user hasn't submitted in the current comp, update their lastComp value and clear their saved results.
+   */
+  validateCompResults(): void;
 }
 
 export interface TahashUserVirtuals {
@@ -178,7 +184,6 @@ const tahashUserSchema = new Schema<
     },
     lastComp: {
       type: Number,
-      readonly: true,
       required: true,
     },
     records: {
@@ -358,6 +363,14 @@ const tahashUserSchema = new Schema<
 
           return result;
         }
+      },
+
+      validateCompResults(): void {
+        const newCompNum = CompManager.getInstance().getActiveCompNum();
+        if (this.lastComp === newCompNum) return;
+
+        this.lastComp = newCompNum;
+        this.eventResults.clear();
       },
     },
     statics: {

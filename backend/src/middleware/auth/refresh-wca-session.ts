@@ -6,6 +6,7 @@ import {
 import { isErrorObject } from "@shared/interfaces/error-object";
 import { errorResponse } from "@shared/types/api-response";
 import { updateAndSaveSession } from "../../utils/session-helpers";
+import { refreshAdminCookie } from "../../utils/admin-helpers";
 
 /**
  * Middleware to refresh an expired WCA session

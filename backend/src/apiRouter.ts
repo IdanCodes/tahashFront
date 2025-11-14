@@ -20,6 +20,8 @@ import {
   userEventDataSchemas,
 } from "./schemas/comp-schemas";
 import { requireAdmin } from "./middleware/require-admin";
+import { CompManager } from "./database/comps/comp-manager";
+import { createCompSrc } from "./database/models/tahash-comp.model";
 
 const router = Router();
 
@@ -105,6 +107,18 @@ router.post(
   validate(updateSubmissionStateSchemas),
   compHandlers.updateSubmissionState,
 );
+
+router.get("/new", requireAuth, requireAdmin, async (req, res) => {
+  await CompManager.getInstance().validateActiveComp(
+    createCompSrc(CompManager.getInstance().getActiveCompNum() + 1, []),
+    true,
+  );
+  res.send("ok");
+});
+
+router.get("/curr", (req: Request, res: Response) => {
+  res.json(CompManager.getInstance().getActiveComp());
+});
 
 /**
  * GET /getCompEvents?comp-number=X

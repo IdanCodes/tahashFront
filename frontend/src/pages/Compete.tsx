@@ -151,16 +151,12 @@ function ScrambleAndImage({
           currSize.h == window.innerHeight
         ) {
           setLoading(true);
-          resetFontBounds();
+          setTimeout(resetFontBounds, 500);
         }
       }, 150);
     }
 
     window.addEventListener("resize", resetOnFinishResize);
-
-    return () => {
-      window.removeEventListener("resize", resetOnFinishResize);
-    };
   }, []);
 
   useEffect(() => {
@@ -737,8 +733,7 @@ function Compete() {
       </div>
       <div
         className={clsx(
-          "transition-opacity",
-          loadingScrTxt ? "opacity-0" : "opacity-100",
+          `transition-opacity ${loadingScrTxt ? "opacity-0" : "opacity-100"}`,
         )}
       >
         {/* Result String */}
