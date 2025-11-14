@@ -11,10 +11,11 @@ export const RoutePath = {
         Error: "/error",
         WcaAuthCallback: "/wca-auth-callback",
         CompeteEvent: "/compete/:eventId",
+        AdminPanel: "/admin-panel",
+        AdminPanelEvent: "/admin-panel/:eventId",
 
         RedirectToAuth: "/redirect-to-auth",
         AuthCallback: "/auth-callback",
-        AdminDashboard: "/admin-dashboard",
         Home: "/home",
     },
 
@@ -23,15 +24,16 @@ export const RoutePath = {
         AuthWcaUrl: "/auth-wca-url",
         UserInfo: "/user-info",
         Logout: "/logout",
-        GetCompEvents: "/comp-events",
+        CompEventsDisplays: "/comp-events-displays",
         GetActiveCompEvents: "/active-comp-events",
         EventsDisplayAndStatus: "/comp-display-status",
         UserEventData: "/user-event-data",
+        EventDisplayInfo: "/eventDisplayInfo",
 
         RetrieveTimes: "/retrieve-times",
         EventStatuses: "/event-statuses",
         IsAdmin: "/is-admin",
-        GetEventSubmissions: "/get-event-submissions",
+        EventSubmissions: "/get-event-submissions",
         WCAUserData: "/wca-user.ts-data",
         AuthenticateWithCode: "/auth-with-code",
         AuthenticateRefreshToken: "/auth-refresh-token",
@@ -40,9 +42,9 @@ export const RoutePath = {
     // post requests
     Post: {
         WcaCodeExchange: "/wca-code-exchange",
-
         UpdateTimes: "/update-times",
-        UpdateHostname: "/update-hostname",
         UpdateSubmissionState: "/update-submission-state",
+
+        UpdateHostname: "/update-hostname",
     },
 } as const;

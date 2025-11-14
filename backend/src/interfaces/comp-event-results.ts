@@ -1,4 +1,4 @@
-import { SubmissionData } from "./submission-data";
+import { SubmissionData } from "@shared/interfaces/submission-data";
 
 /**
  * Scrambles and submissions of an event in a Tahash comp.

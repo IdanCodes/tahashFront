@@ -22,11 +22,13 @@ export const requireAuth = (
 ) => {
   if (isLoggedIn(req)) return next();
   logoutUser(req, res, () => {
-    res.json(
-      new ApiResponse(
-        ResponseCode.Error,
-        "Authentication is required for this request.",
-      ),
-    );
+    res
+      .status(401)
+      .json(
+        new ApiResponse(
+          ResponseCode.Error,
+          "Authentication is required for this request.",
+        ),
+      );
   });
 };

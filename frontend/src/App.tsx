@@ -17,6 +17,7 @@ import { RoutePath } from "@shared/constants/route-path";
 import RequireAuth from "./components/RequireAuth";
 import Compete from "./pages/Compete";
 import { cancelPendingRequests } from "./utils/API/apiUtils";
+import AdminPanel from "./pages/AdminPanel";
 
 function AnimatedRoutes(): JSX.Element {
   const location = useLocation();
@@ -88,6 +89,26 @@ function AnimatedRoutes(): JSX.Element {
             <RequireAuth>
               <PageTransition>
                 <Compete />
+              </PageTransition>
+            </RequireAuth>
+          }
+        />
+        <Route
+          path={RoutePath.Page.AdminPanel}
+          element={
+            <RequireAuth>
+              <PageTransition>
+                <AdminPanel />
+              </PageTransition>
+            </RequireAuth>
+          }
+        />
+        <Route
+          path={RoutePath.Page.AdminPanelEvent}
+          element={
+            <RequireAuth>
+              <PageTransition>
+                <AdminPanel />
               </PageTransition>
             </RequireAuth>
           }

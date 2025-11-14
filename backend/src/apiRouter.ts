@@ -1,4 +1,4 @@
-import { NextFunction, Request, Response, Router } from "express";
+import { Request, Response, Router } from "express";
 import { ResponseCode } from "@shared/types/response-code";
 import { ApiResponse } from "@shared/types/api-response";
 import { TahashUserSession } from "./interfaces/tahash-user-session";
@@ -13,9 +13,13 @@ import { requireAuth } from "./middleware/auth/require-auth";
 import { userHandlers } from "./handlers/user-handlers";
 import { compHandlers } from "./handlers/comp-handlers";
 import {
+  eventDisplayInfoSchemas,
+  eventSubmissionsSchemas,
+  updateSubmissionStateSchemas,
   updateTimesSchemas,
   userEventDataSchemas,
 } from "./schemas/comp-schemas";
+import { requireAdmin } from "./middleware/require-admin";
 
 const router = Router();
 
@@ -58,6 +62,19 @@ router.get(
 );
 
 router.get(
+  RoutePath.Get.CompEventsDisplays,
+  requireAuth,
+  compHandlers.compEventsDisplays,
+);
+
+router.get(
+  RoutePath.Get.EventDisplayInfo,
+  requireAuth,
+  validate(eventDisplayInfoSchemas),
+  compHandlers.eventDisplayInfo,
+);
+
+router.get(
   RoutePath.Get.UserEventData,
   requireAuth,
   validate(userEventDataSchemas),
@@ -69,6 +86,24 @@ router.post(
   requireAuth,
   validate(updateTimesSchemas),
   compHandlers.updateTimes,
+);
+
+// admin
+
+router.get(
+  RoutePath.Get.EventSubmissions,
+  requireAuth,
+  requireAdmin,
+  validate(eventSubmissionsSchemas),
+  compHandlers.eventSubmissions,
+);
+
+router.post(
+  RoutePath.Post.UpdateSubmissionState,
+  requireAuth,
+  requireAdmin,
+  validate(updateSubmissionStateSchemas),
+  compHandlers.updateSubmissionState,
 );
 
 /**

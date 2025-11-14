@@ -26,23 +26,40 @@ function Header(): JSX.Element {
           <li>
             <NavbarButton to="/" text="Home" />
           </li>
-          {userInfo.isLoggedIn ? (
-            <>
-              <li>
-                <NavbarButton to="/profile" text="Profile" />
-              </li>
-              <li>
-                <NavbarButton to="/scrambles" text="Scrambles" />
-              </li>
-            </>
-          ) : (
-            <li>
-              <NavbarButton to="/login" text="Login" />
-            </li>
-          )}
+          {userInfo.isLoggedIn ? <LoggedInLinks /> : <LoggedOutLinks />}
+          {userInfo.isAdmin ? <AdminLinks /> : <></>}
         </ul>
       </nav>
     </div>
+  );
+}
+
+function LoggedInLinks() {
+  return (
+    <>
+      <li>
+        <NavbarButton to="/profile" text="Profile" />
+      </li>
+      <li>
+        <NavbarButton to="/scrambles" text="Scrambles" />
+      </li>
+    </>
+  );
+}
+
+function LoggedOutLinks() {
+  return (
+    <li>
+      <NavbarButton to="/login" text="Login" />
+    </li>
+  );
+}
+
+function AdminLinks() {
+  return (
+    <li>
+      <NavbarButton to={"/admin-panel"} text={"Admin Panel"} />
+    </li>
   );
 }
 

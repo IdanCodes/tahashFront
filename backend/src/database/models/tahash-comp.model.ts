@@ -1,8 +1,8 @@
 import mongoose, { Model, Schema } from "mongoose";
 import { CompEvent, EventId, WCAEvents } from "@shared/types/comp-event";
 import { CompEventResults } from "../../interfaces/comp-event-results";
-import { SubmissionData } from "../../interfaces/submission-data";
-import { SubmissionState } from "../comps/submission-state";
+import { SubmissionData } from "@shared/interfaces/submission-data";
+import { SubmissionState } from "@shared/constants/submission-state";
 import { packedResultSchema } from "./packed-result.schema";
 
 const compEventResultsSchema = new Schema<CompEventResults>(
@@ -143,13 +143,26 @@ export interface TahashCompMethods {
    * @param userId The submitter's user id.
    * @param results The results to submit.
    * @return Whether submitting was successful. True unless:
-   * - The event was not found.
+   * - The event doesn't exist in this comp.
    * - The user has already submitted results for this event.
    */
   submitResults(
     eventId: EventId,
     userId: number,
     results: SubmissionData,
+  ): boolean;
+
+  /**
+   * Update the submission state for a user's submission.
+   * @param eventId The submission's event.
+   * @param userId The submitter's user id.
+   * @param newSubmissionState The new {@link SubmissionState} for the submission.
+   * @return Whether submitting was successful (false if the eventId/userId were not found).
+   */
+  setSubmissionState(
+    eventId: EventId,
+    userId: number,
+    newSubmissionState: SubmissionState,
   ): boolean;
 }
 
@@ -235,9 +248,10 @@ export const TahashCompSchema = new Schema<
         userId: number,
         newSubmissionState: SubmissionState,
       ): boolean {
-        const results = this.data[eventId];
-        if (!results) return false; // event doesn't exist in comp
+        const compEventPair = this.data.find((x) => x.eventId === eventId);
+        if (!compEventPair) return false; // event doesn't exist in comp
 
+        const results = compEventPair.result;
         const submissionIndex = results.submissions.findIndex(
           (sub: SubmissionData) => sub.userId === userId,
         );

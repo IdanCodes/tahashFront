@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { redirectToError } from "../utils/errorUtils";
 import { errorObject } from "@shared/interfaces/error-object";
 import { sendGetRequest, sendPostRequest } from "../utils/API/apiUtils";
-import { useLoading } from "../context/LoadingContext";
+import { useLoading, useLoadingEraser } from "../context/LoadingContext";
 import { HttpHeaders } from "@shared/constants/http-headers";
 import { useUserInfo } from "../context/UserContext";
 import { RoutePath } from "@shared/constants/route-path";
@@ -27,6 +27,8 @@ import { Penalties, Penalty } from "@shared/constants/penalties";
 import LoadingSpinner from "../components/LoadingSpinner";
 import { generateResultStr } from "@shared/utils/event-results-utils";
 import { getTimeFormatName, TimeFormat } from "@shared/constants/time-formats";
+import { motion } from "motion/react";
+import { PageTransitionProps } from "../components/PageTransition";
 
 const hideImageEvents = Object.freeze(["333bf", "444bf", "555bf", "333mbf"]);
 
@@ -46,11 +48,11 @@ function ScrambleMenuButton({
   return (
     <button
       className={clsx(
-        `group relative my-auto flex overflow-hidden rounded-2xl p-2 text-2xl shadow-xl transition-[flex] duration-[400ms] select-none`,
+        `my-auto flex w-full rounded-xl p-2 text-2xl transition-all duration-200 ease-in`,
         isAccessible && `cursor-pointer`,
         !isAccessible && "opacity-60",
-        isActiveScramble && "flex-[4] origin-top-left bg-slate-500/90",
-        !isActiveScramble && "flex-[3] bg-slate-400 hover:bg-slate-500/70",
+        isActiveScramble && "bg-gray-500",
+        !isActiveScramble && "bg-gray-400 hover:bg-gray-500/80",
       )}
       onClick={() => loadScramble()}
       disabled={!isAccessible}
@@ -93,9 +95,11 @@ function ScramblesMenu({
 function ScrambleAndImage({
   scrText,
   scrImg,
+  setLoading,
 }: {
   scrText: string;
   scrImg: string | undefined;
+  setLoading: (isLoading: boolean) => void;
 }) {
   const fontSizeLow = 10;
   const fontSizeHigh = 40;
@@ -117,28 +121,40 @@ function ScrambleAndImage({
   }, [textElRef.current, fontProps]);
 
   const resetFontBounds = () => {
-    setFontProps((fs) => ({
-      size: fs.size,
-      l: fontSizeLow,
-      h: fontSizeHigh,
-      k: 0,
-    }));
+    setTimeout(
+      () =>
+        setFontProps((fs) => ({
+          size: fs.size,
+          l: fontSizeLow,
+          h: fontSizeHigh,
+          k: 0,
+        })),
+      50,
+    );
   };
 
   useEffect(() => {
     if (imageHeight == 0 || textHeight == 0) return;
 
-    const heightMinDiff = 10;
     const diff = Math.abs(imageHeight - textHeight);
-    if (diff >= heightMinDiff) optimizeFontSize(imageHeight, textHeight).then();
+    const heightMinDiff = 10;
+    const isBalanced = diff < heightMinDiff;
+
+    setLoading(!isBalanced);
+    if (!isBalanced) optimizeFontSize(imageHeight, textHeight).then();
   }, [imageHeight, textHeight, fontProps, scrImg]);
 
   useEffect(() => {
     function resetOnFinishResize() {
       const currSize = { w: window.innerWidth, h: window.innerHeight };
       setTimeout(() => {
-        if (currSize.w == window.innerWidth && currSize.h == window.innerHeight)
+        if (
+          currSize.w == window.innerWidth &&
+          currSize.h == window.innerHeight
+        ) {
+          setLoading(true);
           resetFontBounds();
+        }
       }, 150);
     }
 
@@ -204,8 +220,10 @@ function ScrambleAndImage({
     // 2. Optimize font size
     const boundsMinDiff = 0.2;
     const maxIter = 20;
-    if (fontProps.h - fontProps.l < boundsMinDiff || fontProps.k >= maxIter)
+    if (fontProps.h - fontProps.l < boundsMinDiff || fontProps.k >= maxIter) {
+      setLoading(false);
       return;
+    }
 
     await new Promise((res) => requestAnimationFrame(res));
     setFontProps((fs) => {
@@ -232,7 +250,7 @@ function ScrambleAndImage({
     <div className="flex flex-row justify-between gap-[5%] px-5 py-4">
       {/* Scramble */}
       <div
-        className="my-auto h-fit w-full text-center whitespace-pre-wrap"
+        className={clsx("my-auto h-fit w-full text-center whitespace-pre-wrap")}
         ref={textElRef}
       >
         <span
@@ -286,11 +304,11 @@ function TimeInputField({
   }, [activeScramble]);
 
   return (
-    <div className="flex items-center justify-center">
+    <div className="place-items-center content-center justify-center">
       <input
         ref={inputRef}
         type="text"
-        className="w-[60%] rounded-xl bg-white py-2 text-center text-2xl shadow-xl transition-all duration-300 hover:w-[65%] focus:w-[85%] focus:outline-2 focus:outline-slate-400/70"
+        className="rounded-xl bg-white py-2 text-center text-2xl focus:outline-2 focus:outline-black"
         maxLength={12}
         onChange={onInputChange}
         value={currentInput}
@@ -313,27 +331,20 @@ function PenaltySelector({
   timeIsValid: boolean;
 }) {
   const penaltyBtnEnabledColors = {
-    normal: "bg-red-600/80",
-    hover: "bg-red-500/90",
-    click: "bg-red-600/90",
-  };
-
-  const plusTwoEnabledColors = {
-    normal: "bg-yellow-300/80",
-    hover: "bg-yellow-500/90",
-    click: "bg-yellow-600/90",
+    normal: "bg-purple-500",
+    hover: "bg-purple-500/90",
+    click: "bg-purple-600/90",
   };
 
   return (
-    <div className="my-2 flex w-[70%] place-items-center gap-[5%]">
+    <div className="m-auto my-2 flex place-items-center gap-[10%]">
       <PrimaryButton
         text="+2"
         buttonSize={ButtonSize.Small}
-        className="flex-1"
         onClick={penalties.togglePlusTwo}
         colors={
           penalties.currPenalty == Penalties.Plus2
-            ? plusTwoEnabledColors
+            ? penaltyBtnEnabledColors
             : undefined
         }
         disabled={penalties.currPenalty == Penalties.DNF || !timeIsValid}
@@ -341,7 +352,6 @@ function PenaltySelector({
       <PrimaryButton
         text="DNF"
         buttonSize={ButtonSize.Small}
-        className="flex-1"
         colors={
           penalties.currPenalty == Penalties.DNF
             ? penaltyBtnEnabledColors
@@ -367,22 +377,16 @@ function PreviewAndSubmitBtn({
   timeIsValid: boolean;
   previewStr: string;
 }) {
-  const isDisabled = useMemo<boolean>(() => !timeIsValid, [timeIsValid]);
-
   return (
     <div className="flex w-full flex-col">
       <p className="text-center text-3xl">{previewStr}</p>
       {!finishedEvent && (
         <div className="m-auto w-fit">
           <PrimaryButton
-            disabled={isDisabled}
+            disabled={!timeIsValid}
             text={isLastScramble ? "Submit" : "Next"}
             buttonSize={ButtonSize.Small}
             onClick={onSubmitTime}
-            className={clsx(
-              "relative overflow-hidden bg-white text-black transition-colors duration-400 ease-in-out before:absolute before:top-0 before:left-0 before:z-[-1] before:h-full before:w-0 before:bg-green-500 before:transition-all before:duration-300",
-              !isDisabled && "hover:text-white hover:before:w-full",
-            )}
           />
         </div>
       )}
@@ -419,7 +423,7 @@ function SubmitSection({
     <div className="mx-auto flex w-6/10 flex-row justify-between gap-[15%] p-2">
       {/*Time Input & Penalty*/}
       {!finishedEvent && (
-        <div className="flex w-full flex-col items-center">
+        <div className="flex w-full flex-col">
           {/*Time Input*/}
           <TimeInputField
             onInputChange={onInputChange}
@@ -480,6 +484,7 @@ function Compete() {
   const numScrambles = useRef<number>(0);
   const finishedEvent = useRef<boolean>(false);
   const attemptResultStr = useRef<string | undefined>(undefined);
+  const [loadingScrTxt, setLoadingScrTxt] = useState<boolean>(true);
 
   const params = useParams();
   const { addLoading, removeLoading } = useLoading("Compete");
@@ -488,7 +493,6 @@ function Compete() {
 
   async function initCompeteData(competeData: UserCompeteData) {
     hideImage.current = hideImageEvents.includes(competeData.eventData.eventId);
-    console.log(hideImage.current);
     numScrambles.current = competeData.scrambles.length;
     finishedEvent.current = competeData.results.finished;
 
@@ -499,6 +503,7 @@ function Compete() {
       );
     }
 
+    console.log(competeData.eventData);
     setCompeteData(competeData);
 
     const times = competeData.results.times;
@@ -520,7 +525,7 @@ function Compete() {
     if (!hideImage.current) {
       const scrImages = await Promise.all(competeData.scrambles.map(scrToSvg));
       setScrambleImages(scrImages);
-    }
+    } else setLoadingScrTxt(false);
 
     /**
      * Generate an SVG element from a given scramble
@@ -550,18 +555,6 @@ function Compete() {
 
       return parent.innerHTML;
     }
-
-    async function getImageHeight() {
-      const imgStr = (await csTimer.getImage(
-        "",
-        competeData.eventData.scrType,
-      )) as string;
-      const parent = document.createElement("div");
-      parent.innerHTML = imgStr;
-      const el = parent.querySelector("svg")!;
-
-      return el.getAttribute("height") ?? "100";
-    }
   }
 
   useEffect(() => {
@@ -582,12 +575,6 @@ function Compete() {
       initCompeteData(res.data).then(removeLoading);
     });
   }, []);
-
-  useEffect(() => {
-    if (hideImage.current) return;
-    // TODO: remove
-    // console.log(document.getElementsByTagName("svg"));
-  }, [scrambleImages, activeScramble]);
 
   if (!competeData) return <LoadingSpinner />;
 
@@ -732,12 +719,17 @@ function Compete() {
   return (
     <>
       <CubingIconsSheet />
-      <div>
-        {/*Event Title*/}
-        <p className="p-4 text-center text-4xl font-bold text-blue-950">
-          {competeData.eventData.eventTitle}
-        </p>
-
+      {/*Event Title*/}
+      <div className="flex justify-center gap-2 text-center text-4xl text-blue-950">
+        <p className="font-bold">{competeData.eventData.eventTitle} </p>
+        <span className={`cubing-icon ${competeData.eventData.iconName}`} />
+      </div>
+      <div
+        className={clsx(
+          "transition-opacity",
+          loadingScrTxt ? "opacity-0" : "opacity-100",
+        )}
+      >
         {/* Result String */}
         {attemptResultStr.current && (
           <AttemptResultLabel
@@ -755,17 +747,18 @@ function Compete() {
           isScrambleAccessible={isScrambleAccessible}
         />
 
-        <div className="mx-auto w-8/10 rounded-2xl border-2 border-transparent bg-gradient-to-r from-slate-400/70 to-slate-400/80 shadow-xl">
+        <div className="mx-auto w-8/10 rounded-2xl border-5 border-black bg-gray-400">
           {/*Scramble & Image*/}
           <ScrambleAndImage
             scrText={scrambles[activeScramble]}
             scrImg={
               hideImage.current ? undefined : scrambleImages[activeScramble]
             }
+            setLoading={hideImage.current ? (_) => {} : setLoadingScrTxt}
           />
 
           {/*scamble-submit divider*/}
-          <div className="my-2 w-full border-2 border-slate-500/20" />
+          <div className="my-2 w-full border-2 border-black" />
 
           {/*Submit Section*/}
           {isUploading ? (

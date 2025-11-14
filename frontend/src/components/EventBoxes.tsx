@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { EventDisplayAndStatus } from "@shared/types/event-display-and-status";
 import clsx from "clsx";
 import { motion } from "motion/react";
-import { useNavigate } from "react-router-dom";
 import { CubingIconsSheet } from "./CubingIconsSheet";
 import { EventSubmissionStatus } from "@shared/constants/event-submission-status";
 
@@ -87,9 +86,14 @@ function getBoxColors(status: EventSubmissionStatus): {
   }
 }
 
-function EventBox({ das }: { das: EventDisplayAndStatus }) {
+function EventBox({
+  das,
+  handleClickEvent,
+}: {
+  das: EventDisplayAndStatus;
+  handleClickEvent: (eventId: string) => void;
+}) {
   const [hovered, setHovered] = useState<boolean>(false);
-  const navigate = useNavigate();
   const status = das.status;
   let boxColors = getBoxColors(status);
 
@@ -124,7 +128,7 @@ function EventBox({ das }: { das: EventDisplayAndStatus }) {
         }}
         whileHover="hover"
         whileTap="click"
-        onClick={() => navigate(`/compete/${das.info.eventId}`)}
+        onClick={() => handleClickEvent(das.info.eventId)}
       >
         <EventBoxIcon iconName={das.info.iconName} />
         <EventBoxTitle eventTitle={das.info.eventTitle} hovered={hovered} />
@@ -133,13 +137,23 @@ function EventBox({ das }: { das: EventDisplayAndStatus }) {
   );
 }
 
-function EventBoxes({ events }: { events: EventDisplayAndStatus[] }) {
+function EventBoxes({
+  events,
+  handleClickEvent = undefined,
+}: {
+  events: EventDisplayAndStatus[];
+  handleClickEvent: ((eventId: string) => void) | undefined;
+}) {
   return (
     <>
       <CubingIconsSheet />
       <div className="mx-auto mt-2 mb-2 flex w-8/10 flex-wrap place-content-center gap-x-9.5 gap-y-11 border-3 border-black pt-10 pb-4">
         {events.map((das, index) => (
-          <EventBox key={index} das={das} />
+          <EventBox
+            key={index}
+            das={das}
+            handleClickEvent={handleClickEvent ?? ((_) => {})}
+          />
         ))}
       </div>
     </>

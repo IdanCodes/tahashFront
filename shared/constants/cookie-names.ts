@@ -1,3 +1,4 @@
 export const CookieNames = {
-  isLoggedIn: "loggedIn"
+  isLoggedIn: "loggedIn",
+    isAdmin: "isAdmin"
 };
