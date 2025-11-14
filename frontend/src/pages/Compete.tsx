@@ -46,7 +46,7 @@ function ScrambleMenuButton({
   return (
     <button
       className={clsx(
-        `group relative my-auto flex overflow-hidden rounded-2xl p-2 text-2xl shadow-xl transition-[flex] duration-[400ms] select-none `,
+        `group relative my-auto flex overflow-hidden rounded-2xl p-2 text-2xl shadow-xl transition-[flex] duration-[400ms] select-none`,
         isAccessible && `cursor-pointer`,
         !isAccessible && "opacity-60",
         isActiveScramble && "flex-[4] origin-top-left bg-slate-500/90",
@@ -290,7 +290,7 @@ function TimeInputField({
       <input
         ref={inputRef}
         type="text"
-        className="w-[60%] shadow-xl rounded-xl bg-white py-2 text-center text-2xl transition-all duration-300 hover:w-[81%] focus:w-[81%] focus:outline-2 focus:outline-slate-400/70"
+        className="w-[60%] rounded-xl bg-white py-2 text-center text-2xl shadow-xl transition-all duration-300 hover:w-[65%] focus:w-[85%] focus:outline-2 focus:outline-slate-400/70"
         maxLength={12}
         onChange={onInputChange}
         value={currentInput}
@@ -367,23 +367,27 @@ function PreviewAndSubmitBtn({
   timeIsValid: boolean;
   previewStr: string;
 }) {
-return (
-  <div className="flex w-full flex-col">
-    <p className="text-center text-3xl">{previewStr}</p>
-    {!finishedEvent && (
-      <div className="m-auto w-fit">
-        <PrimaryButton
-          disabled={!timeIsValid}
-          text={isLastScramble ? "Submit" : "Next"}
-          buttonSize={ButtonSize.Small}
-          onClick={onSubmitTime}
-          className="relative overflow-hidden bg-white text-black transition-colors duration-500 ease-in-out before:absolute before:top-0 before:left-0 before:z-[-1] before:h-full before:w-0 before:bg-green-500 before:transition-all before:duration-300 hover:text-white hover:before:w-full"
-        />
-      </div>
-    )}
-  </div>
-);
+  const isDisabled = useMemo<boolean>(() => !timeIsValid, [timeIsValid]);
 
+  return (
+    <div className="flex w-full flex-col">
+      <p className="text-center text-3xl">{previewStr}</p>
+      {!finishedEvent && (
+        <div className="m-auto w-fit">
+          <PrimaryButton
+            disabled={isDisabled}
+            text={isLastScramble ? "Submit" : "Next"}
+            buttonSize={ButtonSize.Small}
+            onClick={onSubmitTime}
+            className={clsx(
+              "relative overflow-hidden bg-white text-black transition-colors duration-400 ease-in-out before:absolute before:top-0 before:left-0 before:z-[-1] before:h-full before:w-0 before:bg-green-500 before:transition-all before:duration-300",
+              !isDisabled && "hover:text-white hover:before:w-full",
+            )}
+          />
+        </div>
+      )}
+    </div>
+  );
 }
 
 function SubmitSection({
@@ -751,7 +755,7 @@ function Compete() {
           isScrambleAccessible={isScrambleAccessible}
         />
 
-        <div className="mx-auto shadow-xl w-8/10 rounded-2xl border-2 border-transparent bg-gradient-to-r from-slate-400/70 to-slate-400/80">
+        <div className="mx-auto w-8/10 rounded-2xl border-2 border-transparent bg-gradient-to-r from-slate-400/70 to-slate-400/80 shadow-xl">
           {/*Scramble & Image*/}
           <ScrambleAndImage
             scrText={scrambles[activeScramble]}
