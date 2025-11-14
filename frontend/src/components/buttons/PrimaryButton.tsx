@@ -28,10 +28,9 @@ export default function PrimaryButton({
     <>
       <button
         className={clsx(
-          `box-border flex scale-95 items-center justify-center rounded-2xl px-5 py-3 shadow-xl transition-transform duration-[200ms] [transition-timing-function:cubic-bezier(0.68,-0.55,0.3,2.5)] select-none ${colors.normal}`,
+          `box-border flex scale-95 items-center justify-center rounded-2xl px-5 py-3 shadow-xl transition-transform duration-[200ms] [transition-timing-function:cubic-bezier(0.68,-0.55,0.3,2.5)] select-none`,
           disabled && "cursor-not-allowed opacity-70",
-          !disabled &&
-            `cursor-pointer hover:scale-100 hover:${colors.hover} active:${colors.click} hover:scale-[1.03]`,
+          !disabled && `cursor-pointer hover:scale-100 hover:scale-[1.03]`,
           className,
         )}
         type={btnType}

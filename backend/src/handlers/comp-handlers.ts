@@ -196,11 +196,8 @@ async function updateSubmissionState(
   req: UpdateSubmissionStateRequest,
   res: Response,
 ) {
-  const { compNumber, eventId, userId, submissionState } =
+  const { eventId, userId, submissionState } =
     req.body as UpdateSubmissionStateBodyInput;
-
-  if (!CompManager.getInstance().compExists(compNumber))
-    return res.json(errorResponse(`Invalid comp number ${compNumber}`));
 
   if (!getEventById(eventId))
     return res.json(errorResponse(`Invalid event id "${eventId}"`));
@@ -218,6 +215,7 @@ async function updateSubmissionState(
 
   const activeComp = CompManager.getInstance().getActiveComp();
   activeComp.setSubmissionState(eventId, userId, submissionState);
+  await activeComp.save();
   res.json(new ApiResponse(ResponseCode.Success, "Updated successfully"));
 }
 

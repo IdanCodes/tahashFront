@@ -15,7 +15,6 @@ const packedResultSchema = z.object({
   extraArgs: z.object().optional(),
   centis: z.int().min(-1),
 });
-const compNumberSchema = z.coerce.number().nonnegative().int();
 const submissionStateSchema = z.enum(SubmissionState);
 
 // region Get.UserEventData
@@ -94,7 +93,6 @@ export type EventDisplayInfoRequest = ValidatedRequest<
 // region Post.UpdateSubmissionState
 
 const updateSubmissionStateBodySchema = z.object({
-  compNumber: compNumberSchema,
   eventId: eventIdSchema,
   userId: userIdSchema,
   submissionState: submissionStateSchema,

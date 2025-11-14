@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { sendGetRequest } from "../utils/API/apiUtils";
+import { sendGetRequest, sendPostRequest } from "../utils/API/apiUtils";
 import { RoutePath } from "@shared/constants/route-path";
 import { redirectToError } from "../utils/errorUtils";
 import EventBoxes from "../components/EventBoxes";
@@ -135,16 +135,21 @@ function EventPanel({ eventId }: { eventId: string }) {
   return (
     <>
       {displayInfo ? (
-        <p className="p-4 text-center text-5xl font-bold">
-          {displayInfo.eventTitle}
-        </p>
+        <>
+          <p className="p-4 text-center text-5xl font-bold">
+            {displayInfo.eventTitle}
+          </p>
+          {submissions ? (
+            <EventSubmissionsPanel
+              submissions={submissions}
+              eventId={displayInfo.eventId}
+            />
+          ) : (
+            <LoadingSpinner />
+          )}
+        </>
       ) : (
         <></>
-      )}
-      {submissions ? (
-        <EventSubmissionsPanel submissions={submissions} />
-      ) : (
-        <LoadingSpinner />
       )}
     </>
   );
@@ -152,9 +157,12 @@ function EventPanel({ eventId }: { eventId: string }) {
 
 function EventSubmissionsPanel({
   submissions,
+  eventId,
 }: {
   submissions: SubmissionDataDisplay[];
+  eventId: string;
 }) {
+  const [disableButtons, setDisableButtons] = useState<boolean>(false);
   const submissionStateColor = (state: SubmissionState): string => {
     return state === SubmissionState.Pending
       ? "rgb(255,255,0)"
@@ -162,6 +170,23 @@ function EventSubmissionsPanel({
         ? "rgb(0, 255, 0)"
         : "rgb(255, 0, 0)";
   };
+
+  async function updateSubmissionState(
+    userId: number,
+    submissionState: SubmissionState,
+  ) {
+    setDisableButtons(true);
+    await sendPostRequest(RoutePath.Post.UpdateSubmissionState, {
+      eventId,
+      userId,
+      submissionState,
+    });
+    window.location.reload();
+  }
+
+  function acceptResult(userId: number) {}
+
+  function rejectResult(userId: number) {}
 
   return (
     <>
@@ -199,24 +224,32 @@ function EventSubmissionsPanel({
                 ))}
               </div>
               <span>Result: {submission.resultStr}</span>
-              <div className="flex flex-row justify-between px-2">
-                <PrimaryButton
-                  text="Accept"
-                  colors={{
-                    normal: "rgb(46,217,46)",
-                    hover: "rgb(10,230,10)",
-                    click: "rgb(10,210,10)",
-                  }}
-                />
-                <PrimaryButton
-                  text="Reject"
-                  colors={{
-                    normal: "rgb(217,9,9)",
-                    hover: "rgb(230,30,30)",
-                    click: "rgb(210,30,30)",
-                  }}
-                />
-              </div>
+              {submission.submissionState === SubmissionState.Pending && (
+                <div className="flex flex-row justify-between px-2">
+                  <PrimaryButton
+                    text="Accept"
+                    className="bg-[rgb(46,217,46)] hover:bg-[rgb(10,230,10)] active:bg-[rgb(10,210,10)]"
+                    onClick={() =>
+                      updateSubmissionState(
+                        submission.submitterData.id,
+                        SubmissionState.Approved,
+                      )
+                    }
+                    disabled={disableButtons}
+                  />
+                  <PrimaryButton
+                    text="Reject"
+                    className="bg-[rgb(217,9,9)] hover:bg-[rgb(230,30,30)] active:bg-[rgb(210,30,30)]"
+                    onClick={() =>
+                      updateSubmissionState(
+                        submission.submitterData.id,
+                        SubmissionState.Rejected,
+                      )
+                    }
+                    disabled={disableButtons}
+                  />
+                </div>
+              )}
             </div>
           ))}
         </div>

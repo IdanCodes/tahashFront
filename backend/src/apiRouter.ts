@@ -108,6 +108,8 @@ router.post(
   compHandlers.updateSubmissionState,
 );
 
+// -- test endpoints
+
 router.get("/new", requireAuth, requireAdmin, async (req, res) => {
   await CompManager.getInstance().validateActiveComp(
     createCompSrc(CompManager.getInstance().getActiveCompNum() + 1, []),
