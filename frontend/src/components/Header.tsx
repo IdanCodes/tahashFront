@@ -2,7 +2,7 @@ import React, { JSX } from "react";
 import { NavLink } from "react-router-dom";
 import clsx from "clsx";
 import { useUserInfo } from "../context/UserContext";
-import logo from "./assets/ILSpeeddcubinglogo.png";
+import logo from "./assets/ILSpeeddcubinglogo.svg";
 import "./animations.css";
 
 function Header(): JSX.Element {
@@ -16,7 +16,7 @@ function Header(): JSX.Element {
           alt="ILCubers Logo"
           className="w-[65px] transition-transform duration-200 ease-in-out group-hover:scale-110 lg:w-[55px]"
         />
-        <h1 className="inline-block text-[clamp(1.6rem,2.5vw,2.5rem)] tracking-[0.03em] whitespace-nowrap text-blue-100 transition-all duration-200 ease-in-out select-none group-hover:tracking-[0.05em]">
+        <h1 className="group-hover:animate-wave inline-block text-[clamp(1.6rem,2.5vw,2.5rem)] tracking-[0.03em] whitespace-nowrap text-blue-100 transition-all duration-200 ease-in-out select-none group-hover:scale-102">
           ILCubers - Weekly Competition
         </h1>
       </div>

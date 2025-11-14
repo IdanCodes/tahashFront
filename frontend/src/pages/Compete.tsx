@@ -46,11 +46,11 @@ function ScrambleMenuButton({
   return (
     <button
       className={clsx(
-        `my-auto flex w-full rounded-xl p-2 text-2xl transition-all duration-200 ease-in`,
+        `group relative my-auto flex overflow-hidden rounded-2xl p-2 text-2xl shadow-xl transition-[flex] duration-[400ms] select-none `,
         isAccessible && `cursor-pointer`,
         !isAccessible && "opacity-60",
-        isActiveScramble && "bg-gray-500",
-        !isActiveScramble && "bg-gray-400 hover:bg-gray-500/80",
+        isActiveScramble && "flex-[4] origin-top-left bg-slate-500/90",
+        !isActiveScramble && "flex-[3] bg-slate-400 hover:bg-slate-500/70",
       )}
       onClick={() => loadScramble()}
       disabled={!isAccessible}
@@ -286,11 +286,11 @@ function TimeInputField({
   }, [activeScramble]);
 
   return (
-    <div className="place-items-center content-center justify-center">
+    <div className="flex items-center justify-center">
       <input
         ref={inputRef}
         type="text"
-        className="rounded-xl bg-white py-2 text-center text-2xl focus:outline-2 focus:outline-black"
+        className="w-[60%] shadow-xl rounded-xl bg-white py-2 text-center text-2xl transition-all duration-300 hover:w-[81%] focus:w-[81%] focus:outline-2 focus:outline-slate-400/70"
         maxLength={12}
         onChange={onInputChange}
         value={currentInput}
@@ -313,20 +313,27 @@ function PenaltySelector({
   timeIsValid: boolean;
 }) {
   const penaltyBtnEnabledColors = {
-    normal: "bg-purple-500",
-    hover: "bg-purple-500/90",
-    click: "bg-purple-600/90",
+    normal: "bg-red-600/80",
+    hover: "bg-red-500/90",
+    click: "bg-red-600/90",
+  };
+
+  const plusTwoEnabledColors = {
+    normal: "bg-yellow-300/80",
+    hover: "bg-yellow-500/90",
+    click: "bg-yellow-600/90",
   };
 
   return (
-    <div className="m-auto my-2 flex place-items-center gap-[10%]">
+    <div className="my-2 flex w-[70%] place-items-center gap-[5%]">
       <PrimaryButton
         text="+2"
         buttonSize={ButtonSize.Small}
+        className="flex-1"
         onClick={penalties.togglePlusTwo}
         colors={
           penalties.currPenalty == Penalties.Plus2
-            ? penaltyBtnEnabledColors
+            ? plusTwoEnabledColors
             : undefined
         }
         disabled={penalties.currPenalty == Penalties.DNF || !timeIsValid}
@@ -334,6 +341,7 @@ function PenaltySelector({
       <PrimaryButton
         text="DNF"
         buttonSize={ButtonSize.Small}
+        className="flex-1"
         colors={
           penalties.currPenalty == Penalties.DNF
             ? penaltyBtnEnabledColors
@@ -359,21 +367,23 @@ function PreviewAndSubmitBtn({
   timeIsValid: boolean;
   previewStr: string;
 }) {
-  return (
-    <div className="flex w-full flex-col">
-      <p className="text-center text-3xl">{previewStr}</p>
-      {!finishedEvent && (
-        <div className="m-auto w-fit">
-          <PrimaryButton
-            disabled={!timeIsValid}
-            text={isLastScramble ? "Submit" : "Next"}
-            buttonSize={ButtonSize.Small}
-            onClick={onSubmitTime}
-          />
-        </div>
-      )}
-    </div>
-  );
+return (
+  <div className="flex w-full flex-col">
+    <p className="text-center text-3xl">{previewStr}</p>
+    {!finishedEvent && (
+      <div className="m-auto w-fit">
+        <PrimaryButton
+          disabled={!timeIsValid}
+          text={isLastScramble ? "Submit" : "Next"}
+          buttonSize={ButtonSize.Small}
+          onClick={onSubmitTime}
+          className="relative overflow-hidden bg-white text-black transition-colors duration-500 ease-in-out before:absolute before:top-0 before:left-0 before:z-[-1] before:h-full before:w-0 before:bg-green-500 before:transition-all before:duration-300 hover:text-white hover:before:w-full"
+        />
+      </div>
+    )}
+  </div>
+);
+
 }
 
 function SubmitSection({
@@ -405,7 +415,7 @@ function SubmitSection({
     <div className="mx-auto flex w-6/10 flex-row justify-between gap-[15%] p-2">
       {/*Time Input & Penalty*/}
       {!finishedEvent && (
-        <div className="flex w-full flex-col">
+        <div className="flex w-full flex-col items-center">
           {/*Time Input*/}
           <TimeInputField
             onInputChange={onInputChange}
@@ -720,7 +730,7 @@ function Compete() {
       <CubingIconsSheet />
       <div>
         {/*Event Title*/}
-        <p className="text-center text-4xl font-bold text-blue-950">
+        <p className="p-4 text-center text-4xl font-bold text-blue-950">
           {competeData.eventData.eventTitle}
         </p>
 
@@ -741,7 +751,7 @@ function Compete() {
           isScrambleAccessible={isScrambleAccessible}
         />
 
-        <div className="mx-auto w-8/10 rounded-2xl border-5 border-black bg-gray-400">
+        <div className="mx-auto shadow-xl w-8/10 rounded-2xl border-2 border-transparent bg-gradient-to-r from-slate-400/70 to-slate-400/80">
           {/*Scramble & Image*/}
           <ScrambleAndImage
             scrText={scrambles[activeScramble]}
@@ -751,7 +761,7 @@ function Compete() {
           />
 
           {/*scamble-submit divider*/}
-          <div className="my-2 w-full border-2 border-black" />
+          <div className="my-2 w-full border-2 border-slate-500/20" />
 
           {/*Submit Section*/}
           {isUploading ? (
