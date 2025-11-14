@@ -131,13 +131,16 @@ export async function updateTimes(req: UpdateTimesRequest, res: Response) {
   // user's record for this event
 
   const record = userDoc.getEventRecord(eventId);
-  if (!record) return;
+  let autoApprove = !record;
+  if (record) {
+    const recordNumericRes = getNumericResultOfRecord(
+      eventData.timeFormat,
+      record,
+    );
+    autoApprove ||= recordNumericRes < submissionData.finalResult;
+  }
 
-  const recordNumericRes = getNumericResultOfRecord(
-    eventData.timeFormat,
-    record,
-  );
-  if (!record || recordNumericRes < submissionData.finalResult)
+  if (autoApprove)
     currComp.setSubmissionState(eventId, userId, SubmissionState.Approved);
 
   await currComp.save();
