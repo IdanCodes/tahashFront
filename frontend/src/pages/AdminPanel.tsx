@@ -11,6 +11,12 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useUserInfo } from "../context/UserContext";
 import { HttpHeaders } from "@shared/constants/http-headers";
 import { SubmissionDataDisplay } from "@shared/interfaces/submission-data-display";
+import {
+  SubmissionState,
+  submissionStateStr,
+} from "@shared/constants/submission-state";
+import { formatPackedResults } from "@shared/utils/time-utils";
+import PrimaryButton from "../components/buttons/PrimaryButton";
 
 function AdminPanel() {
   const params = useParams();
@@ -149,6 +155,14 @@ function EventSubmissionsPanel({
 }: {
   submissions: SubmissionDataDisplay[];
 }) {
+  const submissionStateColor = (state: SubmissionState): string => {
+    return state === SubmissionState.Pending
+      ? "rgb(255,255,0)"
+      : state === SubmissionState.Approved
+        ? "rgb(0, 255, 0)"
+        : "rgb(255, 0, 0)";
+  };
+
   return (
     <>
       {submissions.length == 0 ? (
@@ -156,9 +170,56 @@ function EventSubmissionsPanel({
           No submissions for this event yet
         </p>
       ) : (
-        <div>
+        <div className="mx-auto mt-2 mb-2 flex w-8/10 flex-wrap place-content-center gap-x-9.5 gap-y-11 pt-10 pb-4">
           {submissions.map((submission, _) => (
-            <div key={submission.submitterData.id}></div>
+            <div
+              key={submission.submitterData.id}
+              className="flex h-fit w-fit flex-col rounded-xl border-3 bg-gray-400 p-4 text-2xl"
+            >
+              <span className="">{submission.submitterData.name}</span>
+              <span className="">{submission.submitterData.wcaId}</span>
+              <span className="">
+                State:{" "}
+                <span
+                  className="font-semibold"
+                  style={{
+                    color: submissionStateColor(submission.submissionState),
+                  }}
+                >
+                  {submissionStateStr[submission.submissionState]}
+                </span>
+              </span>
+              <span>Times:</span>
+              <div className="flex gap-3">
+                {formatPackedResults(submission.times).map((t, i) => (
+                  <>
+                    <span>
+                      {t}
+                      {i < submission.times.length - 1 ? "," : ""}
+                    </span>
+                  </>
+                ))}
+              </div>
+              <span>Result: {submission.resultStr}</span>
+              <div className="flex flex-row justify-between px-2">
+                <PrimaryButton
+                  text="Accept"
+                  colors={{
+                    normal: "rgb(46,217,46)",
+                    hover: "rgb(10,230,10)",
+                    click: "rgb(10,210,10)",
+                  }}
+                />
+                <PrimaryButton
+                  text="Reject"
+                  colors={{
+                    normal: "rgb(217,9,9)",
+                    hover: "rgb(230,30,30)",
+                    click: "rgb(210,30,30)",
+                  }}
+                />
+              </div>
+            </div>
           ))}
         </div>
       )}
