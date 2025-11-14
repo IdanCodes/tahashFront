@@ -144,6 +144,12 @@ export interface TahashUserMethods {
    * If the user hasn't submitted in the current comp, update their lastComp value and clear their saved results.
    */
   validateCompResults(): void;
+
+  /**
+   * Get the user's record for an event
+   * @param eventId The event's id
+   */
+  getEventRecord(eventId: string): EventRecords<TimeFormat> | undefined;
 }
 
 export interface TahashUserVirtuals {
@@ -371,6 +377,10 @@ const tahashUserSchema = new Schema<
 
         this.lastComp = newCompNum;
         this.eventResults.clear();
+      },
+
+      getEventRecord(eventId: string): EventRecords<TimeFormat> | undefined {
+        return this.records.get(eventId);
       },
     },
     statics: {

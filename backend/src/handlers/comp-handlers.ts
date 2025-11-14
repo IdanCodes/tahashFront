@@ -8,7 +8,6 @@ import {
   EventDisplayInfoRequest,
   EventSubmissionsHeadersInput,
   EventSubmissionsRequest,
-  eventSubmissionsSchemas,
   UpdateSubmissionStateBodyInput,
   UpdateSubmissionStateRequest,
   UpdateTimesBodyInput,
@@ -23,7 +22,8 @@ import { getEmptyPackedResults } from "../utils/packed-result-utils";
 import { initSubmissionData } from "@shared/interfaces/submission-data";
 import { errorObject } from "@shared/interfaces/error-object";
 import { SubmissionDataDisplay } from "@shared/interfaces/submission-data-display";
-import { userInfo } from "node:os";
+import { getNumericResultOfRecord } from "../types/event-records";
+import { SubmissionState } from "@shared/constants/submission-state";
 
 /**
  * Get all event displays and statuses
@@ -126,8 +126,19 @@ export async function updateTimes(req: UpdateTimesRequest, res: Response) {
   const currComp = CompManager.getInstance().getActiveComp();
 
   const submissionData = initSubmissionData(userId, eventData, times);
-  console.log("Submission data:", submissionData);
   currComp.submitResults(eventId, userId, submissionData);
+
+  // user's record for this event
+
+  const record = userDoc.getEventRecord(eventId);
+  if (!record) return;
+
+  const recordNumericRes = getNumericResultOfRecord(
+    eventData.timeFormat,
+    record,
+  );
+  if (!record || recordNumericRes < submissionData.finalResult)
+    currComp.setSubmissionState(eventId, userId, SubmissionState.Approved);
 
   await currComp.save();
 }
