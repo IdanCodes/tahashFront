@@ -228,7 +228,7 @@ function EventSubmissionsPanel({
                 <div className="flex flex-row justify-between px-2">
                   <PrimaryButton
                     text="Accept"
-                    className="bg-[rgb(46,217,46)] hover:bg-[rgb(10,230,10)] active:bg-[rgb(10,210,10)]"
+                    colors="bg-[rgb(46,217,46)] hover:bg-[rgb(10,230,10)] active:bg-[rgb(10,210,10)]"
                     onClick={() =>
                       updateSubmissionState(
                         submission.submitterData.id,
@@ -239,7 +239,7 @@ function EventSubmissionsPanel({
                   />
                   <PrimaryButton
                     text="Reject"
-                    className="bg-[rgb(217,9,9)] hover:bg-[rgb(230,30,30)] active:bg-[rgb(210,30,30)]"
+                    colors="bg-[rgb(217,9,9)] hover:bg-[rgb(230,30,30)] active:bg-[rgb(210,30,30)]"
                     onClick={() =>
                       updateSubmissionState(
                         submission.submitterData.id,

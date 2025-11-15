@@ -9,11 +9,7 @@ export default function PrimaryButton({
   buttonSize = ButtonSize.Medium,
   className = "",
   btnType = "button",
-  colors = {
-    normal: "bg-slate-100/70",
-    hover: "bg-gray-500/90",
-    click: "bg-gray-600/90",
-  },
+  colors = "bg-slate-100/70 hover:bg-slate-100/50 active:bg-slate-300/80",
 }: {
   text?: string | number;
   children?: React.ReactNode;
@@ -21,16 +17,17 @@ export default function PrimaryButton({
   disabled?: boolean;
   buttonSize?: ButtonSize;
   btnType?: React.ButtonHTMLAttributes<HTMLButtonElement>["type"];
-  colors?: { normal: string; hover: string; click: string };
+  colors?: string | undefined;
   className?: string;
 }): JSX.Element {
   return (
     <>
       <button
         className={clsx(
-          `box-border flex scale-95 items-center justify-center rounded-2xl bg-gray-500 px-5 py-3 shadow-xl transition-transform duration-[200ms] [transition-timing-function:cubic-bezier(0.68,-0.55,0.3,2.5)] select-none hover:bg-gray-600/90 active:bg-gray-600`,
+          `box-border flex scale-95 items-center justify-center rounded-2xl px-5 py-3 shadow-xl transition-transform duration-[200ms] [transition-timing-function:cubic-bezier(0.68,-0.55,0.3,2.5)] select-none`,
           disabled && "cursor-not-allowed opacity-70",
           !disabled && `cursor-pointer hover:scale-100 hover:scale-[1.03]`,
+          colors,
           className,
         )}
         type={btnType}

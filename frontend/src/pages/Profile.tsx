@@ -70,7 +70,7 @@ function LogoutButton({ logout }: { logout: () => Promise<void> }) {
         text="Logout"
         disabled={disableLogout}
         onClick={onClickLogout}
-        className="bg-red-500 hover:bg-red-600 active:bg-red-600/90"
+        colors="bg-red-500 hover:bg-red-600 active:bg-red-600/90"
       />
     </div>
   );

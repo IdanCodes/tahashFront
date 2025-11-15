@@ -341,11 +341,11 @@ function PenaltySelector({
       <PrimaryButton
         text="+2"
         buttonSize={ButtonSize.Small}
-        className="flex-1"
+        className={clsx("flex-1")}
         onClick={penalties.togglePlusTwo}
         colors={
-          penalties.currPenalty == Penalties.Plus2
-            ? plusTwoEnabledColors
+          penalties.currPenalty === Penalties.Plus2
+            ? "bg-yellow-300/80 hover:bg-yellow-500/90 active:bg-yellow-600/90"
             : undefined
         }
         disabled={penalties.currPenalty == Penalties.DNF || !timeIsValid}
@@ -353,10 +353,10 @@ function PenaltySelector({
       <PrimaryButton
         text="DNF"
         buttonSize={ButtonSize.Small}
-        className="flex-1"
+        className={clsx("flex-1")}
         colors={
-          penalties.currPenalty == Penalties.DNF
-            ? penaltyBtnEnabledColors
+          penalties.currPenalty === Penalties.DNF
+            ? "bg-red-600/80 hover:bg-red-500/90 active:bg-red-600/90"
             : undefined
         }
         onClick={penalties.toggleDNF}
