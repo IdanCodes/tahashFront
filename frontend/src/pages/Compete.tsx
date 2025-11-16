@@ -324,18 +324,6 @@ function PenaltySelector({
   };
   timeIsValid: boolean;
 }) {
-  const penaltyBtnEnabledColors = {
-    normal: "bg-red-600/80",
-    hover: "bg-red-500/90",
-    click: "bg-red-600/90",
-  };
-
-  const plusTwoEnabledColors = {
-    normal: "bg-yellow-300/80",
-    hover: "bg-yellow-500/90",
-    click: "bg-yellow-600/90",
-  };
-
   return (
     <div className="my-2 flex w-[70%] place-items-center gap-[5%]">
       <PrimaryButton

@@ -3,7 +3,7 @@ import {Penalties} from "../constants/penalties";
 import {
     comparePackedResults,
     DNF_STRING,
-    formatCentis,
+    formatCentis, formatPackedResults,
     getPureCentis,
     getPureCentisArr, isNullCentis,
     NULL_TIME_CENTIS,
@@ -315,4 +315,28 @@ export function shouldAutoApprove(eventData: CompEvent, currRec: EventRecords<Ti
     }
 
     return false;
+}
+
+export function formatAttempts(eventData: CompEvent, results: PackedResult[]): string[] {
+    if (results.length == 0) return ["-INVALID-"];
+
+    if (eventData.timeFormat === TimeFormat.multi)
+        return [getMbldResultStr(results)];
+    else if (eventData.timeFormat !== TimeFormat.ao5)
+        return formatPackedResults(results);
+
+    const pureResults = getPureCentisArr(results);
+    let minIndex = 0, maxIndex = 1;
+    for (let i = 0; i < pureResults.length; i++) {
+        if (pureResults[i] < pureResults[minIndex])
+            minIndex = i;
+        else if (pureResults[i] > pureResults[maxIndex])
+            maxIndex = i;
+    }
+
+    const resultArr = formatPackedResults(results);
+    resultArr[minIndex] = `(${resultArr[minIndex]})`;
+    resultArr[maxIndex] = `(${resultArr[maxIndex]})`;
+
+    return resultArr;
 }
