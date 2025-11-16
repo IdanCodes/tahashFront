@@ -15,7 +15,7 @@ export class CompManager {
    * The singleton instance of {@link CompManager}.
    */
   private static instance: CompManager | undefined = undefined;
-  private activeComp: TahashCompInstance; // TODO: change activeComp on validate new comp
+  private activeComp: TahashCompInstance;
 
   /**
    * Construct a {@link CompManager}.
@@ -138,28 +138,6 @@ export class CompManager {
     return comp ? comp.eventIds : null;
   }
 
-  // /**
-  //  * Save a {@link TahashComp} to the database by its comp number (if it already exists, just update its values).
-  //  * @param tahashComp
-  //  * @return Whether the update has been acknowledged (usually true).
-  //  */
-  // public async saveComp(tahashComp: ITahashComp): Promise<boolean> {
-  //   return (
-  //     await TahashComp.updateOne(
-  //       { compNumber: tahashComp.compNumber },
-  //       {
-  //         $set: {
-  //           compNumber: tahashComp.compNumber,
-  //           startDate: tahashComp.startDate,
-  //           endDate: tahashComp.endDate,
-  //           data: tahashComp.data,
-  //         },
-  //       },
-  //       { upsert: true },
-  //     ).exec()
-  //   ).acknowledged;
-  // }
-
   /**
    * Validate the active comp - if it has ended, create a new comp.
    * @param newSrc A source for the new competition, if it was created.
@@ -172,6 +150,9 @@ export class CompManager {
   ): Promise<TahashCompInstance> {
     // check if the current comp is still active
     if (!force && this.activeComp.isActive()) return this.activeComp;
+
+    await this.activeComp.closeComp();
+    await this.activeComp.save();
 
     // create a new comp and save it to the database
     const newComp = new TahashCompInstance(new TahashCompData(newSrc));

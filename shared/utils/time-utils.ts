@@ -6,9 +6,9 @@ import {Penalties, Penalty} from "../constants/penalties";
 import {isInteger, isNumber, pad} from "./global-utils";
 
 /**
- * "Value" of a null {@link TimeParts} as centiseconds.
+ * "Value" of a null {@link TimeParts} as centiseconds (infinity).
  */
-export const NULL_TIME_CENTIS: number = -1;
+export const NULL_TIME_CENTIS: number = Infinity;
 
 /**
  * String that represents an invalid time.
@@ -349,20 +349,20 @@ export function equalTimes(
  * Compare two packed results
  * @param p1 The first packed result
  * @param p2 The second packed result
- * @return -1: p1 > p2; 0: p1 == p2; 1: p1 < p2;
+ * @return -1: p1 < p2; 0: p1 == p2; 1: p1 > p2;
  * Edge cases:
  * - Both DNFs => 0
  * - One is DNF => The one with DNF is bigger
  */
 export function comparePackedResults(p1: PackedResult, p2: PackedResult): number {
     if (p1.penalty === Penalties.DNF)
-        return p2.penalty === Penalties.DNF ? 0 : -1;
+        return p2.penalty === Penalties.DNF ? 0 : 1;
     else if (p2.penalty === Penalties.DNF)
-        return 1;
+        return -1;
 
     const pure1 = getPureCentis(p1);
     const pure2 = getPureCentis(p2);
-    return pure1 > pure2 ? -1 : (pure1 === pure2 ? 0 : 1);
+    return pure1 > pure2 ? 1 : (pure1 === pure2 ? 0 : -1);
 }
 
 // -- Packed Result utils
@@ -435,6 +435,8 @@ export function getPureCentis(packedResult: PackedResult): number {
 export function getPureCentisArr(results: PackedResult[]): number[] {
     return results.map((r) => getPureCentis(r));
 }
+
+export const isNullCentis = (centis: number): boolean => centis === NULL_TIME_CENTIS;
 
 // TODO: do something about the previewStr stuff
 // format a packed times array to an allTimes array

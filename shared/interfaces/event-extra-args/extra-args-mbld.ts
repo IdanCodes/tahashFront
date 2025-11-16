@@ -1,3 +1,5 @@
+import {NULL_TIME_CENTIS} from "../../utils/time-utils";
+
 /**
  * Extra arguments for the MBLD event.
  */
@@ -21,5 +23,5 @@ export interface ExtraArgsMbld {
  * - Otherwise, returns the total number of points.
  */
 export function calcMultiBldTotalPoints(args: ExtraArgsMbld): number {
-    return Math.max(args.numSuccess - (args.numAttempt - args.numSuccess), -1);
+    return Math.min(args.numSuccess - (args.numAttempt - args.numSuccess), NULL_TIME_CENTIS);
 }

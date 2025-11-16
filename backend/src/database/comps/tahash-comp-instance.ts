@@ -5,6 +5,7 @@ import {
   TahashCompMethods,
 } from "../models/tahash-comp.model";
 import {
+  CompEvent,
   EventId,
   generateScrambles,
   getEventById,
@@ -14,6 +15,7 @@ import { EventDisplayInfo } from "@shared/interfaces/event-display-info";
 import { CompEventResults } from "../../interfaces/comp-event-results";
 import { SubmissionData } from "@shared/interfaces/submission-data";
 import { SubmissionState } from "@shared/constants/submission-state";
+import { PackedResult } from "@shared/interfaces/packed-result";
 
 /*
 TODO:
@@ -81,6 +83,18 @@ export class TahashCompInstance implements ITahashComp, TahashCompMethods {
     return this.srcDoc.isActive();
   }
 
+  /**
+   * User's pastResults: {
+   * compNumber:
+   *   {
+   *    eventId: {
+   *       place: number,
+   *       times: PackedResult[]
+   *     }
+   *   }
+   * }
+   */
+
   async setSubmissionState(
     eventId: EventId,
     userId: number,
@@ -102,12 +116,20 @@ export class TahashCompInstance implements ITahashComp, TahashCompMethods {
     this.srcDoc.data = cloneData;
   }
 
+  filterAndSortSubmissions(): void {
+    return this.srcDoc.filterAndSortSubmissions();
+  }
+
   submitResults(
-    eventId: EventId,
+    eventData: CompEvent,
     userId: number,
-    results: SubmissionData,
+    results: PackedResult[],
   ): boolean {
-    return this.srcDoc.submitResults(eventId, userId, results);
+    return this.srcDoc.submitResults(eventData, userId, results);
+  }
+
+  async closeComp(): Promise<void> {
+    return await this.srcDoc.closeComp();
   }
 
   /**

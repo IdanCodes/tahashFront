@@ -25,6 +25,7 @@ import {
   MO3BestResults,
 } from "../../types/result-format";
 import { CompManager } from "../comps/comp-manager";
+import { PastCompResults } from "../../types/past-comp-results";
 
 const userInfoSchema = new mongoose.Schema(
   {
@@ -67,39 +68,13 @@ export interface ITahashUser {
   lastComp: number;
 
   /* array of the user's records */
-  readonly records: Map<EventId, EventRecords<TimeFormat>> /*
-        user records structure:
-        records: [
-            {
-                eventId: str,
-                // bestResults contains the best results for the event, and for each type of result
-                //      it also saves the comp number (as an integer)
-                //      the comp number's values:
-                //          * >0 -> a tahash comp
-                //          * =0 -> a wca comp
-                //          * -1 -> never competed
-                bestResults:
-                    --- different for each event type:
-                    --  AO5:
-                        { single, singleComp
-                            average, averageComp }
-                    --  MO3/BO3:
-                        { single, singleComp
-                            mean, meanComp }
-                    --  BO3:
-                        { single, singleComp,
-                            mean, meanComp }
-                    --  Multi:
-                        { best total points / -1,
-                        time of attempt with best score / -1,
-                        bestComp }
-                times: packedTimes (-- the full attempt)
-            }
-        ]
-    */;
+  readonly records: Map<EventId, EventRecords<TimeFormat>>;
 
-  /* user's results of the last comp the user competed in */
+  /* user's results of the current competition */
   readonly eventResults: Map<EventId, UserEventResult>;
+
+  /* user's results of past competitions */
+  readonly pastResults: Map<string, PastCompResults>;
 }
 
 export interface TahashUserMethods {
@@ -150,6 +125,13 @@ export interface TahashUserMethods {
    * @param eventId The event's id
    */
   getEventRecord(eventId: string): EventRecords<TimeFormat> | undefined;
+
+  /**
+   * Set the results of a past comp.
+   * @param compNumber The comp's number
+   * @param results The user's results in the comp
+   */
+  setCompResults(compNumber: number, results: PastCompResults): void;
 }
 
 export interface TahashUserVirtuals {
@@ -200,6 +182,20 @@ const tahashUserSchema = new Schema<
     eventResults: {
       type: Map,
       of: userEventResultsSchema,
+      required: true,
+    },
+    pastResults: {
+      type: Map,
+      of: {
+        type: Map,
+        of: {
+          place: {
+            type: Number,
+            required: true,
+          },
+          times: [packedResultSchema],
+        },
+      },
       required: true,
     },
   },
@@ -322,7 +318,7 @@ const tahashUserSchema = new Schema<
             if (
               newRecords.single.centis > 0 &&
               (comparePackedResults(newRecords.single, oldRecords.single) ===
-                1 ||
+                -1 ||
                 oldRecords.single.centis < 0)
             ) {
               result.single = {
@@ -349,7 +345,7 @@ const tahashUserSchema = new Schema<
             if (
               newRecords.single.centis > 0 &&
               (comparePackedResults(newRecords.single, oldRecords.single) ===
-                1 ||
+                -1 ||
                 oldRecords.single.centis < 0)
             ) {
               result.single = {
@@ -381,6 +377,10 @@ const tahashUserSchema = new Schema<
 
       getEventRecord(eventId: string): EventRecords<TimeFormat> | undefined {
         return this.records.get(eventId);
+      },
+
+      setCompResults(compNumber: number, results: PastCompResults): void {
+        this.pastResults.set(compNumber.toString(), results);
       },
     },
     statics: {

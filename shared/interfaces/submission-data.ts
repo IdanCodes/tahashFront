@@ -34,6 +34,11 @@ export interface SubmissionData<ArgType = any> {
    * A display string of the attempt's result.
    */
   resultStr: string;
+
+    /**
+     * The submission's place in the event
+     */
+    place?: number;
 }
 
 /**

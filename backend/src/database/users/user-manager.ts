@@ -5,6 +5,7 @@ import { UserInfo } from "@shared/interfaces/user-info";
 import { TahashUser, TahashUserDoc } from "../models/tahash-user.model";
 import { UserEventResult } from "../../types/user-event-result";
 import { CompManager } from "../comps/comp-manager";
+import { PastCompResults } from "../../types/past-comp-results";
 
 /**
  * A singleton to manage the "users" collection of the database.
@@ -93,6 +94,7 @@ export class UserManager {
       lastComp: -1,
       records: records,
       eventResults: new Map<EventId, UserEventResult>(),
+      pastResults: new Map<EventId, PastCompResults>(),
     });
 
     userDoc.validateCompResults();

@@ -19,30 +19,10 @@ import { HttpHeaders } from "@shared/constants/http-headers";
 import { getEventById } from "@shared/types/comp-event";
 import { UserCompeteData } from "@shared/interfaces/user-compete-data";
 import { getEmptyPackedResults } from "../utils/packed-result-utils";
-import { initSubmissionData } from "@shared/interfaces/submission-data";
 import { errorObject } from "@shared/interfaces/error-object";
 import { SubmissionDataDisplay } from "@shared/interfaces/submission-data-display";
-import { getNumericResultOfRecord } from "../types/event-records";
 import { SubmissionState } from "@shared/constants/submission-state";
-import { TimeFormat } from "@shared/constants/time-formats";
-import {
-  getMinResult,
-  getShortestFMCSol,
-  shouldAutoApprove,
-} from "@shared/utils/event-results-utils";
-import { PackedResult } from "@shared/interfaces/packed-result";
-import { ExtraArgsFmc } from "@shared/interfaces/event-extra-args/extra-args-fmc";
-import {
-  AO5BestResults,
-  FMCBestResults,
-  MbldBestResults,
-  MO3BestResults,
-} from "../types/result-format";
-import {
-  calcMultiBldTotalPoints,
-  ExtraArgsMbld,
-} from "@shared/interfaces/event-extra-args/extra-args-mbld";
-import { comparePackedResults, getPureCentis } from "@shared/utils/time-utils";
+import { shouldAutoApprove } from "@shared/utils/event-results-utils";
 
 /**
  * Get all event displays and statuses
@@ -142,20 +122,18 @@ export async function updateTimes(req: UpdateTimesRequest, res: Response) {
 
   if (!userDoc.finishedEvent(eventId)) return;
 
-  const currComp = CompManager.getInstance().getActiveComp();
-
-  const submissionData = initSubmissionData(userId, eventData, times);
-  currComp.submitResults(eventId, userId, submissionData);
+  const activeComp = CompManager.getInstance().getActiveComp();
+  activeComp.submitResults(eventData, userId, times);
 
   const record = userDoc.getEventRecord(eventId);
-  if (record && shouldAutoApprove(eventData, record, submissionData))
-    await currComp.setSubmissionState(
+  if (record && shouldAutoApprove(eventData, record, times))
+    await activeComp.setSubmissionState(
       eventId,
       userId,
       SubmissionState.Approved,
     );
 
-  await currComp.save();
+  await activeComp.save();
 }
 
 // response is SubmissionDataDisplay[]

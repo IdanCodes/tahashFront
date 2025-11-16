@@ -5,7 +5,7 @@ import {
     DNF_STRING,
     formatCentis,
     getPureCentis,
-    getPureCentisArr,
+    getPureCentisArr, isNullCentis,
     NULL_TIME_CENTIS,
 } from "./time-utils";
 import {NumScrambles, TimeFormat} from "../constants/time-formats";
@@ -79,10 +79,12 @@ function calculateMO3(results: PackedResult[]): number {
  * @return The result, in centiseconds.
  */
 function calculateBO3(results: PackedResult[]): number {
-  let best = results[0].centis;
+    if (results.length == 0) return NULL_TIME_CENTIS;
+
+  let best = getPureCentis(results[0]);
 
   for (let i = 1; i < NumScrambles[TimeFormat.bo3]; i++)
-    best = Math.min(best, results[i].centis);
+    best = Math.min(best, getPureCentis(results[i]));
 
   return best;
 }
@@ -96,7 +98,7 @@ function calculateMultiResult(result: PackedResult<ExtraArgsMbld>): number {
   let extraArgs: ExtraArgsMbld | undefined = result.extraArgs;
   if (!extraArgs) {
     console.error("Invalid MBLD extraArgs!");
-    return -1;
+    return NULL_TIME_CENTIS;
   }
 
   return calcMultiBldTotalPoints(extraArgs);
@@ -189,12 +191,11 @@ export function generateResultStr(
     default:
         const centis = calcEventResult(compEvent, results);
         return formatCentis(centis);
-
   }
 }
 
 export function getMinResult(results: PackedResult[]): PackedResult {
-    if (results.length == 0) return { centis: -1, penalty: Penalties.DNF };
+    if (results.length == 0) return { centis: NULL_TIME_CENTIS, penalty: Penalties.DNF };
     return results.reduce((min, curr) => {
         return getPureCentis(curr) < getPureCentis(min) ? curr : min;
     });
@@ -253,42 +254,60 @@ export function submissionDataToRecord(compEvent: CompEvent, compNumber: number,
 }
 
 /**
+ * Compare two final results
+ * @param r1 The first packed result
+ * @param r2 The second packed result
+ * @return -1: r1 < r2; 0: r1 == r2; 1: r1 > r2;
+ * Edge cases:
+ * - Both null => 0
+ * - One is null => The null one is bigger
+ */
+export function compareFinalResults(r1: number, r2: number) {
+    if (isNullCentis(r1))
+        return isNullCentis(r2) ? 0 : 1;
+    else if (isNullCentis(r2))
+        return -1;
+
+    return r1 > r2 ? 1 : (r1 === r2 ? 0 : -1);
+}
+
+/**
  * Should auto approve submission?
  * @param eventData The event of the attempt
  * @param currRec The user's current record
- * @param sd The new submission's SubmissionData
+ * @param times The submission's solves
  */
-export function shouldAutoApprove(eventData: CompEvent, currRec: EventRecords<TimeFormat>, sd: SubmissionData): boolean {
+export function shouldAutoApprove(eventData: CompEvent, currRec: EventRecords<TimeFormat>, times: PackedResult[]): boolean {
     if (eventData.eventId === "333fm") {
         currRec = currRec as FMCBestResults;
         const newSingle = getShortestFMCSol(
-            sd.times as PackedResult<ExtraArgsFmc>[],
+            times as PackedResult<ExtraArgsFmc>[],
         );
-        const newMean = sd.finalResult;
+        const newMean = calculateFMCResult(times);
 
         return newSingle > currRec.single && newMean > currRec.mean;
     } else if (eventData.timeFormat === TimeFormat.ao5) {
         currRec = currRec as AO5BestResults;
-        const newSingle = getMinResult(sd.times);
-        const newAvg = sd.finalResult;
+        const newSingle = getMinResult(times);
+        const newAvg = calculateAO5(times);
 
-         return comparePackedResults(newSingle, currRec.single) === -1 &&
+         return comparePackedResults(newSingle, currRec.single) === 1 &&
             newAvg > currRec.average;
     } else if (
         eventData.timeFormat === TimeFormat.mo3 ||
         eventData.timeFormat === TimeFormat.bo3
     ) {
         currRec = currRec as MO3BestResults;
-        const newSingle = getMinResult(sd.times);
-        const newMean = sd.finalResult;
+        const newSingle = getMinResult(times);
+        const newMean = calculateMO3(times);
 
-        return comparePackedResults(newSingle, currRec.single) === -1 &&
+        return comparePackedResults(newSingle, currRec.single) === 1 &&
             newMean > currRec.mean;
-    } else if (eventData.timeFormat === TimeFormat.multi && sd.times.length > 0) {
+    } else if (eventData.timeFormat === TimeFormat.multi && times.length > 0) {
         currRec = currRec as MbldBestResults;
-        const newTime = getPureCentis(sd.times[0]);
+        const newTime = getPureCentis(times[0]);
         const newPoints = calcMultiBldTotalPoints(
-            sd.times[0].extraArgs as ExtraArgsMbld,
+            times[0].extraArgs as ExtraArgsMbld,
         );
 
         return newPoints > currRec.bestPoints ||
