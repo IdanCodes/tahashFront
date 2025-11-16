@@ -5,7 +5,7 @@ import {
   getEventById,
   WCAEvents,
 } from "@shared/types/comp-event";
-import { CompEventResults } from "../../interfaces/comp-event-results";
+import { CompEventResults } from "@shared/interfaces/comp-event-results";
 import {
   initSubmissionData,
   SubmissionData,
@@ -25,6 +25,7 @@ import { TimeFormat } from "@shared/constants/time-formats";
 import { PackedResult } from "@shared/interfaces/packed-result";
 import { PastCompResults } from "../../types/past-comp-results";
 import { comparePackedResults } from "@shared/utils/time-utils";
+import { CompEventPair } from "@shared/types/comp-event-pair";
 
 const compEventResultsSchema = new Schema<CompEventResults>(
   {
@@ -66,10 +67,6 @@ const compEventResultsSchema = new Schema<CompEventResults>(
   },
 );
 
-export type CompEventPair = {
-  eventId: EventId;
-  result: CompEventResults;
-};
 const compEventPairSchema = new Schema<CompEventPair>({
   eventId: String,
   result: compEventResultsSchema,
@@ -327,23 +324,9 @@ export const TahashCompSchema = new Schema<
           this.data[i].result.submissions = this.data[i].result.submissions
             .filter((s) => s.submissionState === SubmissionState.Approved)
             .sort((a, b) => compareFinalResults(a.finalResult, b.finalResult));
-          console.log(
-            `${this.data[i].eventId}: ${JSON.stringify(this.data[i].result.submissions)}`,
-          );
         }
       },
 
-      // move to model!!
-      /**
-       * Close the competition:
-       * - Step 1: Set its end date to today
-       *
-       * - Step 2: Sort submissions for each event and filter out rejected/pending submissions
-       * - For each (approved) submission
-       * -
-       * - Step 3: For every user with an accepted submission in the comp,
-       * -
-       */
       async closeComp(): Promise<void> {
         this.endDate = new Date();
         this.endDate.setHours(0, 0, 0, 0);

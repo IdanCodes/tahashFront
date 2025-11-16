@@ -13,6 +13,7 @@ export const RoutePath = {
         CompeteEvent: "/compete/:eventId",
         AdminPanel: "/admin-panel",
         AdminPanelEvent: "/admin-panel/:eventId",
+        Results: "/results",
 
         RedirectToAuth: "/redirect-to-auth",
         AuthCallback: "/auth-callback",
@@ -28,7 +29,8 @@ export const RoutePath = {
         GetActiveCompEvents: "/active-comp-events",
         EventsDisplayAndStatus: "/comp-display-status",
         UserEventData: "/user-event-data",
-        EventDisplayInfo: "/eventDisplayInfo",
+        EventDisplayInfo: "/event-display-info",
+        LastCompDisplayData: "/last-comp-display-data",
 
         RetrieveTimes: "/retrieve-times",
         EventStatuses: "/event-statuses",

@@ -20,7 +20,7 @@ import { getEventById } from "@shared/types/comp-event";
 import { UserCompeteData } from "@shared/interfaces/user-compete-data";
 import { getEmptyPackedResults } from "../utils/packed-result-utils";
 import { errorObject } from "@shared/interfaces/error-object";
-import { SubmissionDataDisplay } from "@shared/interfaces/submission-data-display";
+import { getSubmissionDisplays } from "@shared/interfaces/submission-data-display";
 import { SubmissionState } from "@shared/constants/submission-state";
 import { shouldAutoApprove } from "@shared/utils/event-results-utils";
 
@@ -158,29 +158,12 @@ export async function eventSubmissions(
       ),
     );
 
-  const displays: SubmissionDataDisplay[] = [];
-  for (const submission of eventSubmissions) {
-    const userInfo = await UserManager.getInstance().getUserInfoById(
-      submission.userId,
-    );
-
-    if (!userInfo) {
-      console.warn(
-        `Could not find user ${submission.userId} when constructing SubmissionDataDisplay for Get.EventSubmissions`,
-      );
-      continue;
-    }
-
-    displays.push({
-      submissionState: submission.submissionState,
-      times: submission.times,
-      finalResult: submission.finalResult,
-      resultStr: submission.resultStr,
-      submitterData: userInfo,
-    });
-  }
-
-  res.json(new ApiResponse(ResponseCode.Success, displays));
+  res.json(
+    new ApiResponse(
+      ResponseCode.Success,
+      getSubmissionDisplays(eventSubmissions),
+    ),
+  );
 }
 
 // response contains DisplayInfo of the event
@@ -218,9 +201,16 @@ async function updateSubmissionState(
     );
 
   const activeComp = CompManager.getInstance().getActiveComp();
-  activeComp.setSubmissionState(eventId, userId, submissionState);
+  await activeComp.setSubmissionState(eventId, userId, submissionState);
   await activeComp.save();
   res.json(new ApiResponse(ResponseCode.Success, "Updated successfully"));
+}
+
+async function compDisplayData(_: Request, res: Response) {
+  const activeComp = CompManager.getInstance().getActiveComp();
+  res.json(
+    new ApiResponse(ResponseCode.Success, await activeComp.getDisplayData()),
+  );
 }
 
 export const compHandlers = {
@@ -231,4 +221,5 @@ export const compHandlers = {
   eventSubmissions,
   eventDisplayInfo,
   updateSubmissionState,
+  compDisplayData,
 };

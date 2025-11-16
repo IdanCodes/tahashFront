@@ -1,5 +1,4 @@
 import {
-  CompEventPair,
   ITahashComp,
   TahashCompDoc,
   TahashCompMethods,
@@ -12,10 +11,16 @@ import {
   getEventDisplayInfo,
 } from "@shared/types/comp-event";
 import { EventDisplayInfo } from "@shared/interfaces/event-display-info";
-import { CompEventResults } from "../../interfaces/comp-event-results";
+import { CompEventResults } from "@shared/interfaces/comp-event-results";
 import { SubmissionData } from "@shared/interfaces/submission-data";
 import { SubmissionState } from "@shared/constants/submission-state";
 import { PackedResult } from "@shared/interfaces/packed-result";
+import { CompDisplayData } from "@shared/interfaces/comp-display-data";
+import {
+  CompEventPair,
+  CompEventPairDisplay,
+  getCompEventPairDisplay,
+} from "@shared/types/comp-event-pair";
 
 /*
 TODO:
@@ -130,6 +135,32 @@ export class TahashCompInstance implements ITahashComp, TahashCompMethods {
 
   async closeComp(): Promise<void> {
     return await this.srcDoc.closeComp();
+  }
+
+  /**
+   * Get this competition's display data
+   */
+  async getDisplayData(): Promise<CompDisplayData> {
+    const eventPairDisplays: CompEventPairDisplay[] = [];
+
+    for (let i = 0; i < this.data.length; i++) {
+      const display = await getCompEventPairDisplay(this.data[i]);
+      if (!display) {
+        console.warn(
+          `comp-event-pair.ts.getDisplayData: Could not get display data for event "${this.data[i].eventId}"; skipping.`,
+        );
+        continue;
+      }
+
+      eventPairDisplays.push(display);
+    }
+
+    return {
+      compNumber: this.compNumber,
+      startDate: this.startDate,
+      endDate: this.endDate,
+      data: eventPairDisplays,
+    } as CompDisplayData;
   }
 
   /**
