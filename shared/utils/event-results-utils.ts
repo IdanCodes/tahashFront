@@ -317,12 +317,18 @@ export function shouldAutoApprove(eventData: CompEvent, currRec: EventRecords<Ti
     return false;
 }
 
-export function formatAttempts(eventData: CompEvent, results: PackedResult[]): string[] {
+/**
+ * Format an array of PackedResult into a representing string array.
+ * Adds () for AO5
+ * @param timeFormat The event's time format
+ * @param results The attempts
+ */
+export function formatAttempts(timeFormat: TimeFormat, results: PackedResult[]): string[] {
     if (results.length == 0) return ["-INVALID-"];
 
-    if (eventData.timeFormat === TimeFormat.multi)
+    if (timeFormat === TimeFormat.multi)
         return [getMbldResultStr(results)];
-    else if (eventData.timeFormat !== TimeFormat.ao5)
+    else if (timeFormat !== TimeFormat.ao5)
         return formatPackedResults(results);
 
     const pureResults = getPureCentisArr(results);

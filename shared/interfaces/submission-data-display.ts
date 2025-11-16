@@ -17,6 +17,7 @@ export async function getSubmissionDisplay(submission: SubmissionData): Promise<
         finalResult: submission.finalResult,
         resultStr: submission.resultStr,
         submitterData: userInfo,
+        place: submission.place ?? undefined,
     } as SubmissionDataDisplay : undefined;
 }
 

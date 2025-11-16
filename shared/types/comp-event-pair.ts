@@ -11,7 +11,7 @@ export type CompEventPair = {
     result: CompEventResults;
 };
 
-type SubmissionDisplayNoState = Omit<SubmissionDataDisplay, "submissionState">;
+export type SubmissionDisplayNoState = Omit<SubmissionDataDisplay, "submissionState">;
 export type CompEventPairDisplay = {
     eventDisplay: EventDisplayInfo,
     result: {

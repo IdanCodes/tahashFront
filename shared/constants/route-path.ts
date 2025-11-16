@@ -13,7 +13,7 @@ export const RoutePath = {
         CompeteEvent: "/compete/:eventId",
         AdminPanel: "/admin-panel",
         AdminPanelEvent: "/admin-panel/:eventId",
-        Results: "/results",
+        Results: "/results/:eventId",
 
         RedirectToAuth: "/redirect-to-auth",
         AuthCallback: "/auth-callback",

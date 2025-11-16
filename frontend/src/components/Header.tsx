@@ -4,6 +4,7 @@ import clsx from "clsx";
 import { useUserInfo } from "../context/UserContext";
 import logo from "./assets/ILSpeeddcubinglogo.svg";
 import "./animations.css";
+import { RoutePath } from "@shared/constants/route-path";
 
 function Header(): JSX.Element {
   const userInfo = useUserInfo();
@@ -27,6 +28,9 @@ function Header(): JSX.Element {
             <NavbarButton to="/" text="Home" />
           </li>
           {userInfo.isLoggedIn ? <LoggedInLinks /> : <LoggedOutLinks />}
+          <li>
+            <NavbarButton to={RoutePath.Page.Results} text="Results" />
+          </li>
           {userInfo.isAdmin ? <AdminLinks /> : <></>}
         </ul>
       </nav>

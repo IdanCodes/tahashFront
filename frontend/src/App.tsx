@@ -19,6 +19,7 @@ import Compete from "./pages/Compete";
 import { cancelPendingRequests } from "./utils/API/apiUtils";
 import AdminPanel from "./pages/AdminPanel";
 import NotFoundPage from "./pages/NotFoundPage";
+import Results from "./pages/Results";
 
 function AnimatedRoutes(): JSX.Element {
   const location = useLocation();
@@ -114,6 +115,7 @@ function AnimatedRoutes(): JSX.Element {
             </RequireAuth>
           }
         />
+        <Route path={RoutePath.Page.Results} element={<Results />} />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </AnimatePresence>

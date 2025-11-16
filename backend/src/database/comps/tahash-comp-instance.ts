@@ -137,30 +137,8 @@ export class TahashCompInstance implements ITahashComp, TahashCompMethods {
     return await this.srcDoc.closeComp();
   }
 
-  /**
-   * Get this competition's display data
-   */
   async getDisplayData(): Promise<CompDisplayData> {
-    const eventPairDisplays: CompEventPairDisplay[] = [];
-
-    for (let i = 0; i < this.data.length; i++) {
-      const display = await getCompEventPairDisplay(this.data[i]);
-      if (!display) {
-        console.warn(
-          `comp-event-pair.ts.getDisplayData: Could not get display data for event "${this.data[i].eventId}"; skipping.`,
-        );
-        continue;
-      }
-
-      eventPairDisplays.push(display);
-    }
-
-    return {
-      compNumber: this.compNumber,
-      startDate: this.startDate,
-      endDate: this.endDate,
-      data: eventPairDisplays,
-    } as CompDisplayData;
+    return await this.srcDoc.getDisplayData();
   }
 
   /**

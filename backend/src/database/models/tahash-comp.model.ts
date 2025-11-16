@@ -25,7 +25,12 @@ import { TimeFormat } from "@shared/constants/time-formats";
 import { PackedResult } from "@shared/interfaces/packed-result";
 import { PastCompResults } from "../../types/past-comp-results";
 import { comparePackedResults } from "@shared/utils/time-utils";
-import { CompEventPair } from "@shared/types/comp-event-pair";
+import {
+  CompEventPair,
+  CompEventPairDisplay,
+  getCompEventPairDisplay,
+} from "@shared/types/comp-event-pair";
+import { CompDisplayData } from "@shared/interfaces/comp-display-data";
 
 const compEventResultsSchema = new Schema<CompEventResults>(
   {
@@ -185,6 +190,11 @@ export interface TahashCompMethods {
    * Sort each event's submissions by final result
    */
   filterAndSortSubmissions(): void;
+
+  /**
+   * Get this competition's display data
+   */
+  getDisplayData(): Promise<CompDisplayData>;
 }
 
 export interface TahashCompStatics {
@@ -402,6 +412,29 @@ export const TahashCompSchema = new Schema<
          *    const userDoc = await UserManager.getUserDoc(userId)
          *    userDoc.setCompResults(this.compNumber, pastCompResults)
          */
+      },
+
+      async getDisplayData(): Promise<CompDisplayData> {
+        const eventPairDisplays: CompEventPairDisplay[] = [];
+
+        for (let i = 0; i < this.data.length; i++) {
+          const display = await getCompEventPairDisplay(this.data[i]);
+          if (!display) {
+            console.warn(
+              `comp-event-pair.ts.getDisplayData: Could not get display data for event "${this.data[i].eventId}"; skipping.`,
+            );
+            continue;
+          }
+
+          eventPairDisplays.push(display);
+        }
+
+        return {
+          compNumber: this.compNumber,
+          startDate: this.startDate,
+          endDate: this.endDate,
+          data: eventPairDisplays,
+        } as CompDisplayData;
       },
     },
     statics: {

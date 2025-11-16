@@ -161,7 +161,7 @@ export async function eventSubmissions(
   res.json(
     new ApiResponse(
       ResponseCode.Success,
-      getSubmissionDisplays(eventSubmissions),
+      await getSubmissionDisplays(eventSubmissions),
     ),
   );
 }
@@ -206,10 +206,17 @@ async function updateSubmissionState(
   res.json(new ApiResponse(ResponseCode.Success, "Updated successfully"));
 }
 
-async function compDisplayData(_: Request, res: Response) {
-  const activeComp = CompManager.getInstance().getActiveComp();
+async function lastCompDisplayData(_: Request, res: Response) {
+  const currCompNum = CompManager.getInstance().getActiveCompNum();
+
+  const lastComp = await CompManager.getInstance().getTahashComp(
+    currCompNum - 1,
+  );
+  if (currCompNum <= 1 || !lastComp)
+    return res.json(errorResponse("No competitions found"));
+
   res.json(
-    new ApiResponse(ResponseCode.Success, await activeComp.getDisplayData()),
+    new ApiResponse(ResponseCode.Success, await lastComp.getDisplayData()),
   );
 }
 
@@ -221,5 +228,5 @@ export const compHandlers = {
   eventSubmissions,
   eventDisplayInfo,
   updateSubmissionState,
-  compDisplayData,
+  lastCompDisplayData,
 };
