@@ -13,8 +13,11 @@ import { useCSTimer } from "../hooks/useCsTimer";
 import clsx from "clsx";
 import PrimaryButton from "../components/buttons/PrimaryButton";
 import {
+  comparePackedResults,
   formatPackedResult,
   formatSolveResult,
+  getPureCentis,
+  getPureCentisArr,
   isFullPackedTimesArr,
   packTime,
   tryAnalyzeTimes,
@@ -589,7 +592,7 @@ function Compete() {
     const penaltyChanged =
       allTimes[activeScramble].penalty != currentResult.penalty;
     const timeChanged =
-      allTimes[activeScramble].centis != packTime(currentResult.time);
+      getPureCentis(allTimes[activeScramble]) !== packTime(currentResult.time);
 
     if (isLastScramble && scrIndex != activeScramble) {
       setInputValues((values) => {
@@ -597,7 +600,11 @@ function Compete() {
         newValues[activeScramble] = "";
         return newValues;
       });
-    } else if (upload && (penaltyChanged || timeChanged)) {
+    } else if (
+      upload &&
+      currentResult.time &&
+      (penaltyChanged || timeChanged)
+    ) {
       uploadCurrentResult().then(() => {
         if (activeScramble == numScrambles.current - 1)
           return window.location.reload();
@@ -720,9 +727,10 @@ function Compete() {
         <span className={`cubing-icon ${competeData.eventData.iconName}`} />
       </div>
       <div
-        className={clsx(
-          `transition-opacity ${loadingScrTxt ? "opacity-0" : "opacity-100"}`,
-        )}
+        className={clsx(`transition-opacity`)}
+        style={{
+          opacity: loadingScrTxt ? "0" : "1",
+        }}
       >
         {/* Result String */}
         {attemptResultStr.current && (

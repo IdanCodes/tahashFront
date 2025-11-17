@@ -47,8 +47,9 @@ function Results() {
     const eventIndex = compDisplay.data.findIndex(
       (pair) => pair.eventDisplay.eventId === evId,
     );
+
     if (eventIndex < 0) {
-      setCurrEvent(null);
+      window.location.pathname = "results/333";
       return;
     }
 
