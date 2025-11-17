@@ -19,6 +19,9 @@ services:
     build:
       context: ../backend
       dockerfile: Dockerfile
+      platforms:
+        - linux/amd64
+        - linux/arm64
     container_name: backend
     environment: # Environment variables
       - NODE_ENV=production
@@ -29,7 +32,7 @@ services:
     volumes:
       - backend-data:/app/data
     env_file:
-      - .env.prod
+      - .env
     depends_on:
       - mongo
 
@@ -37,12 +40,15 @@ services:
     build:
       context: ../.
       dockerfile: frontend/Dockerfile
+      platforms:
+        - linux/amd64
+        - linux/arm64
     environment: # Environment variables
       - NODE_ENV=production
     image: idoshahar/tahash-frontend:v0.1
     container_name: frontend
     ports:
-      - "8080:8080"
+      - "3002:8080"
     volumes:
       - ../frontend:/app
       - ../shared:/shared

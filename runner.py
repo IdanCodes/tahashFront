@@ -5,6 +5,10 @@ import sys
 # Configurations
 DOCKER_COMPOSE_PATH = "./deploy/docker_compose.yml"
 
+VERSION = 0.1
+BACKEND_IMAGE = f"idoshahar/tahash-backend:v{VERSION}"
+FRONTEND_IMAGE = f"idoshahar/tahash-frontend:v{VERSION}"
+
 # - Mongo
 DATABASE_COMPOSE_SERVICE = "mongo"
 DATABASE_CONTAINER_NAME = "mongodb"
@@ -21,26 +25,39 @@ def start_db():
 
 def stop_db():
     print("Stopping database...")
-    run(f"docker stop {DATABASE_CONTAINER_NAME}")
+    run(f"docker compose -f {DATABASE_CONTAINER_NAME} down")
     print("Stopped database successfully.")
 
 def clear_db():
-    compose_dir = os.path.dirname(DOCKER_COMPOSE_PATH)
-    compose_namespace = os.path.basename(compose_dir)
-    print("Stopping database...")
-    run(f"docker stop {DATABASE_CONTAINER_NAME}", check=False)
-    print("Clearing database data...")
-    run(f"docker volume rm {compose_namespace}/{DATABASE_VOLUME_NAME}")
-    print("Database cleared!")
+    print("Stopping composition and clearing database volume...")
+    run(f"docker compose -f {DOCKER_COMPOSE_PATH} down -v")
+    run(f"docker compose -f {DOCKER_COMPOSE_PATH} up -d")
+    # compose_dir = os.path.dirname(DOCKER_COMPOSE_PATH)
+    # compose_namespace = os.path.basename(compose_dir)
+    # print("Stopping database...")
+    # run(f"docker compose down {DATABASE_CONTAINER_NAME}", check=False)
+    # print("Clearing database data...")
+    # run(f"docker volume rm {compose_namespace}/{DATABASE_VOLUME_NAME}")
+    # print("Database cleared!")
 
-def start_all():
-    # -- Build backend locally into backend/dist
+def build_all():
     print("Building backend...")
     run("cd ./backend && npm run build")
 
-    # TODO: add option for --watch flag in compose (updates when files change) with a new Dockerfile.prod file for frontend
+    print("Building docker images...")
+    run(f"docker compose -f {DOCKER_COMPOSE_PATH} build")
+
+def push_all():
+    print("Pushing local images...")
+    run(f"docker push {BACKEND_IMAGE}")
+    run(f"docker push {FRONTEND_IMAGE}")
+
+def start_all():
+    # -- Build backend locally into backend/dist
+    build_all()
+
     print("Building and running all...")
-    run(f"docker compose -f {DOCKER_COMPOSE_PATH} up -d --build")
+    run(f"docker compose -f {DOCKER_COMPOSE_PATH} up -d")
     print("Started database and website successfully.")
 
 
@@ -50,8 +67,10 @@ def stop_all():
     print("Stopped running.")
 
 def print_usage():
-    print("Usage: python runner.py [db|all] [on|stop|clear]")
-    print("Note: use 'db clear' to clear the DB's storage.")
+    print("Usage: python runner.py [db|all] [on|stop|clear|build-push|build|push]")
+    print("use 'all build' to build according to the docker compose")
+    print("use 'all push' to push the local frontend and backend images")
+    print("use 'db clear' to clear the DB's storage.")
 
 if __name__ == "__main__":
     if len(sys.argv) != 3:
@@ -79,6 +98,15 @@ if __name__ == "__main__":
             start_all()
         elif action == "stop":
             stop_all()
+        elif action == "build-push":
+            print("BUILD:")
+            build_all()
+            print("PUSH:")
+            push_all()
+        elif action == "build":
+            build_all()
+        elif action == "push":
+            push_all()
         else:
             print_usage()
     else:
