@@ -16,6 +16,7 @@ const packedResultSchema = z.object({
   centis: z.int().min(-1),
 });
 const submissionStateSchema = z.enum(SubmissionState);
+const compNumberSchema = z.coerce.number().positive().int();
 
 // region Get.UserEventData
 // headers

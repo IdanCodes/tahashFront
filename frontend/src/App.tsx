@@ -20,6 +20,7 @@ import { cancelPendingRequests } from "./utils/API/apiUtils";
 import AdminPanel from "./pages/AdminPanel";
 import NotFoundPage from "./pages/NotFoundPage";
 import Results from "./pages/Results";
+import { ActiveCompProvider } from "./context/ActiveCompContext";
 
 function AnimatedRoutes(): JSX.Element {
   const location = useLocation();
@@ -116,6 +117,7 @@ function AnimatedRoutes(): JSX.Element {
           }
         />
         <Route path={RoutePath.Page.Results} element={<Results />} />
+        <Route path={RoutePath.Page.ResultsEvent} element={<Results />} />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </AnimatePresence>
@@ -127,17 +129,19 @@ function App(): JSX.Element {
     <BrowserRouter>
       <div className="min-h-screen bg-gradient-to-tl from-blue-700/90 via-blue-600/90 to-blue-600">
         <LoadingProvider>
-          <UserInfoProvider>
-            <Header />
+          <ActiveCompProvider>
+            <UserInfoProvider>
+              <Header />
 
-            <div className="align-start flex justify-center pb-6">
-              <div className="min-h-[calc(100vh-5rem)] w-[90%] overflow-hidden rounded-b-2xl border border-t-0 border-white/20 bg-white/80 shadow-xl backdrop-blur-md">
-                <LoadingWrapper>
-                  <AnimatedRoutes />
-                </LoadingWrapper>
+              <div className="align-start flex justify-center pb-6">
+                <div className="min-h-[calc(100vh-5rem)] w-[90%] overflow-hidden rounded-b-2xl border border-t-0 border-white/20 bg-white/80 shadow-xl backdrop-blur-md">
+                  <LoadingWrapper>
+                    <AnimatedRoutes />
+                  </LoadingWrapper>
+                </div>
               </div>
-            </div>
-          </UserInfoProvider>
+            </UserInfoProvider>
+          </ActiveCompProvider>
         </LoadingProvider>
       </div>
     </BrowserRouter>

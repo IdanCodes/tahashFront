@@ -5,10 +5,7 @@ import {EventId} from "./comp-event";
 /**
  * An event's display information and submission status
  */
-export interface EventDisplayAndStatus {
-    info: EventDisplayInfo;
-    status: EventSubmissionStatus;
-}
+export type EventDisplayAndStatus = EventDisplayInfo & { status: EventSubmissionStatus };
 
 /**
  * Combine an {@link EventDisplayInfo[]} and an {@link EventSubmissionStatus[]}.
@@ -18,12 +15,12 @@ export interface EventDisplayAndStatus {
  */
 export function getEventsDisplayAndStatus(displayInfos: readonly EventDisplayInfo[], eventStatuses: Map<EventId, EventSubmissionStatus>): EventDisplayAndStatus[] {
     const displayAndStatuses: EventDisplayAndStatus[] = displayInfos.map(
-        (di) => ({ info: di, status: EventSubmissionStatus.NotStarted }),
+        (di) => ({ ...di, status: EventSubmissionStatus.NotStarted }),
     );
     for (const [eventId, status] of eventStatuses) {
         if (status == EventSubmissionStatus.NotStarted) continue;
         const eventIndex = displayAndStatuses.findIndex(
-            (ds) => ds.info.eventId == eventId,
+            (ds) => ds.eventId == eventId,
         );
         if (eventIndex >= 0) displayAndStatuses[eventIndex].status = status;
     }

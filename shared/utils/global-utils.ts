@@ -63,6 +63,6 @@ export function isNumber(value: string): boolean {
  * @param x The number to check.
  */
 export function isInteger(x: number): boolean {
-    return x % 1 === 0;
+    return !isNaN(x) && Number.isInteger(x);
 }
 

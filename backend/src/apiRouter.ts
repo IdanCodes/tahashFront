@@ -90,7 +90,17 @@ router.post(
   compHandlers.updateTimes,
 );
 
-router.get(RoutePath.Get.LastCompDisplayData, compHandlers.lastCompDisplayData);
+router.get(RoutePath.Get.ActiveCompInfo, compHandlers.activeCompInfo);
+
+router.get(
+  `${RoutePath.Get.CompDisplayInfo}/:compNumber`,
+  compHandlers.compDisplayInfo,
+);
+
+router.get(
+  `${RoutePath.Get.EventResultDisplays}/:compNumber/:eventId`,
+  compHandlers.eventResultDisplays,
+);
 
 // admin
 

@@ -66,7 +66,7 @@ function ChooseEventPage() {
       setEventDisplays(
         eventDIs.map(
           (di): EventDisplayAndStatus => ({
-            info: di,
+            ...di,
             status: EventSubmissionStatus.NotStarted,
           }),
         ),

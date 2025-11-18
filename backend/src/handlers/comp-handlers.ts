@@ -23,6 +23,10 @@ import { errorObject } from "@shared/interfaces/error-object";
 import { getSubmissionDisplays } from "@shared/interfaces/submission-data-display";
 import { SubmissionState } from "@shared/constants/submission-state";
 import { shouldAutoApprove } from "@shared/utils/event-results-utils";
+import { TahashCompDoc } from "../database/models/tahash-comp.model";
+import { isInteger } from "@shared/utils/global-utils";
+import { submissionsToResultDisplays } from "@shared/types/comp-event-pair";
+import { CompDisplayInfo } from "@shared/interfaces/comp-display-info";
 
 /**
  * Get all event displays and statuses
@@ -206,18 +210,67 @@ async function updateSubmissionState(
   res.json(new ApiResponse(ResponseCode.Success, "Updated successfully"));
 }
 
-async function lastCompDisplayData(_: Request, res: Response) {
-  const currCompNum = CompManager.getInstance().getActiveCompNum();
-
-  const lastComp = await CompManager.getInstance().getTahashComp(
-    currCompNum - 1,
+export async function activeCompInfo(_: Request, res: Response) {
+  return res.json(
+    new ApiResponse(
+      ResponseCode.Success,
+      CompManager.getInstance().getActiveComp().getDisplayInfo(),
+    ),
   );
-  if (currCompNum <= 1 || !lastComp)
-    return res.json(errorResponse("No competitions found"));
+}
 
-  res.json(
-    new ApiResponse(ResponseCode.Success, await lastComp.getDisplayData()),
+export async function compDisplayInfo(req: Request, res: Response) {
+  const compNumberStr = req.params.compNumber;
+  if (!compNumberStr)
+    return res.json(errorResponse("Path parameter compNumber is required"));
+
+  const compNumber = Number(compNumberStr);
+  if (!isInteger(compNumber))
+    return res.json(errorResponse(`Invalid comp number ${compNumberStr}`));
+
+  if (compNumber === CompManager.getInstance().getActiveCompNum())
+    return activeCompInfo(req, res);
+
+  let comp: TahashCompDoc | null =
+    await CompManager.getInstance().getTahashComp(compNumber);
+  if (!comp)
+    return res.json(errorResponse(`Invalid comp number ${compNumberStr}`));
+  res.json(new ApiResponse(ResponseCode.Success, comp.getDisplayInfo()));
+}
+
+// /:compNumber/:eventId
+// response contains EventResultDisplay[]
+export async function eventResultDisplays(req: Request, res: Response) {
+  const compNumberStr = req.params.compNumber;
+  const eventId = req.params.eventId;
+  if (!compNumberStr || !eventId)
+    return res.json(
+      errorResponse("Path parameters compNumber and eventId are required"),
+    );
+
+  const eventData = getEventById(eventId);
+  if (!eventData)
+    return res.json(errorResponse(`Invalid event id "${eventId}"`));
+
+  const compNumber = Number(compNumberStr);
+  let comp: TahashCompDoc | null = null;
+  if (
+    !isInteger(compNumber) ||
+    !(comp = await CompManager.getInstance().getTahashComp(compNumber))
+  )
+    return res.json(errorResponse(`Invalid comp number ${compNumberStr}`));
+
+  const eventResults = comp.getEventResults(eventId);
+  if (!eventResults)
+    return res.json(
+      errorResponse(`Event "${eventId}" does not exist in this competition`),
+    );
+
+  const eventResultDisplays = await submissionsToResultDisplays(
+    eventData,
+    eventResults.submissions,
   );
+  res.json(new ApiResponse(ResponseCode.Success, eventResultDisplays));
 }
 
 export const compHandlers = {
@@ -228,5 +281,7 @@ export const compHandlers = {
   eventSubmissions,
   eventDisplayInfo,
   updateSubmissionState,
-  lastCompDisplayData,
+  activeCompInfo,
+  compDisplayInfo,
+  eventResultDisplays,
 };

@@ -83,7 +83,7 @@ function ScramblesMenu({
         <ScrambleMenuButton
           key={i}
           isAccessible={isScrambleAccessible(i)}
-          isActiveScramble={activeScramble == i}
+          isActiveScramble={activeScramble === i}
           loadScramble={() => loadScramble(i)}
           resultStr={formatPackedResult(allTimes[i])}
           scrNumber={i + 1}
@@ -556,11 +556,11 @@ function Compete() {
   }
 
   useEffect(() => {
-    addLoading();
+    // addLoading();
 
     const eventId = params.eventId;
     if (!eventId || !userInfo.user) {
-      removeLoading();
+      // removeLoading();
       navigate(RoutePath.Page.Scrambles);
       return;
     }
@@ -570,7 +570,10 @@ function Compete() {
     }).then((res) => {
       if (res.aborted) return;
       else if (res.isError) return redirectToError(res.data);
-      initCompeteData(res.data).then(removeLoading);
+      initCompeteData(res.data)
+        .then
+        // removeLoading
+        ();
     });
   }, []);
 
@@ -726,6 +729,11 @@ function Compete() {
         <p className="font-bold">{competeData.eventData.eventTitle} </p>
         <span className={`cubing-icon ${competeData.eventData.iconName}`} />
       </div>
+      {loadingScrTxt && (
+        <>
+          <LoadingSpinner />
+        </>
+      )}
       <div
         className={clsx(`transition-opacity`)}
         style={{
@@ -748,7 +756,6 @@ function Compete() {
           loadScramble={loadScramble}
           isScrambleAccessible={isScrambleAccessible}
         />
-
         <div className="mx-auto w-8/10 rounded-2xl border-2 border-transparent bg-gradient-to-r from-slate-400/70 to-slate-400/80 shadow-xl">
           {/*Scramble & Image*/}
           <ScrambleAndImage

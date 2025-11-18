@@ -4,11 +4,22 @@ import clsx from "clsx";
 import { motion } from "motion/react";
 import { CubingIconsSheet } from "./CubingIconsSheet";
 import { EventSubmissionStatus } from "@shared/constants/event-submission-status";
+import { EventDisplayInfo } from "@shared/interfaces/event-display-info";
 
-function EventBoxIcon({ iconName }: { iconName: string }) {
+export function EventBoxIcon({
+  iconName,
+  size = "6rem",
+}: {
+  iconName: string;
+  size?: string;
+}) {
   return (
     <motion.span
-      className={`cubing-icon ${iconName} col-1 row-1 m-auto text-8xl`}
+      className={`cubing-icon ${iconName} col-1 row-1 flex justify-center text-6xl`}
+      style={{
+        fontSize: size,
+        lineHeight: 1,
+      }}
       variants={{
         hover: {
           opacity: 0.8,
@@ -24,19 +35,27 @@ function EventBoxIcon({ iconName }: { iconName: string }) {
   );
 }
 
-function EventBoxTitle({
+export function EventBoxTitle({
   eventTitle,
   hovered,
+  height = 20,
+  fontSize = 2,
 }: {
   eventTitle: string;
   hovered: boolean;
+  height?: number;
+  fontSize?: number;
 }) {
   return (
     <motion.p
       className={clsx(
         "col-1 row-1",
-        "pointer-events-none relative bottom-17 pb-2 text-center text-lg font-semibold text-nowrap select-none",
+        "pointer-events-none relative pb-2 text-center font-semibold text-nowrap select-none",
       )}
+      style={{
+        bottom: `${height}px`,
+        fontSize: `${fontSize}rem`,
+      }}
       initial={{
         opacity: 0,
       }}
@@ -86,15 +105,28 @@ function getBoxColors(status: EventSubmissionStatus): {
   }
 }
 
-function EventBox({
+export function EventBox({
   das,
   handleClickEvent,
+  boxOptions = {
+    size: 6,
+    fontSize: 1.3,
+    hasBorder: true,
+    animateHover: true,
+  },
 }: {
-  das: EventDisplayAndStatus;
+  das: EventDisplayInfo | EventDisplayAndStatus;
   handleClickEvent: (eventId: string) => void;
+  boxOptions?: {
+    size: number;
+    fontSize: number;
+    hasBorder: boolean;
+    animateHover: boolean;
+  };
 }) {
   const [hovered, setHovered] = useState<boolean>(false);
-  const status = das.status;
+  const status =
+    "status" in das ? das.status : EventSubmissionStatus.NotStarted;
   let boxColors = getBoxColors(status);
 
   return (
@@ -102,11 +134,17 @@ function EventBox({
       <motion.div
         onHoverStart={() => setHovered(true)}
         onHoverEnd={() => setHovered(false)}
-        className="box-content grid size-29 cursor-pointer place-content-center items-center rounded-2xl border-3 border-black"
-        style={{ backgroundColor: boxColors.default }}
+        className={clsx(
+          `box-content grid cursor-pointer place-content-center items-center rounded-2xl`,
+          boxOptions.hasBorder && "border-black outline-[2.5px]",
+        )}
+        style={{
+          backgroundColor: boxColors.default,
+          padding: `${boxOptions.size / 1.2}px`,
+        }}
         variants={{
           hover: {
-            rotate: 3,
+            rotate: boxOptions.animateHover ? 3 : 0,
             scale: 1.07,
             backgroundColor: boxColors.hover,
           },
@@ -128,10 +166,15 @@ function EventBox({
         }}
         whileHover="hover"
         whileTap="click"
-        onClick={() => handleClickEvent(das.info.eventId)}
+        onClick={() => handleClickEvent(das.eventId)}
       >
-        <EventBoxIcon iconName={das.info.iconName} />
-        <EventBoxTitle eventTitle={das.info.eventTitle} hovered={hovered} />
+        <EventBoxIcon iconName={das.iconName} size={`${boxOptions.size}rem`} />
+        <EventBoxTitle
+          eventTitle={das.eventTitle}
+          hovered={hovered}
+          height={boxOptions.size * (10 + (7 - boxOptions.size) / 5)}
+          fontSize={boxOptions.fontSize}
+        />
       </motion.div>
     </>
   );
@@ -147,7 +190,7 @@ function EventBoxes({
   return (
     <>
       <CubingIconsSheet />
-      <div className="mx-auto mt-2 mb-2 flex w-8/10 flex-wrap place-content-center gap-x-9.5 gap-y-11 border-3 border-black pt-10 pb-4">
+      <div className="mx-auto mt-2 mb-2 flex w-8/10 flex-wrap place-content-center gap-x-9.5 gap-y-11 pt-6 pb-4">
         {events.map((das, index) => (
           <EventBox
             key={index}

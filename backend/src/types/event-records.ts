@@ -1,7 +1,7 @@
 import { TimeFormat } from "@shared/constants/time-formats";
 import { BO3BestResults, ResultFormatMap } from "./result-format";
 import { getPureCentis } from "@shared/utils/time-utils";
-import { getMinResult } from "@shared/utils/event-results-utils";
+import { getBestResult } from "@shared/utils/event-results-utils";
 
 export type EventRecords<T extends TimeFormat> = ResultFormatMap[T];
 

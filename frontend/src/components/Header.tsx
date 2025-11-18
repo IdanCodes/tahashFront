@@ -5,9 +5,11 @@ import { useUserInfo } from "../context/UserContext";
 import logo from "./assets/ILSpeeddcubinglogo.svg";
 import "./animations.css";
 import { RoutePath } from "@shared/constants/route-path";
+import { useActiveComp } from "../context/ActiveCompContext";
 
 function Header(): JSX.Element {
   const userInfo = useUserInfo();
+  const compInfo = useActiveComp();
 
   return (
     <div className="flex h-auto w-full flex-col items-center justify-center gap-4 bg-gradient-to-br from-blue-700 via-blue-800 to-indigo-800 p-4 lg:h-[100px] lg:flex-row-reverse lg:justify-between lg:gap-0 lg:p-[1vw]">
@@ -21,6 +23,9 @@ function Header(): JSX.Element {
           ILCubers - Weekly Competition
         </h1>
       </div>
+      {compInfo.displayInfo && (
+        <p className="text-white">Comp #{compInfo.displayInfo.compNumber}</p>
+      )}
 
       <nav className="pr-[2vw] lg:p-[2vw] lg:pr-0">
         <ul className="flex list-none gap-5 text-center font-extrabold text-blue-100">

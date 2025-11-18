@@ -3,6 +3,7 @@ import {
   CompEvent,
   EventId,
   getEventById,
+  getEventDisplayInfo,
   WCAEvents,
 } from "@shared/types/comp-event";
 import { CompEventResults } from "@shared/interfaces/comp-event-results";
@@ -25,12 +26,8 @@ import { TimeFormat } from "@shared/constants/time-formats";
 import { PackedResult } from "@shared/interfaces/packed-result";
 import { PastCompResults } from "../../types/past-comp-results";
 import { comparePackedResults } from "@shared/utils/time-utils";
-import {
-  CompEventPair,
-  CompEventPairDisplay,
-  getCompEventPairDisplay,
-} from "@shared/types/comp-event-pair";
-import { CompDisplayData } from "@shared/interfaces/comp-display-data";
+import { CompEventPair } from "@shared/types/comp-event-pair";
+import { CompDisplayInfo } from "@shared/interfaces/comp-display-info";
 
 const compEventResultsSchema = new Schema<CompEventResults>(
   {
@@ -194,7 +191,7 @@ export interface TahashCompMethods {
   /**
    * Get this competition's display data
    */
-  getDisplayData(): Promise<CompDisplayData>;
+  getDisplayInfo(): CompDisplayInfo;
 }
 
 export interface TahashCompStatics {
@@ -414,27 +411,13 @@ export const TahashCompSchema = new Schema<
          */
       },
 
-      async getDisplayData(): Promise<CompDisplayData> {
-        const eventPairDisplays: CompEventPairDisplay[] = [];
-
-        for (let i = 0; i < this.data.length; i++) {
-          const display = await getCompEventPairDisplay(this.data[i]);
-          if (!display) {
-            console.warn(
-              `comp-event-pair.ts.getDisplayData: Could not get display data for event "${this.data[i].eventId}"; skipping.`,
-            );
-            continue;
-          }
-
-          eventPairDisplays.push(display);
-        }
-
+      getDisplayInfo(): CompDisplayInfo {
         return {
           compNumber: this.compNumber,
           startDate: this.startDate,
           endDate: this.endDate,
-          data: eventPairDisplays,
-        } as CompDisplayData;
+          events: this.eventIds.map((eid) => getEventDisplayInfo(eid)),
+        } as CompDisplayInfo;
       },
     },
     statics: {

@@ -16,9 +16,9 @@ function Scrambles() {
 
   useEffect(() => {
     if (events) return;
-    addLoading();
+    // addLoading();
     sendGetRequest(RoutePath.Get.EventsDisplayAndStatus).then((res) => {
-      removeLoading();
+      // removeLoading();
       if (res.aborted) return;
       if (res.code != ResponseCode.Success) return redirectToError(res.data);
       setEvents(res.data as EventDisplayAndStatus[]);

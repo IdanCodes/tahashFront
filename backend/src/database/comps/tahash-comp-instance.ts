@@ -15,12 +15,8 @@ import { CompEventResults } from "@shared/interfaces/comp-event-results";
 import { SubmissionData } from "@shared/interfaces/submission-data";
 import { SubmissionState } from "@shared/constants/submission-state";
 import { PackedResult } from "@shared/interfaces/packed-result";
-import { CompDisplayData } from "@shared/interfaces/comp-display-data";
-import {
-  CompEventPair,
-  CompEventPairDisplay,
-  getCompEventPairDisplay,
-} from "@shared/types/comp-event-pair";
+import { CompDisplayInfo } from "@shared/interfaces/comp-display-info";
+import { CompEventPair } from "@shared/types/comp-event-pair";
 
 /*
 TODO:
@@ -137,8 +133,13 @@ export class TahashCompInstance implements ITahashComp, TahashCompMethods {
     return await this.srcDoc.closeComp();
   }
 
-  async getDisplayData(): Promise<CompDisplayData> {
-    return await this.srcDoc.getDisplayData();
+  getDisplayInfo(): CompDisplayInfo {
+    return {
+      compNumber: this.compNumber,
+      startDate: this.startDate,
+      endDate: this.endDate,
+      events: this.eventDisplayInfos,
+    } as CompDisplayInfo;
   }
 
   /**
