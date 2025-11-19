@@ -46,7 +46,7 @@ function ScrambleMenuButton({
   return (
     <button
       className={clsx(
-        `group relative my-auto flex overflow-hidden rounded-2xl p-2 text-2xl shadow-xl transition-[flex] duration-[400ms] select-none`,
+        `group relative my-auto flex overflow-hidden rounded-2xl p-2 text-2xl shadow-xl transition-[flex] duration-[400ms] select-none max-lg:text-lg`,
         isAccessible && `cursor-pointer`,
         !isAccessible && "opacity-60",
         isActiveScramble && "flex-[4] origin-top-left bg-slate-500/90",
@@ -302,11 +302,11 @@ function TimeInputField({
   }, [activeScramble]);
 
   return (
-    <div className="flex items-center justify-center">
+    <div className="flex w-full items-center justify-center">
       <input
         ref={inputRef}
         type="text"
-        className="w-[60%] rounded-xl bg-white py-2 text-center text-2xl shadow-xl transition-all duration-300 hover:w-[65%] focus:w-[85%] focus:outline-2 focus:outline-slate-400/70"
+        className="w-[50%] rounded-xl bg-white py-2 text-center text-2xl shadow-xl transition-all duration-300 hover:w-[55%] focus:w-[65%] focus:outline-2 focus:outline-slate-400/70"
         maxLength={12}
         onChange={onInputChange}
         value={currentInput}
@@ -341,11 +341,11 @@ function PenaltySelector({
   };
 
   return (
-    <div className="my-2 flex w-[70%] place-items-center gap-[5%]">
+    <div className="my-2 flex w-full items-center justify-center gap-[5%]">
       <PrimaryButton
         text="+2"
         buttonSize={ButtonSize.Small}
-        className="flex-1"
+        className="basis-[35%]"
         onClick={penalties.togglePlusTwo}
         colors={
           penalties.currPenalty == Penalties.Plus2
@@ -357,7 +357,7 @@ function PenaltySelector({
       <PrimaryButton
         text="DNF"
         buttonSize={ButtonSize.Small}
-        className="flex-1"
+        className="basis-[35%]"
         colors={
           penalties.currPenalty == Penalties.DNF
             ? penaltyBtnEnabledColors
@@ -387,7 +387,7 @@ function PreviewAndSubmitBtn({
 
   return (
     <div className="flex w-full flex-col">
-      <p className="text-center text-3xl">{previewStr}</p>
+      <p className="text-center text-3xl transition-all duration-300 ease-in-out hover:scale-115">{previewStr}</p>
       {!finishedEvent && (
         <div className="m-auto w-fit">
           <PrimaryButton
@@ -731,7 +731,7 @@ function Compete() {
     <>
       <CubingIconsSheet />
       {/*Event Title*/}
-      <div className="flex justify-center gap-2 text-center text-4xl text-blue-950">
+      <div className="flex justify-center p-4 gap-2 text-center text-4xl text-blue-950">
         <p className="font-bold">{competeData.eventData.eventTitle} </p>
         <span className={`cubing-icon ${competeData.eventData.iconName}`} />
       </div>

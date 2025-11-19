@@ -31,7 +31,7 @@ export default function PrimaryButton({
           `box-border flex scale-95 items-center justify-center rounded-2xl px-5 py-3 shadow-xl transition-transform duration-[200ms] [transition-timing-function:cubic-bezier(0.68,-0.55,0.3,2.5)] select-none ${colors.normal}`,
           disabled && "cursor-not-allowed opacity-70",
           !disabled &&
-            `cursor-pointer hover:scale-100 hover:${colors.hover} active:${colors.click} hover:scale-[1.03]`,
+            `cursor-pointer hover:scale-100 hover:${colors.hover} active:${colors.click} hover:scale-[1.03] `,
           className,
         )}
         type={btnType}

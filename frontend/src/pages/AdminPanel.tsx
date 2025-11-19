@@ -9,6 +9,7 @@ import { EventSubmissionStatus } from "@shared/constants/event-submission-status
 import LoadingSpinner from "../components/LoadingSpinner";
 import { useNavigate, useParams } from "react-router-dom";
 import { useUserInfo } from "../context/UserContext";
+import clsx from "clsx";
 import { HttpHeaders } from "@shared/constants/http-headers";
 import { SubmissionDataDisplay } from "@shared/interfaces/submission-data-display";
 import {
@@ -174,7 +175,7 @@ function EventSubmissionsPanel({
           {submissions.map((submission, _) => (
             <div
               key={submission.submitterData.id}
-              className="flex h-fit w-fit flex-col rounded-xl border-3 bg-gray-400 p-4 text-2xl"
+              className="flex h-fit w-fit flex-col rounded-xl border-3 border-gray-800 bg-gradient-to-r from-slate-400/40 to-slate-400/50 p-4 text-2xl"
             >
               <span className="">{submission.submitterData.name}</span>
               <span className="">{submission.submitterData.wcaId}</span>
@@ -203,6 +204,16 @@ function EventSubmissionsPanel({
               <span>Result: {submission.resultStr}</span>
               <div className="flex flex-row justify-between px-2">
                 <PrimaryButton
+                  className={clsx(
+                    "rounded-xl border-[3px] border-green-400 bg-green-400 text-[#181818]",
+                    "transition-all duration-300 ease-in-out [transition-timing-function:ease-in-out]",
+
+                    // Disable all scaling completely
+                    "!hover:scale-90 !active:scale-90 !scale-90",
+
+                    "hover:bg-transparent hover:text-green-400",
+                    "hover:shadow-[0_0_25px_#95f9fe50]", // glow
+                  )}
                   text="Accept"
                   colors={{
                     normal: "rgb(46,217,46)",

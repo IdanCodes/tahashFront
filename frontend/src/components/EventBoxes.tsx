@@ -147,7 +147,7 @@ function EventBoxes({
   return (
     <>
       <CubingIconsSheet />
-      <div className="mx-auto mt-2 mb-2 flex w-8/10 flex-wrap place-content-center gap-x-9.5 gap-y-11 border-3 border-black pt-10 pb-4">
+      <div className="mx-auto mt-2 mb-2 flex w-8/10 flex-wrap place-content-center gap-x-9.5 gap-y-11 border-3 border-black p-10 rounded-2xl ">
         {events.map((das, index) => (
           <EventBox
             key={index}
