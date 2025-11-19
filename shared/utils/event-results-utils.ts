@@ -75,12 +75,12 @@ function calculateMO3(results: PackedResult[]): number {
  * @return The result, in centiseconds.
  */
 function calculateBO3(results: PackedResult[]): number {
-    if (results.length == 0) return NULL_TIME_CENTIS;
+  let best = NULL_TIME_CENTIS;
 
-  let best = getPureCentis(results[0]);
-
-  for (let i = 1; i < NumScrambles[TimeFormat.bo3]; i++)
-    best = Math.min(best, getPureCentis(results[i]));
+  for (let i = 0; i < NumScrambles[TimeFormat.bo3]; i++) {
+      if (results[i].penalty !== Penalties.DNF)
+        best = Math.min(best, getPureCentis(results[i]));
+  }
 
   return best;
 }
@@ -186,7 +186,7 @@ export function generateResultStr(
 
     default:
         const centis = calcEventResult(compEvent, results);
-        return formatCentis(centis);
+        return !isFinite(centis) ? DNF_STRING : formatCentis(centis);
   }
 }
 
@@ -196,7 +196,7 @@ export function generateResultStr(
  * @param results The results to search
  */
 export function getBestResult(eventData: CompEvent, results: PackedResult[]): PackedResult {
-    const INVALID = { centis: NULL_TIME_CENTIS, penalty: Penalties.DNF };
+    const INVALID: PackedResult = { centis: NULL_TIME_CENTIS, penalty: Penalties.DNF };
     if (results.length == 0) return INVALID;
 
     if (eventData.timeFormat === TimeFormat.multi)
@@ -207,15 +207,15 @@ export function getBestResult(eventData: CompEvent, results: PackedResult[]): Pa
     }
 
     return results.reduce((min, curr) => {
-        return getPureCentis(curr) < getPureCentis(min) ? curr : min;
-    });
+        return curr.penalty !== Penalties.DNF && getPureCentis(curr) < getPureCentis(min) ? curr : min;
+    }, INVALID);
 }
 
 export function getBestResultStr(eventData: CompEvent, results: PackedResult[]): string {
     if (eventData.timeFormat === TimeFormat.multi)
         return getMbldResultStr(results);
     else if (eventData.eventId === "333fm") {
-        const len =getShortestFMCSol(results);
+        const len = getShortestFMCSol(results);
         return len ? len.toString() : "";
     }
 

@@ -51,7 +51,6 @@ services:
       - "3002:8080"
     volumes:
       - ../frontend:/app
-      - ../shared:/shared
     depends_on:
       - backend
 
