@@ -25,7 +25,7 @@ function Header(): JSX.Element {
           </h1>
         </div>
         {compInfo.displayInfo && (
-          <p className="absolute bottom-[-10px] text-[clamp(0.9rem,0.8vw,1.1rem)] text-white transition-all duration-200 group-hover:scale-105 group-hover:text-yellow-400">
+          <p className="absolute bottom-[-8px] text-[clamp(0.9rem,0.8vw,1.1rem)] text-white transition-all duration-200 group-hover:scale-105 group-hover:text-yellow-400">
             Comp #{compInfo.displayInfo.compNumber}
           </p>
         )}
@@ -82,7 +82,7 @@ function NavbarButton({ to, text }: { to: string; text: string }): JSX.Element {
       to={to}
       className={({ isActive }) =>
         clsx(
-          "relative px-[10px] text-[clamp(0.8rem,1vw,1.9rem)] transition-transform duration-300 ease-in-out",
+          "relative px-[10px] text-[clamp(1.02rem,1vw,1.4rem)] transition-transform duration-300 ease-in-out max-lg:text-[clamp(0.8rem,1vw,1.9rem)]",
           isActive
             ? "scale-105 text-blue-100"
             : "text-blue-100 hover:scale-110",
