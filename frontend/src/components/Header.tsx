@@ -12,7 +12,7 @@ function Header(): JSX.Element {
   const compInfo = useActiveComp();
 
   return (
-    <div className="flex h-auto w-full flex-col items-center justify-center gap-3 bg-gradient-to-br from-blue-700 via-blue-800 to-indigo-800 p-4 lg:h-[100px] lg:flex-row-reverse lg:justify-between lg:gap-0 lg:p-[1vw]">
+    <div className="flex h-auto w-full flex-col items-center justify-center gap-3 bg-gradient-to-br from-blue-700 via-blue-800 to-indigo-800 p-4 lg:h-[90px] lg:flex-row-reverse lg:justify-between lg:gap-0 lg:p-[1vw]">
       <div className="group relative flex flex-col items-center pb-[0.3vw]">
         <div className="flex flex-row items-center gap-3 lg:items-center lg:gap-5">
           <img
@@ -20,12 +20,12 @@ function Header(): JSX.Element {
             alt="ILCubers Logo"
             className="w-[45px] transition-transform duration-200 ease-in-out group-hover:scale-110 lg:w-[55px]"
           />
-          <h1 className="group-hover:animate-wave inline-block text-[clamp(1.4rem,2.5vw,2.5rem)] tracking-[0.03em] whitespace-nowrap text-blue-100 transition-all duration-200 ease-in-out select-none group-hover:scale-102">
+          <h1 className="group-hover:animate-wave inline-block text-[clamp(1.2rem,2vw,2.5rem)] tracking-[0.03em] whitespace-nowrap text-blue-100 transition-all duration-200 ease-in-out select-none group-hover:scale-102">
             ILCubers - Weekly Competition
           </h1>
         </div>
         {compInfo.displayInfo && (
-          <p className="absolute bottom-[-8px] text-[clamp(0.9rem,0.8vw,1.1rem)] text-white transition-all duration-200 group-hover:scale-105 group-hover:text-yellow-400">
+          <p className="absolute bottom-[-8px] text-[clamp(0.75rem,1vw,1.1rem)] text-white transition-all duration-200 group-hover:scale-105 group-hover:text-yellow-400">
             Comp #{compInfo.displayInfo.compNumber}
           </p>
         )}
@@ -82,7 +82,7 @@ function NavbarButton({ to, text }: { to: string; text: string }): JSX.Element {
       to={to}
       className={({ isActive }) =>
         clsx(
-          "relative px-[10px] text-[clamp(1.02rem,1vw,1.4rem)] transition-transform duration-300 ease-in-out max-lg:text-[clamp(0.8rem,1vw,1.9rem)]",
+          "relative px-[10px] text-[clamp(1.2rem,1vw,1.4rem)] transition-transform duration-300 ease-in-out max-lg:text-[clamp(0.8rem,1vw,1.9rem)]",
           isActive
             ? "scale-105 text-blue-100"
             : "text-blue-100 hover:scale-110",
