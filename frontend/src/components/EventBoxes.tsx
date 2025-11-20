@@ -184,7 +184,7 @@ function EventBoxes({
   events,
   handleClickEvent = undefined,
 }: {
-  events: EventDisplayAndStatus[];
+  events: EventDisplayInfo[] | EventDisplayAndStatus[];
   handleClickEvent: ((eventId: string) => void) | undefined;
 }) {
   return (

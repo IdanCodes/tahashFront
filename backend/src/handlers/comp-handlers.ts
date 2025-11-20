@@ -25,8 +25,7 @@ import { SubmissionState } from "@shared/constants/submission-state";
 import { shouldAutoApprove } from "@shared/utils/event-results-utils";
 import { TahashCompDoc } from "../database/models/tahash-comp.model";
 import { isInteger } from "@shared/utils/global-utils";
-import { submissionsToResultDisplays } from "@shared/types/comp-event-pair";
-import { CompDisplayInfo } from "@shared/interfaces/comp-display-info";
+import { submissionsToResultDisplays } from "@shared/types/event-result-display";
 
 /**
  * Get all event displays and statuses
@@ -138,6 +137,36 @@ export async function updateTimes(req: UpdateTimesRequest, res: Response) {
     );
 
   await activeComp.save();
+}
+
+export async function eventsAndSubmissionOverviews(
+  req: Request,
+  res: Response,
+) {
+  const compNumberStr = req.params.compNumber;
+  if (!compNumberStr)
+    return res.json(errorResponse("Path parameter compNumber is required"));
+
+  const compNumber = Number(compNumberStr);
+  if (!isInteger(compNumber))
+    return res.json(errorResponse(`Invalid comp number ${compNumberStr}`));
+
+  if (compNumber === CompManager.getInstance().getActiveCompNum()) {
+    const overviews = CompManager.getInstance()
+      .getActiveComp()
+      .eventsAndSubmissionOverviews();
+    return res.json(new ApiResponse(ResponseCode.Success, overviews));
+  }
+
+  let comp: TahashCompDoc | null =
+    await CompManager.getInstance().getTahashComp(compNumber);
+  if (!comp)
+    return res.json(errorResponse(`Invalid comp number ${compNumberStr}`));
+
+  return new ApiResponse(
+    ResponseCode.Success,
+    comp.eventsAndSubmissionOverviews(),
+  );
 }
 
 // response is SubmissionDataDisplay[]
@@ -278,6 +307,7 @@ export const compHandlers = {
   userEventData,
   updateTimes,
   compEventsDisplays,
+  eventsAndSubmissionOverviews,
   eventSubmissions,
   eventDisplayInfo,
   updateSubmissionState,

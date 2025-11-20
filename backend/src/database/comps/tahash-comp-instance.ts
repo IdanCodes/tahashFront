@@ -17,6 +17,10 @@ import { SubmissionState } from "@shared/constants/submission-state";
 import { PackedResult } from "@shared/interfaces/packed-result";
 import { CompDisplayInfo } from "@shared/interfaces/comp-display-info";
 import { CompEventPair } from "@shared/types/comp-event-pair";
+import {
+  getSubmissionsOverview,
+  SubmissionsOverview,
+} from "@shared/types/SubmissionsOverview";
 
 /*
 TODO:
@@ -140,6 +144,21 @@ export class TahashCompInstance implements ITahashComp, TahashCompMethods {
       endDate: this.endDate,
       events: this.eventDisplayInfos,
     } as CompDisplayInfo;
+  }
+
+  eventsAndSubmissionOverviews(): (EventDisplayInfo & SubmissionsOverview)[] {
+    const result: (EventDisplayInfo & SubmissionsOverview)[] = [];
+
+    for (let i = 0; i < this.data.length; i++) {
+      const submissions = this.data[i].result.submissions;
+
+      result.push({
+        ...this.eventDisplayInfos[i],
+        overview: getSubmissionsOverview(submissions).overview,
+      } as EventDisplayInfo & SubmissionsOverview);
+    }
+
+    return result;
   }
 
   /**

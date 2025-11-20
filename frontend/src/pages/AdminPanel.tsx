@@ -17,6 +17,8 @@ import {
 } from "@shared/constants/submission-state";
 import { formatPackedResults } from "@shared/utils/time-utils";
 import PrimaryButton from "../components/buttons/PrimaryButton";
+import { SubmissionsOverview } from "@shared/types/SubmissionsOverview";
+import { useActiveComp } from "../context/ActiveCompContext";
 
 function AdminPanel() {
   const params = useParams();
@@ -47,32 +49,45 @@ function AdminPanel() {
 }
 
 function ChooseEventPage() {
-  const [eventDisplays, setEventDisplays] = useState<
-    EventDisplayAndStatus[] | null
+  const [eventDisplays, setEventDisplays] = useState<EventDisplayInfo[] | null>(
+    null,
+  );
+  const [submissionOverviews, setSubmissionOverviews] = useState<
+    SubmissionsOverview[] | null
   >(null);
   const navigate = useNavigate();
+  const activeComp = useActiveComp();
 
   useEffect(() => {
-    if (eventDisplays) return;
+    if (eventDisplays || !activeComp.displayInfo) return;
 
-    sendGetRequest(RoutePath.Get.CompEventsDisplays).then((res) => {
+    sendGetRequest(
+      `${RoutePath.Get.EventsAndSubmissionOverviews}/${activeComp.displayInfo.compNumber}`,
+    ).then((res) => {
       if (res.aborted) return;
-      if (res.isError) {
-        redirectToError(res.data);
-        return;
-      }
+      if (res.isError) return redirectToError(res.data);
 
-      const eventDIs: EventDisplayInfo[] = res.data as EventDisplayInfo[];
+      console.log("res.data", res.data);
+      const data: (EventDisplayInfo & SubmissionsOverview)[] = res.data;
       setEventDisplays(
-        eventDIs.map(
-          (di): EventDisplayAndStatus => ({
-            ...di,
-            status: EventSubmissionStatus.NotStarted,
+        data.map(
+          (di): EventDisplayInfo => ({
+            eventId: di.eventId,
+            eventTitle: di.eventTitle,
+            iconName: di.iconName,
+          }),
+        ),
+      );
+
+      setSubmissionOverviews(
+        data.map(
+          (so): SubmissionsOverview => ({
+            overview: so.overview,
           }),
         ),
       );
     });
-  }, []);
+  }, [activeComp.displayInfo]);
 
   return (
     <>

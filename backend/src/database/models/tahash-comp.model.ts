@@ -13,10 +13,7 @@ import {
 } from "@shared/interfaces/submission-data";
 import { SubmissionState } from "@shared/constants/submission-state";
 import { packedResultSchema } from "./packed-result.schema";
-import {
-  EventRecords,
-  getNumericResultOfRecord,
-} from "../../types/event-records";
+import { EventRecords } from "../../types/event-records";
 import { UserManager } from "../users/user-manager";
 import {
   compareFinalResults,
@@ -25,9 +22,13 @@ import {
 import { TimeFormat } from "@shared/constants/time-formats";
 import { PackedResult } from "@shared/interfaces/packed-result";
 import { PastCompResults } from "../../types/past-comp-results";
-import { comparePackedResults } from "@shared/utils/time-utils";
 import { CompEventPair } from "@shared/types/comp-event-pair";
 import { CompDisplayInfo } from "@shared/interfaces/comp-display-info";
+import { EventDisplayInfo } from "@shared/interfaces/event-display-info";
+import {
+  getSubmissionsOverview,
+  SubmissionsOverview,
+} from "@shared/types/SubmissionsOverview";
 
 const compEventResultsSchema = new Schema<CompEventResults>(
   {
@@ -192,6 +193,11 @@ export interface TahashCompMethods {
    * Get this competition's display data
    */
   getDisplayInfo(): CompDisplayInfo;
+
+  /**
+   * Get the competition's event displays and current submissions overview
+   */
+  eventsAndSubmissionOverviews(): (EventDisplayInfo & SubmissionsOverview)[];
 }
 
 export interface TahashCompStatics {
@@ -418,6 +424,24 @@ export const TahashCompSchema = new Schema<
           endDate: this.endDate,
           events: this.eventIds.map((eid) => getEventDisplayInfo(eid)),
         } as CompDisplayInfo;
+      },
+
+      eventsAndSubmissionOverviews(): (EventDisplayInfo &
+        SubmissionsOverview)[] {
+        const result: (EventDisplayInfo & SubmissionsOverview)[] = [];
+
+        for (let i = 0; i < this.data.length; i++) {
+          const eventId = this.data[i].eventId;
+          const submissions = this.data[i].result.submissions;
+
+          const displayInfo = getEventDisplayInfo(eventId);
+          result.push({
+            ...displayInfo,
+            overview: getSubmissionsOverview(submissions).overview,
+          } as EventDisplayInfo & SubmissionsOverview);
+        }
+
+        return result;
       },
     },
     statics: {

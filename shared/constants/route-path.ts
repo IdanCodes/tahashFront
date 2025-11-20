@@ -27,6 +27,7 @@ export const RoutePath = {
         UserInfo: "/user-info",
         Logout: "/logout",
         CompEventsDisplays: "/comp-events-displays",
+        EventsAndSubmissionOverviews: "/events-and-submission-overviews",
         EventsDisplayAndStatus: "/comp-display-status",
         UserEventData: "/user-event-data",
         EventDisplayInfo: "/event-display-info",

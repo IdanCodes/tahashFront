@@ -1,10 +1,8 @@
-import { SubmissionState } from "../constants/submission-state";
-import { PackedResult } from "./packed-result";
-import {
-  calcEventResult,
-  generateResultStr,
-} from "../utils/event-results-utils";
-import { CompEvent } from "../types/comp-event";
+import {SubmissionState} from "../constants/submission-state";
+import {PackedResult} from "./packed-result";
+import {calcEventResult, generateResultStr,} from "../utils/event-results-utils";
+import {CompEvent} from "../types/comp-event";
+import {SubmissionsOverview} from "../types/SubmissionsOverview";
 
 /**
  * Submission data of an attempt in a Tahash Comp.

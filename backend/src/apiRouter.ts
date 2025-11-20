@@ -105,6 +105,13 @@ router.get(
 // admin
 
 router.get(
+  `${RoutePath.Get.EventsAndSubmissionOverviews}/:compNumber`,
+  requireAuth,
+  requireAdmin,
+  compHandlers.eventsAndSubmissionOverviews,
+);
+
+router.get(
   RoutePath.Get.EventSubmissions,
   requireAuth,
   requireAdmin,
