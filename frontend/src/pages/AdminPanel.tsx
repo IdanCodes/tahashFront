@@ -24,6 +24,7 @@ function AdminPanel() {
   const userInfo = useUserInfo();
   const [mode, setMode] = useState<"chooseEvent" | "eventPanel" | null>(null);
   const eventId = useRef<string>("");
+  const navigate = useNavigate();
 
   useEffect(() => {
     eventId.current = params.eventId ?? "";
@@ -39,7 +40,15 @@ function AdminPanel() {
       {mode == "chooseEvent" ? (
         <ChooseEventPage />
       ) : mode == "eventPanel" ? (
-        <EventPanel eventId={eventId.current} />
+        <>
+          <div
+            className="absolute top-[3vw] left-[10vw] size-fit"
+            onClick={() => navigate(RoutePath.Page.AdminPanel)}
+          >
+            <PrimaryButton text={"Back"} />
+          </div>
+          <EventPanel eventId={eventId.current} />
+        </>
       ) : (
         <LoadingSpinner />
       )}
@@ -47,6 +56,7 @@ function AdminPanel() {
   );
 }
 
+// TODO: forward a ref of the EventDisplayInfo to the AdminPanel, which will then be passed into the EventPanel so it won't have to re-fetch the display info
 function ChooseEventPage() {
   const [eventDisplays, setEventDisplays] = useState<EventDisplayInfo[] | null>(
     null,
@@ -103,40 +113,28 @@ function ChooseEventPage() {
                 }}
                 das={info}
               />
-              <div className="flex justify-between py-1 text-2xl font-bold text-shadow-sm">
-                <span className="text-yellow-500">
-                  {submissionOverviews[index].overview[
-                    SubmissionState.Pending
-                  ].toString()}
-                </span>
-                <p className="text-green-500">
-                  {
-                    submissionOverviews[index].overview[
-                      SubmissionState.Approved
-                    ]
-                  }
-                </p>
-                <p className="text-red-600">
-                  {
-                    submissionOverviews[index].overview[
-                      SubmissionState.Rejected
-                    ]
-                  }
-                </p>
-              </div>
+              <OverviewTexts overview={submissionOverviews[index].overview} />
             </div>
           ))}
         </div>
       ) : (
-        // <EventBoxes
-        //   events={eventDisplays}
-        //   handleClickEvent={(eventId) => {
-        //     navigate(`/admin-panel/${eventId}`);
-        //   }}
-        // />
         <LoadingSpinner />
       )}
     </>
+  );
+}
+
+function OverviewTexts({ overview }: { overview: number[] }) {
+  return (
+    <div className="flex justify-between py-1 text-2xl font-bold text-shadow-sm">
+      <span className="text-yellow-500">
+        {overview[SubmissionState.Pending].toString()}
+      </span>
+      <span className="text-green-500">
+        {overview[SubmissionState.Approved]}
+      </span>
+      <span className="text-red-600">{overview[SubmissionState.Rejected]}</span>
+    </div>
   );
 }
 
@@ -198,7 +196,9 @@ function EventPanel({ eventId }: { eventId: string }) {
           )}
         </>
       ) : (
-        <></>
+        <>
+          <LoadingSpinner />
+        </>
       )}
     </>
   );
