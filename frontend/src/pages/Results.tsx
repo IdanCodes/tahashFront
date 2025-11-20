@@ -16,7 +16,6 @@ import {
   EMPTY_DISPLAY_INFO,
   EventDisplayInfo,
 } from "@shared/interfaces/event-display-info";
-import { EventResultDisplay } from "@shared/types/comp-event-pair";
 import { useActiveComp } from "../context/ActiveCompContext";
 import {
   EventBox,
@@ -27,6 +26,7 @@ import { sendGetRequest } from "../utils/API/apiUtils";
 import { RoutePath } from "@shared/constants/route-path";
 import { redirectToError } from "../utils/errorUtils";
 import { CubingIconsSheet } from "../components/CubingIconsSheet";
+import { EventResultDisplay } from "@shared/types/event-result-display";
 
 function Results() {
   const [currEventIndex, setCurrEventIndex] = useState<number>(0);
@@ -173,10 +173,6 @@ function EventSelection({
               animateHover: false,
             }}
           />
-          // <div className="box-border grid place-content-center items-center rounded-2xl">
-          //   <EventBoxIcon iconName={info.iconName} size="4rem" />
-          //   <EventBoxTitle eventTitle={info.eventTitle} hovered={true} />
-          // </div>
         ))}
       </div>
     </>

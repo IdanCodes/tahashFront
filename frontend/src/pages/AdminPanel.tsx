@@ -2,10 +2,8 @@ import React, { useEffect, useRef, useState } from "react";
 import { sendGetRequest, sendPostRequest } from "../utils/API/apiUtils";
 import { RoutePath } from "@shared/constants/route-path";
 import { redirectToError } from "../utils/errorUtils";
-import EventBoxes from "../components/EventBoxes";
-import { EventDisplayAndStatus } from "@shared/types/event-display-and-status";
+import EventBoxes, { EventBox } from "../components/EventBoxes";
 import { EventDisplayInfo } from "@shared/interfaces/event-display-info";
-import { EventSubmissionStatus } from "@shared/constants/event-submission-status";
 import LoadingSpinner from "../components/LoadingSpinner";
 import { useNavigate, useParams } from "react-router-dom";
 import { useUserInfo } from "../context/UserContext";
@@ -19,6 +17,7 @@ import { formatPackedResults } from "@shared/utils/time-utils";
 import PrimaryButton from "../components/buttons/PrimaryButton";
 import { SubmissionsOverview } from "@shared/types/SubmissionsOverview";
 import { useActiveComp } from "../context/ActiveCompContext";
+import { CubingIconsSheet } from "../components/CubingIconsSheet";
 
 function AdminPanel() {
   const params = useParams();
@@ -91,15 +90,50 @@ function ChooseEventPage() {
 
   return (
     <>
+      <CubingIconsSheet />
       <p className="p-4 text-center text-5xl font-bold">Event Submissions</p>
-      {eventDisplays ? (
-        <EventBoxes
-          events={eventDisplays}
-          handleClickEvent={(eventId) => {
-            navigate(`/admin-panel/${eventId}`);
-          }}
-        />
+      {eventDisplays && submissionOverviews ? (
+        <div className="mx-auto mt-2 mb-2 flex w-8/10 flex-wrap place-content-center gap-x-9.5 gap-y-13 pt-6 pb-4">
+          {eventDisplays.map((info, index) => (
+            <div>
+              <EventBox
+                key={index}
+                handleClickEvent={(eventId) => {
+                  navigate(`/admin-panel/${eventId}`);
+                }}
+                das={info}
+              />
+              <div className="flex justify-between py-1 text-2xl font-bold text-shadow-sm">
+                <span className="text-yellow-500">
+                  {submissionOverviews[index].overview[
+                    SubmissionState.Pending
+                  ].toString()}
+                </span>
+                <p className="text-green-500">
+                  {
+                    submissionOverviews[index].overview[
+                      SubmissionState.Approved
+                    ]
+                  }
+                </p>
+                <p className="text-red-600">
+                  {
+                    submissionOverviews[index].overview[
+                      SubmissionState.Rejected
+                    ]
+                  }
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
       ) : (
+        // <EventBoxes
+        //   events={eventDisplays}
+        //   handleClickEvent={(eventId) => {
+        //     navigate(`/admin-panel/${eventId}`);
+        //   }}
+        // />
         <LoadingSpinner />
       )}
     </>
