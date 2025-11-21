@@ -89,7 +89,7 @@ function Results() {
 
   return (
     <div>
-      <p className="p-4 text-center text-5xl font-bold">
+      <p className="p-5 text-center text-6xl font-bold">
         Results of Competition #{activeComp.displayInfo.compNumber - 1}
       </p>
       <EventSelection
@@ -107,8 +107,8 @@ function Results() {
       {eventResults ? (
         <>
           {eventResults.length > 0 ? (
-            <table className="mx-auto my-2 w-6/10 rounded-t-2xl bg-blue-700/55 text-2xl">
-              <thead className="rounded-t-2xl bg-transparent text-[1.615rem] text-white/90">
+            <table className="mx-auto my-2 w-7/10 rounded-t-2xl bg-blue-700/55 text-2xl">
+              <thead className="rounded-t-2xl bg-transparent text-[1.655rem] text-white/90">
                 <tr className="font-semibold">
                   <th className="pl-4">#</th>
                   <th className="py-2">Name</th>
@@ -123,7 +123,7 @@ function Results() {
                     key={index}
                     className="font-mono odd:!bg-slate-50 even:!bg-slate-200"
                   >
-                    <td className="pl-2 text-[1.595rem] text-center">{result.place}</td>
+                    <td className="pl-2 text-[1.625rem] text-center">{result.place}</td>
                     <td className="py-2 text-center">{result.name}</td>
                     <td className="py-2 text-center">{result.best}</td>
                     <td className="py-2 text-center">{result.average}</td>
@@ -165,14 +165,14 @@ function EventSelection({
   return (
     <>
       <CubingIconsSheet />
-      <div className="mx-auto flex w-95/100 flex-row flex-wrap place-content-center items-center gap-x-3 gap-y-7 py-4">
+      <div className="mx-auto pt-8 flex w-95/100 flex-row flex-wrap place-content-center items-center gap-x-3 gap-y-7 py-4">
         {events.map((info, index) => (
           <EventBox
             key={index}
             handleClickEvent={handleClickEvent}
             das={info}
             boxOptions={{
-              size: 2.7,
+              size: 3.7,
               fontSize: 1,
               hasBorder: selectedEventId === info.eventId,
               animateHover: false,
