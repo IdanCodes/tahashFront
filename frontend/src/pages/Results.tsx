@@ -107,27 +107,32 @@ function Results() {
       {eventResults ? (
         <>
           {eventResults.length > 0 ? (
-            <table className="mx-auto my-2 w-8/10 text-2xl">
-              <thead>
+            <table className="mx-auto my-2 w-6/10 rounded-t-2xl bg-blue-700/55 text-2xl">
+              <thead className="rounded-t-2xl bg-transparent text-[1.615rem] text-white/90">
                 <tr className="font-semibold">
-                  <td>#</td>
-                  <td>Name</td>
-                  <td>Best</td>
-                  <td>Average</td>
-                  <td>Solves</td>
+                  <th className="pl-4">#</th>
+                  <th className="py-2">Name</th>
+                  <th className="py-2">Best</th>
+                  <th className="py-2">Average</th>
+                  <th className="text-center">Solves</th>
                 </tr>
               </thead>
               <tbody>
                 {eventResults.map((result, index) => (
-                  <tr key={index}>
-                    <td>{result.place}</td>
-                    <td>{result.name}</td>
-                    <td>{result.best}</td>
-                    <td>{result.average}</td>
-                    <td className="flex flex-row justify-between">
-                      {result.solves.map((t, i) => (
-                        <span key={i}>{t}</span>
-                      ))}
+                  <tr
+                    key={index}
+                    className="font-mono odd:!bg-slate-50 even:!bg-slate-200"
+                  >
+                    <td className="pl-2 text-[1.595rem] text-center">{result.place}</td>
+                    <td className="py-2 text-center">{result.name}</td>
+                    <td className="py-2 text-center">{result.best}</td>
+                    <td className="py-2 text-center">{result.average}</td>
+                    <td>
+                      <div className="flex flex-row justify-center gap-8">
+                        {result.solves.map((t, i) => (
+                          <span key={i} className="p-">{t}</span>
+                        ))}
+                      </div>
                     </td>
                   </tr>
                 ))}
