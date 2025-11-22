@@ -9,6 +9,7 @@ import {
 import { sendGetRequest } from "../utils/API/apiUtils";
 import { RoutePath } from "@shared/constants/route-path";
 import { redirectToError } from "../utils/errorUtils";
+import { errorObject } from "@shared/interfaces/error-object";
 
 interface ActiveCompContextType {
   displayInfo: CompDisplayInfo | null;
@@ -23,13 +24,25 @@ export function ActiveCompProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (displayInfo) return;
-
-    sendGetRequest(RoutePath.Get.ActiveCompInfo).then((res) => {
-      if (res.aborted) return;
-      if (res.isError) return redirectToError(res.data);
-      setDisplayInfo(res.data);
-    });
+    fetchCompData().then();
   }, []);
+
+  async function fetchCompData() {
+    const res = await sendGetRequest(RoutePath.Get.ActiveCompInfo);
+    if (res.aborted) return;
+    if (res.isError)
+      return setTimeout(
+        () =>
+          redirectToError(
+            errorObject(
+              "Error fetching comp data",
+              `Is the API running? ${res.data}`,
+            ),
+          ),
+        2000,
+      );
+    setDisplayInfo(res.data);
+  }
 
   return (
     <ActiveCompContext.Provider

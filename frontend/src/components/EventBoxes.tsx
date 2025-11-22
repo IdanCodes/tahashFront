@@ -15,7 +15,7 @@ export function EventBoxIcon({
 }) {
   return (
     <motion.span
-      className={`cubing-icon ${iconName} col-1 row-1 flex justify-center text-6xl`}
+      className={`cubing-icon ${iconName} col-1 row-1 flex justify-center p-[2px] text-6xl`}
       style={{
         fontSize: size,
         lineHeight: 1,
@@ -135,7 +135,7 @@ export function EventBox({
         onHoverStart={() => setHovered(true)}
         onHoverEnd={() => setHovered(false)}
         className={clsx(
-          `box-content grid cursor-pointer place-content-center items-center rounded-2xl`,
+          `box-content grid w-fit cursor-pointer place-content-center items-center rounded-2xl`,
           boxOptions.hasBorder && "border-black outline-[2.5px]",
         )}
         style={{
@@ -172,7 +172,7 @@ export function EventBox({
         <EventBoxTitle
           eventTitle={das.eventTitle}
           hovered={hovered}
-          height={boxOptions.size * (10 + (7 - boxOptions.size) / 5)}
+          height={boxOptions.size * 1.1 * (10 + (7 - boxOptions.size) / 5)}
           fontSize={boxOptions.fontSize}
         />
       </motion.div>

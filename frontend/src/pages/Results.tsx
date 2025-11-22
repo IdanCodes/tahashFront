@@ -123,14 +123,18 @@ function Results() {
                     key={index}
                     className="font-mono odd:!bg-slate-50 even:!bg-slate-200"
                   >
-                    <td className="pl-2 text-[1.625rem] text-center">{result.place}</td>
+                    <td className="pl-2 text-center text-[1.625rem]">
+                      {result.place}
+                    </td>
                     <td className="py-2 text-center">{result.name}</td>
                     <td className="py-2 text-center">{result.best}</td>
                     <td className="py-2 text-center">{result.average}</td>
                     <td>
                       <div className="flex flex-row justify-center gap-8">
                         {result.solves.map((t, i) => (
-                          <span key={i} className="p-">{t}</span>
+                          <span key={i} className="p-">
+                            {t}
+                          </span>
                         ))}
                       </div>
                     </td>
@@ -165,14 +169,14 @@ function EventSelection({
   return (
     <>
       <CubingIconsSheet />
-      <div className="mx-auto pt-8 flex w-95/100 flex-row flex-wrap place-content-center items-center gap-x-3 gap-y-7 py-4">
+      <div className="mx-auto flex w-95/100 flex-row flex-wrap place-content-center items-center gap-x-3 gap-y-7 py-4 pt-5">
         {events.map((info, index) => (
           <EventBox
             key={index}
             handleClickEvent={handleClickEvent}
             das={info}
             boxOptions={{
-              size: 3.7,
+              size: 3.5,
               fontSize: 1,
               hasBorder: selectedEventId === info.eventId,
               animateHover: false,

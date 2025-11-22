@@ -174,7 +174,7 @@ function ScrambleAndImage({
         textElRef.current.clientHeight > 0
       ) {
         setIsInitialCheckDone(true);
-        resetFontBounds();
+        frameId = requestAnimationFrame(resetFontBounds);
       } else frameId = requestAnimationFrame(waitForInitial);
     };
 
@@ -486,7 +486,7 @@ function Compete() {
   const [loadingScrTxt, setLoadingScrTxt] = useState<boolean>(true);
 
   const params = useParams();
-  const { addLoading, removeLoading } = useLoading("Compete");
+  // const { addLoading, removeLoading } = useLoading("Compete");
   const userInfo = useUserInfo();
   const navigate = useNavigate();
 
