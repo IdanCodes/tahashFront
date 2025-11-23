@@ -1,9 +1,11 @@
 import { Penalties, Penalty } from "../constants/penalties";
+import {ExtraArgsFmc} from "./event-extra-args/extra-args-fmc";
+import {ExtraArgsMbld} from "./event-extra-args/extra-args-mbld";
 
 /**
  * Represents the result of a solve without the time.
  */
-export interface BaseResult<ArgsType = object> {
+export interface BaseResult<ArgsType = object | ExtraArgsFmc | ExtraArgsMbld> {
   /**
    * The penalty of the solve.
    */

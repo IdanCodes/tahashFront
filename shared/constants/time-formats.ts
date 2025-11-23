@@ -25,3 +25,9 @@ export const NumScrambles: Record<TimeFormat, number> = {
 export function getTimeFormatName(timeFormat: TimeFormat): "Average" | "Mean" | "Best" | "Result" {
     return timeFormat === TimeFormat.ao5 ? "Average" : (timeFormat === TimeFormat.mo3 ? "Mean" : (timeFormat === TimeFormat.bo3 ? "Best" : "Result"));
 }
+
+/**
+ * @return true => The format's time comparison is based on average; false => The format's time comparison is based on single
+ */
+export const isAverageFormat = (format: TimeFormat): boolean =>
+    format === TimeFormat.ao5 || format === TimeFormat.mo3;

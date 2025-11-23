@@ -28,7 +28,7 @@ import { ButtonSize } from "../components/buttons/ButtonSize";
 import { packResult, SolveResult } from "@shared/interfaces/solve-result";
 import { Penalties, Penalty } from "@shared/constants/penalties";
 import LoadingSpinner from "../components/LoadingSpinner";
-import { generateResultStr } from "@shared/utils/event-results-utils";
+import { getResultStr } from "@shared/utils/event-results-utils";
 import { getTimeFormatName, TimeFormat } from "@shared/constants/time-formats";
 
 const hideImageEvents = Object.freeze(["333bf", "444bf", "555bf", "333mbf"]);
@@ -496,7 +496,7 @@ function Compete() {
     finishedEvent.current = competeData.results.finished;
 
     if (finishedEvent.current) {
-      attemptResultStr.current = generateResultStr(
+      attemptResultStr.current = getResultStr(
         competeData.eventData,
         competeData.results.times,
       );

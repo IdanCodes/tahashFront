@@ -6,7 +6,6 @@ import {
 import {
   CompEvent,
   EventId,
-  generateScrambles,
   getEventById,
   getEventDisplayInfo,
 } from "@shared/types/comp-event";
@@ -21,6 +20,8 @@ import {
   getSubmissionsOverview,
   SubmissionsOverview,
 } from "@shared/types/SubmissionsOverview";
+import { getRandomString } from "@shared/utils/global-utils";
+import csTimer from "cstimer_module";
 
 /*
 TODO:
@@ -88,18 +89,6 @@ export class TahashCompInstance implements ITahashComp, TahashCompMethods {
     return this.srcDoc.isActive();
   }
 
-  /**
-   * User's pastResults: {
-   * compNumber:
-   *   {
-   *    eventId: {
-   *       place: number,
-   *       times: PackedResult[]
-   *     }
-   *   }
-   * }
-   */
-
   async setSubmissionState(
     eventId: EventId,
     userId: number,
@@ -115,10 +104,31 @@ export class TahashCompInstance implements ITahashComp, TahashCompMethods {
     const cloneData = this.data;
     for (const { eventId, result } of cloneData) {
       if (result.scrambles.length > 0) continue;
-      result.scrambles = generateScrambles(eventId);
+
+      const scrs = generateScrambles(eventId);
+      if (!scrs) continue;
+      result.scrambles = scrs;
     }
 
     this.srcDoc.data = cloneData;
+
+    function generateScrambles(eventId: string) {
+      const eventData = getEventById(eventId);
+      if (!eventData) return null;
+
+      const num = eventData.getNumScrambles();
+
+      // generate seed instead of scrambles
+      if (num < 0) return [getRandomString()];
+
+      let result: string[] = [];
+      for (let i = 0; i < num; i++) {
+        const len = eventData.getScrambleLength();
+        result.push(csTimer.getScramble(eventData.scrType, len));
+      }
+
+      return result;
+    }
   }
 
   filterAndSortSubmissions(): void {

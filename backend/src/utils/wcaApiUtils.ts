@@ -10,7 +10,11 @@ import {
 } from "@shared/interfaces/wca-api/wcaUser";
 import { getEnv } from "../config/env";
 import { WcaOAuthTokenResponse } from "@shared/interfaces/wca-api/wcaOAuth";
-import { EventRecords } from "../types/event-records";
+import {
+  EventRecords,
+  eventRecordToGeneralRecords,
+  GeneralRecord,
+} from "../types/event-records";
 import { TimeFormat } from "@shared/constants/time-formats";
 import { EventId, getEventById } from "@shared/types/comp-event";
 import {
@@ -25,7 +29,10 @@ import {
   ResultFormatMap,
 } from "../types/result-format";
 import { Penalties } from "@shared/constants/penalties";
-import { calcMultiBldTotalPoints } from "@shared/interfaces/event-extra-args/extra-args-mbld";
+import {
+  calcMultiBldTotalPoints,
+  ExtraArgsMbld,
+} from "@shared/interfaces/event-extra-args/extra-args-mbld";
 
 /**
  * WCA OAuth application id (environment variable)
@@ -141,7 +148,6 @@ export async function getUserDataByUserId(
 }
 
 /* returns a "records" array of the user's WCA records */
-// TODO: implement getWCARecordsOfUser
 export async function getWCARecordsOfUser(
   wcaId: string,
 ): Promise<Map<EventId, EventRecords<TimeFormat>> | ErrorObject> {
@@ -179,11 +185,14 @@ export async function getWCARecordsOfUser(
         const attempted = solved + missed;
 
         newRecord = {
-          bestPoints: calcMultiBldTotalPoints({
-            numSuccess: solved,
-            numAttempt: attempted,
-          }),
-          timeOfBestAttempt: timeInSeconds / 100.0, // convert to centiseconds
+          bestSingle: {
+            centis: timeInSeconds / 100.0, // convert to centiseconds
+            penalty: Penalties.None,
+            extraArgs: {
+              numSuccess: solved,
+              numAttempt: attempted,
+            } as ExtraArgsMbld,
+          },
           bestComp: 0,
         };
       } else if (compEvent.eventId === "333fm") {

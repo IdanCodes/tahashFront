@@ -13,7 +13,10 @@ import {
   SubmissionState,
   submissionStateStr,
 } from "@shared/constants/submission-state";
-import { formatPackedResults } from "@shared/utils/time-utils";
+import {
+  formatPackedResult,
+  formatPackedResults,
+} from "@shared/utils/time-utils";
 import PrimaryButton from "../components/buttons/PrimaryButton";
 import { SubmissionsOverview } from "@shared/types/SubmissionsOverview";
 import { useActiveComp } from "../context/ActiveCompContext";
@@ -105,9 +108,8 @@ function ChooseEventPage() {
       {eventDisplays && submissionOverviews ? (
         <div className="mx-auto mt-2 mb-2 flex w-8/10 flex-wrap place-content-center gap-x-9.5 gap-y-13 pt-6 pb-4">
           {eventDisplays.map((info, index) => (
-            <div>
+            <div key={index}>
               <EventBox
-                key={index}
                 handleClickEvent={(eventId) => {
                   navigate(`/admin-panel/${eventId}`);
                 }}
@@ -272,7 +274,8 @@ function EventSubmissionsPanel({
                   </span>
                 ))}
               </div>
-              <span>Result: {submission.resultStr}</span>
+              <span>Single: {formatPackedResult(submission.single)}</span>
+              <span>Average: {submission.average}</span>
               {submission.submissionState === SubmissionState.Pending && (
                 <div className="flex flex-row justify-between px-2">
                   <PrimaryButton

@@ -1,6 +1,4 @@
-import csTimer from "cstimer_module";
-import { NumScrambles, TimeFormat } from "../constants/time-formats";
-import { getRandomString } from "../utils/global-utils";
+import {isAverageFormat, NumScrambles, TimeFormat} from "../constants/time-formats";
 import { EventDisplayInfo } from "../interfaces/event-display-info";
 import { ExtraArgs } from "./extra-args";
 
@@ -70,24 +68,6 @@ export class CompEvent {
             Math.floor(Math.random() * (2 * this.scrLenRadius)) +
               (this.scrLenExp - this.scrLenRadius),
           );
-  }
-
-  /**
-   * Get a string[] with scrambles for this event.
-   */
-  public generateScrambles(): string[] {
-    const num = this.getNumScrambles();
-
-    // generate seed instead of scrambles
-    if (num < 0) return [getRandomString()];
-
-    let result: string[] = [];
-    for (let i = 0; i < num; i++) {
-      const len = this.getScrambleLength();
-      result.push(csTimer.getScramble(this.scrType, len));
-    }
-
-    return result;
   }
 
   /**
@@ -220,20 +200,6 @@ export function createEmptyArgs<T extends ExtraArgs>(
 }
 
 /**
- * Generate scrambles for an event.
- * @param eventId The event's id.
- * @return An array of scrambles for of the requested event.
- */
-export function generateScrambles(eventId: EventId): string[] {
-  const event = getEventById(eventId);
-  if (!event)
-    throw new Error(
-      `Error in generateScrambles: \"${eventId}\" is not a valid event`,
-    );
-  return event.generateScrambles();
-}
-
-/**
  * Get the {@link EventDisplayInfo} of an event.
  * @param eventId The event's id.
  */
@@ -245,4 +211,21 @@ export function getEventDisplayInfo(eventId: EventId): EventDisplayInfo {
     );
 
   return event.getEventInfo();
+}
+
+/**
+ * Get an event's TimeFormat using its event id.
+ * @return If the event was found, its TimeFormat; Otherwise - TimeFormat.ao5
+ */
+export const getEventFormat = (eventId: EventId): TimeFormat => {
+    const eventData = getEventById(eventId);
+    return eventData ? eventData.timeFormat : TimeFormat.ao5;
+}
+
+/**
+ * @return Similar to TimeFormat.isAverageFormat; the fallback return value is true if the event was not found
+ */
+export const isAverageEvent = (eventId: EventId): boolean => {
+    const eventData = getEventById(eventId);
+    return eventData ? isAverageFormat(eventData.timeFormat) : true;
 }

@@ -354,7 +354,7 @@ export function equalTimes(
  * - Both DNFs => 0
  * - One is DNF => The one with DNF is bigger
  */
-export function comparePackedResults(p1: PackedResult, p2: PackedResult): number {
+export function comparePackedResults(p1: PackedResult, p2: PackedResult): 0 | 1 | -1 {
     if (p1.penalty === Penalties.DNF)
         return p2.penalty === Penalties.DNF ? 0 : 1;
     else if (p2.penalty === Penalties.DNF)

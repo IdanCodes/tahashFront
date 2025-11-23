@@ -25,7 +25,11 @@ import { SubmissionState } from "@shared/constants/submission-state";
 import { shouldAutoApprove } from "@shared/utils/event-results-utils";
 import { TahashCompDoc } from "../database/models/tahash-comp.model";
 import { isInteger } from "@shared/utils/global-utils";
-import { submissionsToResultDisplays } from "@shared/types/event-result-display";
+import {
+  EventResultDisplay,
+  submissionsToResultDisplays,
+} from "@shared/types/event-result-display";
+import { eventRecordToGeneralRecords } from "../types/event-records";
 
 /**
  * Get all event displays and statuses
@@ -129,7 +133,14 @@ export async function updateTimes(req: UpdateTimesRequest, res: Response) {
   activeComp.submitResults(eventData, userId, times);
 
   const record = userDoc.getEventRecord(eventId);
-  if (record && shouldAutoApprove(eventData, record, times))
+  if (
+    record &&
+    shouldAutoApprove(
+      eventData,
+      eventRecordToGeneralRecords(eventData.timeFormat, record),
+      times,
+    )
+  )
     await activeComp.setSubmissionState(
       eventId,
       userId,
@@ -283,6 +294,11 @@ export async function eventResultDisplays(req: Request, res: Response) {
 
   const compNumber = Number(compNumberStr);
   let comp: TahashCompDoc | null = null;
+  if (compNumber === 0)
+    return res.json(
+      new ApiResponse(ResponseCode.Success, [] as EventResultDisplay[]),
+    );
+
   if (
     !isInteger(compNumber) ||
     !(comp = await CompManager.getInstance().getTahashComp(compNumber))

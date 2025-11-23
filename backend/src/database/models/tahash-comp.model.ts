@@ -4,22 +4,20 @@ import {
   EventId,
   getEventById,
   getEventDisplayInfo,
+  getEventFormat,
   WCAEvents,
 } from "@shared/types/comp-event";
 import { CompEventResults } from "@shared/interfaces/comp-event-results";
 import {
+  getSubmissionCompareFunc,
   initSubmissionData,
   SubmissionData,
 } from "@shared/interfaces/submission-data";
 import { SubmissionState } from "@shared/constants/submission-state";
 import { packedResultSchema } from "./packed-result.schema";
-import { EventRecords } from "../../types/event-records";
+import { GeneralRecord } from "../../types/event-records";
 import { UserManager } from "../users/user-manager";
-import {
-  compareFinalResults,
-  submissionDataToRecord,
-} from "@shared/utils/event-results-utils";
-import { TimeFormat } from "@shared/constants/time-formats";
+import { submissionDataToRecord } from "@shared/utils/event-results-utils";
 import { PackedResult } from "@shared/interfaces/packed-result";
 import { PastCompResults } from "../../types/past-comp-results";
 import { CompEventPair } from "@shared/types/comp-event-pair";
@@ -50,12 +48,12 @@ const compEventResultsSchema = new Schema<CompEventResults>(
           type: [packedResultSchema],
           required: true,
         },
-        finalResult: {
-          type: Number,
+        single: {
+          type: packedResultSchema,
           required: true,
         },
-        resultStr: {
-          type: String,
+        average: {
+          type: Number,
           required: true,
         },
         place: {
@@ -300,12 +298,11 @@ export const TahashCompSchema = new Schema<
 
           const userDoc = await UserManager.getInstance().getUserById(userId);
           const rec = submissionDataToRecord(
-            eventData,
             this.compNumber,
             results.submissions[submissionIndex],
           );
           userDoc.updateRecords(
-            new Map<string, EventRecords<TimeFormat>>([[eventId, rec]]),
+            new Map<string, GeneralRecord>([[eventId, rec]]),
           );
           await userDoc.save();
         }
@@ -336,7 +333,9 @@ export const TahashCompSchema = new Schema<
         for (let i = 0; i < this.data.length; i++) {
           this.data[i].result.submissions = this.data[i].result.submissions
             .filter((s) => s.submissionState === SubmissionState.Approved)
-            .sort((a, b) => compareFinalResults(a.finalResult, b.finalResult));
+            .sort(
+              getSubmissionCompareFunc(getEventFormat(this.data[i].eventId)),
+            );
         }
       },
 
@@ -372,12 +371,12 @@ export const TahashCompSchema = new Schema<
             submissions[0].times,
           );
 
+          const compareSubmissions = getSubmissionCompareFunc(
+            getEventFormat(eventId),
+          );
           for (let j = 1; j < submissions.length; j++) {
-            if (submissions[j - 1].finalResult < submissions[j].finalResult)
+            if (compareSubmissions(submissions[j - 1], submissions[j]) < 0)
               place += 1;
-            console.log(
-              `submissions[j-1]:${submissions[j - 1].finalResult}; submissions[j]:${submissions[j].finalResult}`,
-            );
             addResult(
               submissions[j].userId,
               eventId,

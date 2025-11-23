@@ -42,28 +42,6 @@ function Results() {
     [currEventIndex],
   );
 
-  // useEffect(() => {
-  //   if (!compDisplay || compDisplay.data.length == 0) {
-  //     setCurrEvent(null);
-  //     return;
-  //   }
-  //
-  //   const evId = params.eventId;
-  //   const eventIndex = compDisplay.data.findIndex(
-  //     (pair) => pair.eventDisplay.eventId === evId,
-  //   );
-  //
-  //   if (eventIndex < 0) {
-  //     setTimeout(() => (window.location.pathname = "results/333"), 1000);
-  //     return;
-  //   }
-  //
-  //   setCurrEvent({
-  //     event: compDisplay.data[eventIndex].eventDisplay,
-  //     submissions: compDisplay.data[eventIndex].result.submissions,
-  //   });
-  // }, [compDisplay]);
-
   // TODO: Add option to abort if the user switches the event mid-fetch
   useEffect(() => {
     if (!activeComp.displayInfo) return;

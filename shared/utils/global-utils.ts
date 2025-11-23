@@ -66,3 +66,13 @@ export function isInteger(x: number): boolean {
     return !isNaN(x) && Number.isInteger(x);
 }
 
+/**
+ * Compare two numbers
+ * @param a The first number
+ * @param b The second number
+ * @return -1: r1 < r2; 0: r1 == r2; 1: r1 > r2;
+ */
+export function compareNumbers(a: number, b: number): 0 | 1 | -1 {
+    return a > b ? 1 : (a === b ? 0 : -1);
+}
+

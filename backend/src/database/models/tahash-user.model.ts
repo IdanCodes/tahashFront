@@ -1,8 +1,17 @@
 import mongoose, { Model, Schema } from "mongoose";
 import { UserInfo } from "@shared/interfaces/user-info";
-import { EventId, getEventById } from "@shared/types/comp-event";
+import {
+  EventId,
+  getEventById,
+  getEventFormat,
+} from "@shared/types/comp-event";
 import { UserEventResult } from "../../types/user-event-result";
-import { EventRecords } from "../../types/event-records";
+import {
+  EventRecords,
+  eventRecordToGeneralRecords,
+  GeneralRecord,
+  generalRecordsToEventRecord,
+} from "../../types/event-records";
 import { TimeFormat } from "@shared/constants/time-formats";
 import { packedResultSchema } from "./packed-result.schema";
 import { PackedResult } from "@shared/interfaces/packed-result";
@@ -113,7 +122,7 @@ export interface TahashUserMethods {
    * Update the improved records from the newRecords map in this user
    * @param newRecords The new records to use
    */
-  updateRecords(newRecords: Map<EventId, EventRecords<TimeFormat>>): void;
+  updateRecords(newRecords: Map<EventId, GeneralRecord>): void;
 
   /**
    * If the user hasn't submitted in the current comp, update their lastComp value and clear their saved results.
@@ -254,116 +263,142 @@ const tahashUserSchema = new Schema<
           );
           return false;
         }
-        this.updateRecords(recordsResponse);
+
+        const generalRecordsMap: Map<string, GeneralRecord> = new Map();
+        for (const [eventId, eventRecord] of recordsResponse) {
+          const format = getEventFormat(eventId);
+          generalRecordsMap.set(
+            eventId,
+            eventRecordToGeneralRecords(format, eventRecord),
+          );
+        }
+        this.updateRecords(generalRecordsMap);
 
         this.lastUpdatedWcaData = Date.now();
         return true;
       },
 
-      updateRecords(newRecords: Map<EventId, EventRecords<TimeFormat>>) {
+      updateRecords(newRecords: Map<EventId, GeneralRecord>) {
         for (const [eventId, eventRecords] of newRecords) {
+          const format = getEventFormat(eventId);
           const existingRecords = this.records.get(eventId);
           this.records.set(
             eventId,
             existingRecords
-              ? getBestRecords(eventId, eventRecords, existingRecords)
+              ? getBestRecords(
+                  getEventFormat(eventId),
+                  eventRecords,
+                  eventRecordToGeneralRecords(format, existingRecords),
+                )
               : eventRecords,
           );
         }
 
         // get the best records for each record type of the two records ("combine" them)
-        function getBestRecords(
-          eventId: EventId,
-          newRecords: EventRecords<TimeFormat>,
-          oldRecords: EventRecords<TimeFormat>,
-        ): EventRecords<TimeFormat> {
-          const compEvent = getEventById(eventId);
-          if (!compEvent) return oldRecords;
+        function getBestRecords<T extends TimeFormat>(
+          format: T,
+          newRecords: GeneralRecord,
+          oldRecords: GeneralRecord,
+        ): EventRecords<T> {
+          // const compEvent = getEventById(eventId);
+          // if (!compEvent) return oldRecords;
+          let result: GeneralRecord = { ...oldRecords };
 
-          let result: EventRecords<TimeFormat> = { ...oldRecords };
-          if (eventId === "333fm") {
-            result = result as FMCBestResults;
-            newRecords = newRecords as FMCBestResults;
-            oldRecords = oldRecords as FMCBestResults;
-            if (
-              newRecords.single > 0 &&
-              (newRecords.single < oldRecords.single || oldRecords.single < 0)
-            ) {
-              result.single = newRecords.single;
-              result.singleComp = newRecords.singleComp;
-            }
-            if (
-              newRecords.mean > 0 &&
-              (newRecords.mean < newRecords.meanComp || oldRecords.mean < 0)
-            ) {
-              result.mean = newRecords.mean;
-              result.meanComp = newRecords.meanComp;
-            }
-          } else if (compEvent.timeFormat === TimeFormat.multi) {
-            result = result as MbldBestResults;
-            newRecords = newRecords as MbldBestResults;
-            oldRecords = oldRecords as MbldBestResults;
-            if (
-              newRecords.bestPoints > 0 &&
-              newRecords.bestPoints > oldRecords.bestPoints
-            ) {
-              result.bestPoints = newRecords.bestPoints;
-              result.bestComp = newRecords.bestComp;
-              result.timeOfBestAttempt = newRecords.timeOfBestAttempt;
-            }
-          } else if (compEvent.timeFormat === TimeFormat.ao5) {
-            result = result as AO5BestResults;
-            newRecords = newRecords as AO5BestResults;
-            oldRecords = oldRecords as AO5BestResults;
-            if (
-              newRecords.single.centis > 0 &&
-              (comparePackedResults(newRecords.single, oldRecords.single) ===
-                -1 ||
-                oldRecords.single.centis < 0)
-            ) {
-              result.single = {
-                ...newRecords.single,
-                extraArgs: { ...newRecords.single.extraArgs },
-              };
-              result.singleComp = newRecords.singleComp;
-            }
-            if (
-              newRecords.average > 0 &&
-              (newRecords.average < oldRecords.average ||
-                oldRecords.average < 0)
-            ) {
-              result.average = newRecords.average;
-              result.averageComp = newRecords.averageComp;
-            }
-          } else if (
-            compEvent.timeFormat === TimeFormat.mo3 ||
-            compEvent.timeFormat === TimeFormat.bo3
-          ) {
-            result = result as MO3BestResults;
-            newRecords = newRecords as MO3BestResults;
-            oldRecords = oldRecords as MO3BestResults;
-            if (
-              newRecords.single.centis > 0 &&
-              (comparePackedResults(newRecords.single, oldRecords.single) ===
-                -1 ||
-                oldRecords.single.centis < 0)
-            ) {
-              result.single = {
-                ...newRecords.single,
-                extraArgs: { ...newRecords.single.extraArgs },
-              };
-              result.singleComp = newRecords.singleComp;
-            }
-            if (
-              newRecords.mean > 0 &&
-              (newRecords.mean < oldRecords.mean || oldRecords.mean < 0)
-            ) {
-              result.mean = newRecords.mean;
-              result.meanComp = newRecords.meanComp;
-            }
+          if (newRecords.single < oldRecords.single) {
+            result.single = JSON.parse(JSON.stringify(newRecords.single));
+            result.singleComp = newRecords.singleComp;
           }
 
-          return result;
+          if (newRecords.average < oldRecords.average) {
+            result.average = JSON.parse(JSON.stringify(newRecords.average));
+            result.averageComp = newRecords.averageComp;
+          }
+
+          return generalRecordsToEventRecord(format, result);
+
+          // if (eventId === "333fm") {
+          //   result = result as FMCBestResults;
+          //   newRecords = newRecords as FMCBestResults;
+          //   oldRecords = oldRecords as FMCBestResults;
+          //   if (
+          //     newRecords.single > 0 &&
+          //     (newRecords.single < oldRecords.single || oldRecords.single < 0)
+          //   ) {
+          //     result.single = newRecords.single;
+          //     result.singleComp = newRecords.singleComp;
+          //   }
+          //   if (
+          //     newRecords.mean > 0 &&
+          //     (newRecords.mean < newRecords.meanComp || oldRecords.mean < 0)
+          //   ) {
+          //     result.mean = newRecords.mean;
+          //     result.meanComp = newRecords.meanComp;
+          //   }
+          // } else if (compEvent.timeFormat === TimeFormat.multi) {
+          //   result = result as MbldBestResults;
+          //   newRecords = newRecords as MbldBestResults;
+          //   oldRecords = oldRecords as MbldBestResults;
+          //   if (
+          //     newRecords.bestPoints > 0 &&
+          //     newRecords.bestPoints > oldRecords.bestPoints
+          //   ) {
+          //     result.bestPoints = newRecords.bestPoints;
+          //     result.bestComp = newRecords.bestComp;
+          //     result.timeOfBestAttempt = newRecords.timeOfBestAttempt;
+          //   }
+          // } else if (compEvent.timeFormat === TimeFormat.ao5) {
+          //   result = result as AO5BestResults;
+          //   newRecords = newRecords as AO5BestResults;
+          //   oldRecords = oldRecords as AO5BestResults;
+          //   if (
+          //     newRecords.single.centis > 0 &&
+          //     (comparePackedResults(newRecords.single, oldRecords.single) ===
+          //       -1 ||
+          //       oldRecords.single.centis < 0)
+          //   ) {
+          //     result.single = {
+          //       ...newRecords.single,
+          //       extraArgs: { ...newRecords.single.extraArgs },
+          //     };
+          //     result.singleComp = newRecords.singleComp;
+          //   }
+          //   if (
+          //     newRecords.average > 0 &&
+          //     (newRecords.average < oldRecords.average ||
+          //       oldRecords.average < 0)
+          //   ) {
+          //     result.average = newRecords.average;
+          //     result.averageComp = newRecords.averageComp;
+          //   }
+          // } else if (
+          //   compEvent.timeFormat === TimeFormat.mo3 ||
+          //   compEvent.timeFormat === TimeFormat.bo3
+          // ) {
+          //   result = result as MO3BestResults;
+          //   newRecords = newRecords as MO3BestResults;
+          //   oldRecords = oldRecords as MO3BestResults;
+          //   if (
+          //     newRecords.single.centis > 0 &&
+          //     (comparePackedResults(newRecords.single, oldRecords.single) ===
+          //       -1 ||
+          //       oldRecords.single.centis < 0)
+          //   ) {
+          //     result.single = {
+          //       ...newRecords.single,
+          //       extraArgs: { ...newRecords.single.extraArgs },
+          //     };
+          //     result.singleComp = newRecords.singleComp;
+          //   }
+          //   if (
+          //     newRecords.mean > 0 &&
+          //     (newRecords.mean < oldRecords.mean || oldRecords.mean < 0)
+          //   ) {
+          //     result.mean = newRecords.mean;
+          //     result.meanComp = newRecords.meanComp;
+          //   }
+          // }
+          //
+          // return result;
         }
       },
 

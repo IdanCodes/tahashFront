@@ -1,5 +1,6 @@
 import { PackedResult } from "@shared/interfaces/packed-result";
 import { TimeFormat } from "@shared/constants/time-formats";
+import { ExtraArgsMbld } from "@shared/interfaces/event-extra-args/extra-args-mbld";
 
 /**
  * Best results for events using the {@link TimeFormat.ao5} format.
@@ -97,12 +98,7 @@ export type MbldBestResults = {
    * - `<0`: never succeeded
    * - `>=0`: best total points
    */
-  bestPoints: number;
-
-  /**
-   * Time of the attempt that achieved the best score, in centiseconds.
-   */
-  timeOfBestAttempt: number;
+  bestSingle: PackedResult<ExtraArgsMbld>;
 
   /**
    * Competition number where the best multi-blind attempt was achieved.
