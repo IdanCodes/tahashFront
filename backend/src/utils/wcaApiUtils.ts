@@ -183,11 +183,15 @@ export async function getWCARecordsOfUser(
         const missed = MM;
         const solved = difference + missed;
         const attempted = solved + missed;
+        const points = calcMultiBldTotalPoints({
+          numSuccess: solved,
+          numAttempt: attempted,
+        } as ExtraArgsMbld);
 
         newRecord = {
           bestSingle: {
             centis: timeInSeconds / 100.0, // convert to centiseconds
-            penalty: Penalties.None,
+            penalty: points <= 0 ? Penalties.DNF : Penalties.None,
             extraArgs: {
               numSuccess: solved,
               numAttempt: attempted,

@@ -14,6 +14,7 @@ import {
   submissionStateStr,
 } from "@shared/constants/submission-state";
 import {
+  formatCentis,
   formatPackedResult,
   formatPackedResults,
 } from "@shared/utils/time-utils";
@@ -275,7 +276,7 @@ function EventSubmissionsPanel({
                 ))}
               </div>
               <span>Single: {formatPackedResult(submission.single)}</span>
-              <span>Average: {submission.average}</span>
+              <span>Average: {formatCentis(submission.average)}</span>
               {submission.submissionState === SubmissionState.Pending && (
                 <div className="flex flex-row justify-between px-2">
                   <PrimaryButton
