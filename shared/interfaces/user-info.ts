@@ -24,3 +24,14 @@ export function wcaUserToUserInfo(wcaUser: WcaUser): UserInfo {
     photoUrl: wcaUser.avatar.url,
   };
 }
+
+/**
+ * Check if a string matches the format of a WCA ID
+ */
+export function isWcaIdFormat(wcaId: string): boolean {
+    const wcaIdLen = 4 + 4 + 2; // YYYYLLLLNN
+    return wcaId.length === wcaIdLen
+        && /^[0-9]+$/.test(wcaId.substring(0, 3)) // year
+        && /^[A-Z]+$/.test(wcaId.substring(4,7)) // last name
+        && /^[0-9]+$/.test(wcaId.substring(8,9)); // index
+}

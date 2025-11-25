@@ -15,11 +15,11 @@ import {
 } from "@shared/interfaces/submission-data";
 import { SubmissionState } from "@shared/constants/submission-state";
 import { packedResultSchema } from "./packed-result.schema";
-import { GeneralRecord } from "../../types/event-records";
+import { GeneralRecord } from "@shared/types/event-records";
 import { UserManager } from "../users/user-manager";
 import { submissionDataToRecord } from "@shared/utils/event-results-utils";
 import { PackedResult } from "@shared/interfaces/packed-result";
-import { PastCompResults } from "../../types/past-comp-results";
+import { PastCompResults } from "@shared/types/past-comp-results";
 import { CompEventPair } from "@shared/types/comp-event-pair";
 import { CompDisplayInfo } from "@shared/interfaces/comp-display-info";
 import { EventDisplayInfo } from "@shared/interfaces/event-display-info";

@@ -19,6 +19,7 @@ export const RoutePath = {
         RedirectToAuth: "/redirect-to-auth",
         AuthCallback: "/auth-callback",
         Home: "/home",
+        UserPage: "/user/:wcaId",
     },
 
     // get requests
@@ -34,6 +35,7 @@ export const RoutePath = {
         ActiveCompInfo: "/active-comp-info",
         CompDisplayInfo: "/comp-display-info",
         EventResultDisplays: "/event-result-displays",
+        CompetitorData: "/competitor-data",
 
         RetrieveTimes: "/retrieve-times",
         GetActiveCompEvents: "/active-comp-events",

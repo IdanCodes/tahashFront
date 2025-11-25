@@ -401,7 +401,7 @@ export const isFullPackedTimesArr = (packedResults: PackedResult[]) =>
  * @param centis The amount of centiseconds.
  */
 export const formatCentis = (centis: number): string =>
-    formatTimeParts(unpackCentis(centis));
+    isNullCentis(centis) ? DNF_STRING : formatTimeParts(unpackCentis(centis));
 
 /**
  * Convert a centiseconds value to its representing string format.

@@ -1,11 +1,11 @@
-import { EventRecords } from "../../types/event-records";
+import { EventRecords } from "@shared/types/event-records";
 import { TimeFormat } from "@shared/constants/time-formats";
 import { EventId } from "@shared/types/comp-event";
 import { UserInfo } from "@shared/interfaces/user-info";
 import { TahashUser, TahashUserDoc } from "../models/tahash-user.model";
 import { UserEventResult } from "../../types/user-event-result";
 import { CompManager } from "../comps/comp-manager";
-import { PastCompResults } from "../../types/past-comp-results";
+import { PastCompResults } from "@shared/types/past-comp-results";
 
 /**
  * A singleton to manage the "users" collection of the database.
@@ -105,30 +105,6 @@ export class UserManager {
     return userDoc;
   }
 
-  // /**
-  //  * Save a {@link TahashUser} to the database by their user id (if the user already exists, updates their values)
-  //  * @param tahashUser The user to save.
-  //  * @return Whether the update has been acknowledges (usually true).
-  //  */
-  // public async saveUser(tahashUser: TahashUserDoc): Promise<boolean> {
-  //   return (
-  //     await this.collection.updateOne(
-  //       { userId: tahashUser.userId },
-  //       {
-  //         $set: {
-  //           userId: tahashUser.userId,
-  //           userInfo: tahashUser.userInfo,
-  //           lastUpdatedWcaData: tahashUser.lastUpdatedWcaData,
-  //           lastComp: tahashUser.lastComp,
-  //           records: tahashUser.records,
-  //           eventResults: tahashUser.eventResults,
-  //         },
-  //       },
-  //       { upsert: true },
-  //     )
-  //   ).acknowledged;
-  // }
-
   /**
    * Get (a clone of) a user's {@link UserInfo}.
    * @param userId The user's id.
@@ -139,5 +115,16 @@ export class UserManager {
   async getUserInfoById(userId: number): Promise<UserInfo | null> {
     const userDoc: TahashUserDoc | null = await this.getUserDocById(userId);
     return userDoc ? userDoc.userInfo : null;
+  }
+
+  /**
+   * Get a user's document from the database by their WCA ID.
+   * @param wcaId The requested user's WCA ID.
+   * @return
+   * - If the user doesn't exist in the database, returns `null`.
+   * - Otherwise, returns the document of the user.
+   */
+  async getUserDocByWcaId(wcaId: string): Promise<TahashUserDoc | null> {
+    return TahashUser.findUserByWcaId(wcaId);
   }
 }

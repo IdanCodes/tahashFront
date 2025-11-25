@@ -19,7 +19,7 @@ import {
 import {ExtraArgsFmc} from "../interfaces/event-extra-args/extra-args-fmc";
 import {CompEvent} from "../types/comp-event";
 import {SubmissionData} from "../interfaces/submission-data";
-import {GeneralRecord} from "../../backend/src/types/event-records";
+import {GeneralRecord} from "../types/event-records";
 
 /**
  * Calculate an average of 5 given the full attempt.
@@ -265,42 +265,6 @@ export function submissionDataToRecord(compNumber: number, sd: SubmissionData): 
         average: sd.average,
         averageComp: compNumber,
     }
-    // if (compEvent.eventId === "333fm") {
-    //     const shortestResult = getShortestFMCSol(sd.times);
-    //     if (!shortestResult) return INVALID_SD;
-    //
-    //     return ({
-    //         single: shortestResult,
-    //         singleComp: compNumber,
-    //         mean: sd.average,
-    //         meanComp: compNumber
-    //     }) as FMCBestResults;
-    // }
-    // else if (compEvent.timeFormat === TimeFormat.ao5) {
-    //     return {
-    //         single: getBestResult(compEvent, sd.times),
-    //         singleComp: compNumber,
-    //         average: sd.average,
-    //         averageComp: compNumber
-    //     } as AO5BestResults;
-    // }
-    // else if (compEvent.timeFormat === TimeFormat.mo3 || compEvent.timeFormat === TimeFormat.bo3) {
-    //     return {
-    //         single: getBestResult(compEvent, sd.times),
-    //         singleComp: compNumber,
-    //         mean: sd.average,
-    //         meanComp: compNumber
-    //     } as MO3BestResults;
-    // }
-    // else { // multi
-    //     if (sd.times.length == 0) return INVALID_SD;
-    //
-    //     return {
-    //         timeOfBestAttempt: getPureCentis(sd.times[0]),
-    //         bestPoints: calcMultiBldTotalPoints(sd.times[0].extraArgs as ExtraArgsMbld),
-    //         bestComp: compNumber
-    //     } as MbldBestResults
-    // }
 }
 
 /**
@@ -317,45 +281,6 @@ export function shouldAutoApprove(eventData: CompEvent, currRec: GeneralRecord, 
     if (eventData.timeFormat === TimeFormat.multi)
         return times.length != 0 && compareMultiResults(single as PackedResult<ExtraArgsMbld>, times[0] as PackedResult<ExtraArgsMbld>) >= 0;
     return comparePackedResults(single, currRec.single) >= 0 && (!average || average >= currRec.average);
-
-    // if (eventData.eventId === "333fm") {
-    //     currRec = currRec as FMCBestResults;
-    //     const newSingle = getShortestFMCSol(
-    //         times as PackedResult<ExtraArgsFmc>[],
-    //     );
-    //     const newMean = calculateFMCResult(times);
-    //     if (!newSingle) return false;
-    //
-    //     return newSingle > currRec.single && newMean > currRec.mean;
-    // } else if (eventData.timeFormat === TimeFormat.ao5) {
-    //     currRec = currRec as AO5BestResults;
-    //     const newSingle = getBestResult(eventData, times);
-    //     const newAvg = calculateAO5(times);
-    //
-    //      return comparePackedResults(newSingle, currRec.single) === 1 &&
-    //         newAvg > currRec.average;
-    // } else if (
-    //     eventData.timeFormat === TimeFormat.mo3 ||
-    //     eventData.timeFormat === TimeFormat.bo3
-    // ) {
-    //     currRec = currRec as MO3BestResults;
-    //     const newSingle = getBestResult(eventData, times);
-    //     const newMean = calculateMO3(times);
-    //
-    //     return comparePackedResults(newSingle, currRec.single) === 1 &&
-    //         newMean > currRec.mean;
-    // } else if (eventData.timeFormat === TimeFormat.multi && times.length > 0) {
-    //     currRec = currRec as MbldBestResults;
-    //     const newTime = getPureCentis(times[0]);
-    //     const newPoints = calcMultiBldTotalPoints(
-    //         times[0].extraArgs as ExtraArgsMbld,
-    //     );
-    //
-    //     return newPoints > currRec.bestPoints ||
-    //         (newPoints == currRec.bestPoints && newTime > currRec.timeOfBestAttempt);
-    // }
-    //
-    // return false;
 }
 
 /**

@@ -102,6 +102,11 @@ router.get(
   compHandlers.eventResultDisplays,
 );
 
+router.get(
+  `${RoutePath.Get.CompetitorData}/:wcaId`,
+  compHandlers.competitorData,
+);
+
 // admin
 
 router.get(
@@ -140,45 +145,5 @@ router.get("/new", requireAuth, requireAdmin, async (req, res) => {
 router.get("/curr", (req: Request, res: Response) => {
   res.json(CompManager.getInstance().getActiveComp());
 });
-
-/**
- * GET /getCompEvents?comp-number=X
- *
- * Get a competition's events' ids.
- *
- * Query Parameters:
- * - {@link QueryParams.CompNumber} (number): The competition number.
- *
- * Response (JSON):
- * - 200 OK: An array [ eventId: string ].
- * - 400 Bad Request: Error object if the comp number was invalid.
- * - 404 Not Found: Error object if the requested comp was not found.
- */
-// router.get(RoutePath.Get.GetCompEvents, async (req: Request, res: Response) => {
-//   if (!isLoggedIn(req)) return res.json();
-//
-//   // comp number parameter
-//   const compNumber: number | undefined = Number(
-//     req.query[QueryParams.CompNumber],
-//   );
-//   if (!compNumber)
-//     return res.json(
-//       new ApiResponse(
-//         ResponseCode.Error,
-//         "Required comp number as a query parameter",
-//       ),
-//     );
-//
-//   const eventIds = await CompManager.getInstance().getCompEventIds(compNumber);
-//   if (!eventIds)
-//     return res.json(
-//       new ApiResponse(
-//         ResponseCode.Error,
-//         `Comp with comp number ${compNumber} does not exist.`,
-//       ),
-//     );
-//
-//   res.json(new ApiResponse(ResponseCode.Success, eventIds));
-// });
 
 export default router;

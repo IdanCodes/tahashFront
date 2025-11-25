@@ -24,12 +24,13 @@ import { getSubmissionDisplays } from "@shared/interfaces/submission-data-displa
 import { SubmissionState } from "@shared/constants/submission-state";
 import { shouldAutoApprove } from "@shared/utils/event-results-utils";
 import { TahashCompDoc } from "../database/models/tahash-comp.model";
-import { isInteger } from "@shared/utils/global-utils";
+import { isAlphanumeric, isInteger } from "@shared/utils/global-utils";
 import {
   EventResultDisplay,
   submissionsToResultDisplays,
 } from "@shared/types/event-result-display";
-import { eventRecordToGeneralRecords } from "../types/event-records";
+import { eventRecordToGeneralRecords } from "@shared/types/event-records";
+import { isWcaIdFormat } from "@shared/interfaces/user-info";
 
 /**
  * Get all event displays and statuses
@@ -318,6 +319,18 @@ export async function eventResultDisplays(req: Request, res: Response) {
   res.json(new ApiResponse(ResponseCode.Success, eventResultDisplays));
 }
 
+export async function competitorData(req: Request, res: Response) {
+  const wcaId = req.params.wcaId.toUpperCase();
+  if (!isWcaIdFormat(wcaId))
+    return res.json(errorResponse(`Invalid WCA ID "${wcaId}"`));
+
+  const userDoc = await UserManager.getInstance().getUserDocByWcaId(wcaId);
+  if (!userDoc)
+    return res.json(errorResponse(`The user "${wcaId}" is not registered`));
+
+  res.json(new ApiResponse(ResponseCode.Success, userDoc.getCompetitorData()));
+}
+
 export const compHandlers = {
   eventsDisplayAndStatus,
   userEventData,
@@ -330,4 +343,5 @@ export const compHandlers = {
   activeCompInfo,
   compDisplayInfo,
   eventResultDisplays,
+  competitorData,
 };

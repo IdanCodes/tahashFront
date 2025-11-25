@@ -11,7 +11,7 @@ import {
   eventRecordToGeneralRecords,
   GeneralRecord,
   generalRecordsToEventRecord,
-} from "../../types/event-records";
+} from "@shared/types/event-records";
 import { TimeFormat } from "@shared/constants/time-formats";
 import { packedResultSchema } from "./packed-result.schema";
 import { PackedResult } from "@shared/interfaces/packed-result";
@@ -25,6 +25,8 @@ import { isErrorObject } from "@shared/interfaces/error-object";
 import {
   comparePackedResults,
   isFullPackedTimesArr,
+  isNullCentis,
+  NULL_TIME_CENTIS,
 } from "@shared/utils/time-utils";
 import {
   AO5BestResults,
@@ -34,7 +36,9 @@ import {
   MO3BestResults,
 } from "../../types/result-format";
 import { CompManager } from "../comps/comp-manager";
-import { PastCompResults } from "../../types/past-comp-results";
+import { PastCompResults } from "@shared/types/past-comp-results";
+import { CompetitorData } from "@shared/types/competitor-data";
+import { Penalties } from "@shared/constants/penalties";
 
 const userInfoSchema = new mongoose.Schema(
   {
@@ -83,6 +87,7 @@ export interface ITahashUser {
   readonly eventResults: Map<EventId, UserEventResult>;
 
   /* user's results of past competitions */
+  // <compId, results>
   readonly pastResults: Map<string, PastCompResults>;
 }
 
@@ -141,6 +146,11 @@ export interface TahashUserMethods {
    * @param results The user's results in the comp
    */
   setCompResults(compNumber: number, results: PastCompResults): void;
+
+  /**
+   * Get this user's competitor data (passes reference)
+   */
+  getCompetitorData(): CompetitorData;
 }
 
 export interface TahashUserVirtuals {
@@ -158,6 +168,11 @@ export interface TahashUserStatics {
    * Find a user by their id.
    */
   findUserById(userId: number): Promise<TahashUserDoc | null>;
+
+  /**
+   * Find a user by their WCA Id
+   */
+  findUserByWcaId(wcaId: string): Promise<TahashUserDoc | null>;
 }
 
 const updateWCADataInterval: Readonly<number> = 7; /* number of days to wait between updating wca data */
@@ -282,29 +297,40 @@ const tahashUserSchema = new Schema<
         for (const [eventId, eventRecords] of newRecords) {
           const format = getEventFormat(eventId);
           const existingRecords = this.records.get(eventId);
+          const newRecord: GeneralRecord = existingRecords
+            ? getBestRecords(
+                eventRecords,
+                eventRecordToGeneralRecords(format, existingRecords),
+              )
+            : eventRecords;
+          if (existingRecords) {
+            console.log(
+              "old:",
+              eventRecordToGeneralRecords(format, existingRecords),
+            );
+            console.log("new:", eventRecords);
+          }
+          if (
+            newRecord.single.penalty === Penalties.DNF &&
+            (!newRecord.average || isNullCentis(newRecord.averageComp))
+          )
+            continue;
+
           this.records.set(
             eventId,
-            existingRecords
-              ? getBestRecords(
-                  getEventFormat(eventId),
-                  eventRecords,
-                  eventRecordToGeneralRecords(format, existingRecords),
-                )
-              : eventRecords,
+            generalRecordsToEventRecord(format, newRecord),
           );
         }
 
         // get the best records for each record type of the two records ("combine" them)
-        function getBestRecords<T extends TimeFormat>(
-          format: T,
+        // returns null if neither of the records has any defined time (not `undefined`/DNF)
+        function getBestRecords(
           newRecords: GeneralRecord,
           oldRecords: GeneralRecord,
-        ): EventRecords<T> {
-          // const compEvent = getEventById(eventId);
-          // if (!compEvent) return oldRecords;
+        ): GeneralRecord {
           let result: GeneralRecord = { ...oldRecords };
 
-          if (newRecords.single < oldRecords.single) {
+          if (comparePackedResults(newRecords.single, oldRecords.single) < 0) {
             result.single = JSON.parse(JSON.stringify(newRecords.single));
             result.singleComp = newRecords.singleComp;
           }
@@ -314,7 +340,12 @@ const tahashUserSchema = new Schema<
             result.averageComp = newRecords.averageComp;
           }
 
-          return generalRecordsToEventRecord(format, result);
+          console.log("old.single", oldRecords.single);
+          console.log("new.single", newRecords.single);
+          console.log("old.average", oldRecords.average);
+          console.log("new.average", newRecords.average);
+          console.log("result:", result);
+          return result;
 
           // if (eventId === "333fm") {
           //   result = result as FMCBestResults;
@@ -417,11 +448,25 @@ const tahashUserSchema = new Schema<
       setCompResults(compNumber: number, results: PastCompResults): void {
         this.pastResults.set(compNumber.toString(), results);
       },
+
+      getCompetitorData(): CompetitorData {
+        return {
+          userInfo: this.userInfo,
+          records: this.records,
+          pastResults: this.pastResults,
+        } as CompetitorData;
+      },
     },
     statics: {
       async findUserById(userId: number): Promise<TahashUserDoc | null> {
         return await this.findOne({
           "userInfo.id": userId,
+        }).exec();
+      },
+
+      async findUserByWcaId(wcaId: string): Promise<TahashUserDoc | null> {
+        return await this.findOne({
+          "userInfo.wcaId": wcaId,
         }).exec();
       },
     },

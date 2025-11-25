@@ -25,25 +25,23 @@ function ProfileAttribute({
 function ProfilePanel({ userInfo }: { userInfo: UserInfo }) {
   return (
     <>
-      <div className="mx-auto flex w-35/100 flex-col">
+      <div className="mx-auto flex w-35/100 flex-col gap-4">
         <ProfileAttribute name="Name:" value={userInfo.name} />
         <ProfileAttribute name="WCA ID:" value={userInfo.wcaId} />
         <ProfileAttribute name="Country:" value={userInfo.country} />
-        <ProfileAttribute
-          name="Photo:"
-          value={
-            <a
-              target="_blank"
-              href={`https://www.worldcubeassociation.org/persons/${userInfo.wcaId ?? ""}`}
-            >
-              <img
-                src={userInfo.photoUrl}
-                alt="User's WCA photo"
-                className="h-auto w-35 cursor-pointer rounded-2xl border-4 border-black transition-all duration-75 hover:scale-103"
-              />
-            </a>
-          }
-        />
+        <div className="flex justify-center">
+          <a href={`/user/${userInfo.wcaId}`}>
+            <PrimaryButton text={"Stats"} />
+          </a>
+        </div>
+        <div className="flex justify-center">
+          <a
+            target="_blank"
+            href={`https://www.worldcubeassociation.org/persons/${userInfo.wcaId ?? ""}`}
+          >
+            <PrimaryButton text={"WCA Profile"} colors="bg-orange-500" />
+          </a>
+        </div>
       </div>
     </>
   );

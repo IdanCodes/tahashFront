@@ -11,11 +11,6 @@ export type AO5BestResults = {
    */
   single: PackedResult;
 
-  // /**
-  //  * All 5 attempts of the average that contains the best single.
-  //  */
-  // singleAttempts: PackedResult[];
-
   /**
    * Competition number where the best single was achieved.
    * - `>0`: tahash comp
@@ -28,11 +23,6 @@ export type AO5BestResults = {
    * Best average of 5 result, in centiseconds.
    */
   average: number;
-
-  // /**
-  //  * All 5 attempts that formed the best average.
-  //  */
-  // averageAttempts: PackedResult[];
 
   /**
    * Competition number where the best average was achieved.

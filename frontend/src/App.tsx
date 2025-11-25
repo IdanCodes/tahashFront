@@ -21,6 +21,7 @@ import AdminPanel from "./pages/AdminPanel";
 import NotFoundPage from "./pages/NotFoundPage";
 import Results from "./pages/Results";
 import { ActiveCompProvider } from "./context/ActiveCompContext";
+import UserPage from "./pages/UserPage";
 
 function AnimatedRoutes(): JSX.Element {
   const location = useLocation();
@@ -118,6 +119,7 @@ function AnimatedRoutes(): JSX.Element {
         />
         <Route path={RoutePath.Page.Results} element={<Results />} />
         <Route path={RoutePath.Page.ResultsEvent} element={<Results />} />
+        <Route path={RoutePath.Page.UserPage} element={<UserPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </AnimatePresence>

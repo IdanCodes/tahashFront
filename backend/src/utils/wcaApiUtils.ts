@@ -14,7 +14,7 @@ import {
   EventRecords,
   eventRecordToGeneralRecords,
   GeneralRecord,
-} from "../types/event-records";
+} from "@shared/types/event-records";
 import { TimeFormat } from "@shared/constants/time-formats";
 import { EventId, getEventById } from "@shared/types/comp-event";
 import {

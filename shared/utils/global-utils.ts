@@ -76,3 +76,10 @@ export function compareNumbers(a: number, b: number): 0 | 1 | -1 {
     return a > b ? 1 : (a === b ? 0 : -1);
 }
 
+/**
+ * Check if a string contains only letters and numbers (a-z, A-Z, 0-9)
+ */
+export function isAlphanumeric(str: string) {
+    return /^[a-zA-Z0-9]+$/.test(str);
+}
+

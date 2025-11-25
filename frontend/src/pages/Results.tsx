@@ -1,15 +1,3 @@
-/**
- * GET.EventResultsDisplay/:compNumber/:eventId [
- *   {
- *     place: number,
- *     name: string,
- *     best: string,
- *     average: string,
- *     solves: string[]
- *   }
- * ]
- */
-
 import React, { useEffect, useMemo, useState } from "react";
 import LoadingSpinner from "../components/LoadingSpinner";
 import {
@@ -17,11 +5,7 @@ import {
   EventDisplayInfo,
 } from "@shared/interfaces/event-display-info";
 import { useActiveComp } from "../context/ActiveCompContext";
-import {
-  EventBox,
-  EventBoxIcon,
-  EventBoxTitle,
-} from "../components/EventBoxes";
+import { EventBox } from "../components/EventBoxes";
 import { sendGetRequest } from "../utils/API/apiUtils";
 import { RoutePath } from "@shared/constants/route-path";
 import { redirectToError } from "../utils/errorUtils";

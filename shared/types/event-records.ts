@@ -1,12 +1,10 @@
 import { TimeFormat } from "@shared/constants/time-formats";
 import {
   AO5BestResults,
-  BO3BestResults,
-  FMCBestResults,
   MbldBestResults,
   MO3BestResults,
   ResultFormatMap,
-} from "./result-format";
+} from "../../backend/src/types/result-format";
 import { getPureCentis, NULL_TIME_CENTIS } from "@shared/utils/time-utils";
 import { PackedResult } from "@shared/interfaces/packed-result";
 
