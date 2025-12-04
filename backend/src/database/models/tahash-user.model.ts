@@ -87,7 +87,7 @@ export interface ITahashUser {
   readonly eventResults: Map<EventId, UserEventResult>;
 
   /* user's results of past competitions */
-  // <compId, results>
+  // <compNumber, results>
   readonly pastResults: Map<string, PastCompResults>;
 }
 
@@ -450,10 +450,15 @@ const tahashUserSchema = new Schema<
       },
 
       getCompetitorData(): CompetitorData {
+        const records: [EventId, EventRecords<TimeFormat>][] = [];
+        for (const [eid, er] of this.records) records.push([eid, er]);
+        const pastResults: [string, PastCompResults][] = [];
+        for (const [cn, pr] of this.pastResults) pastResults.push([cn, pr]);
+
         return {
           userInfo: this.userInfo,
-          records: this.records,
-          pastResults: this.pastResults,
+          records,
+          pastResults,
         } as CompetitorData;
       },
     },

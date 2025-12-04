@@ -11,6 +11,7 @@ import { RoutePath } from "@shared/constants/route-path";
 import { redirectToError } from "../utils/errorUtils";
 import { CubingIconsSheet } from "../components/CubingIconsSheet";
 import { EventResultDisplay } from "@shared/types/event-result-display";
+import EventSelection from "../components/EventSelection";
 
 function Results() {
   const [currEventIndex, setCurrEventIndex] = useState<number>(0);
@@ -116,37 +117,6 @@ function Results() {
         </>
       )}
     </div>
-  );
-}
-
-function EventSelection({
-  events,
-  selectedEventId,
-  handleClickEvent,
-}: {
-  events: EventDisplayInfo[];
-  selectedEventId: string;
-  handleClickEvent: (eventIndex: string) => void;
-}) {
-  return (
-    <>
-      <CubingIconsSheet />
-      <div className="mx-auto flex w-95/100 flex-row flex-wrap place-content-center items-center gap-x-3 gap-y-7 py-4 pt-5">
-        {events.map((info, index) => (
-          <EventBox
-            key={index}
-            handleClickEvent={handleClickEvent}
-            das={info}
-            boxOptions={{
-              size: 3.5,
-              fontSize: 1,
-              hasBorder: selectedEventId === info.eventId,
-              animateHover: false,
-            }}
-          />
-        ))}
-      </div>
-    </>
   );
 }
 

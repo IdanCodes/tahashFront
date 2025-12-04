@@ -128,7 +128,7 @@ export function tryAnalyzeTimes(timeStr: string): TimeParts | null {
     timeStr = timeStr.trim();
 
     // check if the characters are valid
-    const noColons: string = timeStr.replaceAll(":", "");
+    const noColons: string = timeStr.replace(":", "");
     if (noColons == "" || !isNumber(noColons)) return null;
 
     const colonParts = timeStr.split(":");
@@ -376,9 +376,9 @@ export function applyPenaltyCentis(
     centis: number,
     penalty: Penalty = Penalties.None,
 ): number {
-    return penalty == Penalties.Plus2
+    return penalty === Penalties.DNF ? NULL_TIME_CENTIS : (penalty == Penalties.Plus2
         ? centis + 2 * maxTimeParts[TimeUnit.Centis]
-        : centis;
+        : centis);
 }
 
 /**
@@ -436,7 +436,7 @@ export function getPureCentisArr(results: PackedResult[]): number[] {
     return results.map((r) => getPureCentis(r));
 }
 
-export const isNullCentis = (centis: number): boolean => centis === NULL_TIME_CENTIS;
+export const isNullCentis = (centis: number ): boolean => !centis || centis === NULL_TIME_CENTIS;
 
 // TODO: do something about the previewStr stuff
 // format a packed times array to an allTimes array

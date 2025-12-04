@@ -17,6 +17,7 @@ import {
   formatCentis,
   formatPackedResult,
   formatPackedResults,
+  NULL_TIME_CENTIS,
 } from "@shared/utils/time-utils";
 import PrimaryButton from "../components/buttons/PrimaryButton";
 import { SubmissionsOverview } from "@shared/types/SubmissionsOverview";
@@ -276,7 +277,9 @@ function EventSubmissionsPanel({
                 ))}
               </div>
               <span>Single: {formatPackedResult(submission.single)}</span>
-              <span>Average: {formatCentis(submission.average)}</span>
+              <span>
+                Average: {formatCentis(submission.average ?? NULL_TIME_CENTIS)}
+              </span>
               {submission.submissionState === SubmissionState.Pending && (
                 <div className="flex flex-row justify-between px-2">
                   <PrimaryButton

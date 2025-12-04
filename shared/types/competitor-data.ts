@@ -6,6 +6,8 @@ import { PastCompResults } from "./past-comp-results";
 
 export type CompetitorData = {
   userInfo: UserInfo;
-  records: Map<EventId, EventRecords<TimeFormat>>;
-  pastResults: Map<string, PastCompResults>;
+  records: [EventId, EventRecords<TimeFormat>][];
+
+  /* [compNumber, results] */
+  pastResults: [string, PastCompResults][];
 };
