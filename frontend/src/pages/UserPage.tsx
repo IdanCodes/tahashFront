@@ -118,7 +118,7 @@ function CompetitorDataPanel({
 
   return (
     <>
-      <p className="text-center text-3xl">{competitorData.userInfo.name}</p>
+      <p className="text-center text-3xl p-4">{competitorData.userInfo.name}</p>
       <RecordsPanel records={records} />
       {pastResults.length > 0 ? (
         <PastResultsPanel pastResults={pastResults} />
@@ -138,13 +138,13 @@ function RecordsPanel({
 }) {
   return (
     <div className="w-full place-items-center">
-      <p className="text-4xl font-semibold">Records</p>
+      <p className="text-4xl text-center font-semibold">Records</p>
       <table className="mx-auto my-2 w-7/10 rounded-t-2xl bg-blue-700/55 text-2xl">
         <thead className="rounded-t-2xl bg-transparent text-[1.655rem] text-white/90">
           <tr>
-            <td className="py-2 text-center">Event</td>
-            <td className="py-2 text-center">Single</td>
-            <td className="text-center">Average</td>
+            <th className="py-2 text-center">Event</th>
+            <th className="py-2 text-center">Single</th>
+            <th className="py-2 text-center">Average</th>
           </tr>
         </thead>
         <tbody>
@@ -161,7 +161,7 @@ function RecordsPanel({
                   />
                   <p className="text-center">{displayInfo.eventTitle}</p>
                 </td>
-                <td className="size-fit py-2">
+                <td className="size-fit py-2 text-center">
                   <div className="flex items-baseline justify-center gap-2">
                     <RecordLabel
                       timeCentis={getPureCentis(record.single)}
@@ -232,7 +232,7 @@ function PastResultsPanel({
   return (
     <>
       <div className="w-full place-items-center">
-        <p className="pb-1 text-4xl font-semibold">Results History</p>
+        <p className="pb-1 text-4xl text-center pt-8 font-semibold">Results History</p>
         <EventSelection
           events={events}
           selectedEventId={selectedEventId}
@@ -244,11 +244,11 @@ function PastResultsPanel({
           <table className="mx-auto my-2 w-8/10 rounded-t-2xl bg-blue-700/55 text-2xl">
             <thead className="rounded-t-2xl bg-transparent text-[1.655rem] text-white/90">
               <tr>
-                <td className="pl-4">Comp</td>
-                <td className="py-2">Place</td>
-                <td className="py-2">Single</td>
-                <td className="py-2">Average</td>
-                <td className="py-2 text-center">Solves</td>
+                <th className="pl-4 text-center">Comp</th>
+                <th className="py-2 text-center">Place</th>
+                <th className="py-2 text-center ">Single</th>
+                <th className="py-2 text-center">Average</th>
+                <th className="py-2 text-center">Solves</th>
               </tr>
             </thead>
             <tbody>
@@ -256,7 +256,7 @@ function PastResultsPanel({
                 resultEntries.map(([compNumber, result], index) => (
                   <tr
                     key={index}
-                    className="font-mono odd:!bg-slate-50 even:!bg-slate-200"
+                    className="font-mono text-center odd:!bg-slate-50 even:!bg-slate-200"
                   >
                     <TableData>{compNumber}</TableData>
                     <TableData>#{result.place.toString()}</TableData>
@@ -267,7 +267,7 @@ function PastResultsPanel({
                       {getAverageStr(eventData, result.times)}
                     </TableData>
                     <TableData>
-                      <div className="flex w-[90%] justify-between">
+                      <div className="flex w-[90%] justify-evenly text-center py-2">
                         {formatAttempts(eventData.timeFormat, result.times).map(
                           (str, index) => (
                             <span key={index}>{str}</span>

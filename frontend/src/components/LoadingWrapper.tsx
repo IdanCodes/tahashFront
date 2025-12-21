@@ -11,7 +11,7 @@ function LoadingWrapper({ children }: { children: ReactNode }): JSX.Element {
     return (
       <>
         <p className="pt-10 text-center text-5xl">Loading...</p>
-        <div className="flex h-full w-full flex-col">
+        <div className="flex h-full w-full flex-col items-center">
           <LoadingSpinner />
         </div>
       </>
