@@ -27,7 +27,7 @@ import {
   MO3BestResults,
   MbldBestResults,
   ResultFormatMap,
-} from "../types/result-format";
+} from "@shared/types/result-format";
 import { Penalties } from "@shared/constants/penalties";
 import {
   calcMultiBldTotalPoints,

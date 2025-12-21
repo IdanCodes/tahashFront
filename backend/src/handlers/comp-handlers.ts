@@ -20,17 +20,15 @@ import { getEventById } from "@shared/types/comp-event";
 import { UserCompeteData } from "@shared/interfaces/user-compete-data";
 import { getEmptyPackedResults } from "../utils/packed-result-utils";
 import { errorObject } from "@shared/interfaces/error-object";
-import { getSubmissionDisplays } from "@shared/interfaces/submission-data-display";
 import { SubmissionState } from "@shared/constants/submission-state";
 import { shouldAutoApprove } from "@shared/utils/event-results-utils";
 import { TahashCompDoc } from "../database/models/tahash-comp.model";
 import { isAlphanumeric, isInteger } from "@shared/utils/global-utils";
-import {
-  EventResultDisplay,
-  submissionsToResultDisplays,
-} from "@shared/types/event-result-display";
+import { EventResultDisplay } from "@shared/types/event-result-display";
 import { eventRecordToGeneralRecords } from "@shared/types/event-records";
 import { isWcaIdFormat } from "@shared/interfaces/user-info";
+import { getSubmissionDisplays } from "../utils/submission-data-helpers";
+import { submissionsToResultDisplays } from "../utils/event-result-display-helpers";
 
 /**
  * Get all event displays and statuses

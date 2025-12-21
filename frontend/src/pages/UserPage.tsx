@@ -120,7 +120,13 @@ function CompetitorDataPanel({
     <>
       <p className="text-center text-3xl">{competitorData.userInfo.name}</p>
       <RecordsPanel records={records} />
-      <PastResultsPanel pastResults={pastResults} />
+      {pastResults.length > 0 ? (
+        <PastResultsPanel pastResults={pastResults} />
+      ) : (
+        <>
+          <p className="text-center text-2xl">No past results</p>
+        </>
+      )}
     </>
   );
 }

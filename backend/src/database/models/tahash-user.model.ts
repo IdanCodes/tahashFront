@@ -5,7 +5,7 @@ import {
   getEventById,
   getEventFormat,
 } from "@shared/types/comp-event";
-import { UserEventResult } from "../../types/user-event-result";
+import { UserEventResult } from "@shared/types/user-event-result";
 import {
   EventRecords,
   eventRecordToGeneralRecords,
@@ -34,7 +34,7 @@ import {
   FMCBestResults,
   MbldBestResults,
   MO3BestResults,
-} from "../../types/result-format";
+} from "@shared/types/result-format";
 import { CompManager } from "../comps/comp-manager";
 import { PastCompResults } from "@shared/types/past-comp-results";
 import { CompetitorData } from "@shared/types/competitor-data";

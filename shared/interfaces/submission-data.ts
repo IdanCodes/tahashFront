@@ -1,10 +1,10 @@
 import {SubmissionState} from "../constants/submission-state";
 import {PackedResult} from "./packed-result";
 import {getAverageCentis, getBestResult,} from "../utils/event-results-utils";
-import {CompEvent, EventId, getEventFormat} from "../types/comp-event";
+import {CompEvent} from "../types/comp-event";
 import {comparePackedResults, NULL_TIME_CENTIS} from "../utils/time-utils";
 import {isAverageFormat, TimeFormat} from "../constants/time-formats";
-import {calcMultiBldTotalPoints, compareMultiResults, ExtraArgsMbld} from "./event-extra-args/extra-args-mbld";
+import {compareMultiResults, ExtraArgsMbld} from "./event-extra-args/extra-args-mbld";
 import {compareNumbers} from "../utils/global-utils";
 
 /**

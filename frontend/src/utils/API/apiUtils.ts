@@ -6,7 +6,8 @@ import {
 } from "@shared/types/api-response";
 import { errorObject } from "@shared/interfaces/error-object";
 
-const basePath = "/api";
+const basePath = import.meta.env.VITE_API_PATH || "/api";
+console.log("requestbasepath:", basePath);
 enum RequestMethod {
   GET = "GET",
   POST = "POST",

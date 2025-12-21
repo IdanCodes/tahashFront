@@ -5,11 +5,9 @@ import {
   EventDisplayInfo,
 } from "@shared/interfaces/event-display-info";
 import { useActiveComp } from "../context/ActiveCompContext";
-import { EventBox } from "../components/EventBoxes";
 import { sendGetRequest } from "../utils/API/apiUtils";
 import { RoutePath } from "@shared/constants/route-path";
 import { redirectToError } from "../utils/errorUtils";
-import { CubingIconsSheet } from "../components/CubingIconsSheet";
 import { EventResultDisplay } from "@shared/types/event-result-display";
 import EventSelection from "../components/EventSelection";
 

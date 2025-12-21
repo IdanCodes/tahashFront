@@ -1,11 +1,13 @@
-import { ConfigEnv, defineConfig, loadEnv } from "vite";
 // @ts-ignore
 import react from "@vitejs/plugin-react";
 // @ts-ignore
 import tailwindcss from "@tailwindcss/vite";
 import * as path from "node:path";
 
-// https://vite.dev/config/
+// vite.config.js
+import { defineConfig } from "vite";
+import { resolve } from "path";
+
 export default defineConfig({
   plugins: [react(), tailwindcss()],
   resolve: {
@@ -22,3 +24,7 @@ export default defineConfig({
     },
   },
 });
+// https://vite.dev/config/
+// export default defineConfig({
+//
+// });

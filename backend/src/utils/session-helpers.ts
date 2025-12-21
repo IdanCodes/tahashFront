@@ -4,9 +4,7 @@ import { UserInfo } from "@shared/interfaces/user-info";
 import { isLoggedIn } from "../middleware/auth/require-auth";
 import { COOKIE_CONFIG } from "../config/env";
 import { CookieNames } from "@shared/constants/cookie-names";
-import { ApiResponse, errorResponse } from "@shared/types/api-response";
 import { SID_COOKIE_NAME } from "../middleware/db-session";
-import { ResponseCode } from "@shared/types/response-code";
 import { refreshAdminCookie } from "./admin-helpers";
 
 /**
@@ -37,6 +35,7 @@ export function updateAndSaveSession(
 export function refreshLoginCookie(req: Request, res: Response) {
   res.cookie(CookieNames.isLoggedIn, JSON.stringify(isLoggedIn(req)), {
     httpOnly: false,
+    domain: COOKIE_CONFIG.DOMAIN,
     expires: req.session.cookie.expires ?? undefined,
     secure: COOKIE_CONFIG.SECURE,
     sameSite: COOKIE_CONFIG.SAMESITE,

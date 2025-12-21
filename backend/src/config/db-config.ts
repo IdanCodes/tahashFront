@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { IS_PRODUCTION, tryGetEnv } from "./env";
+import { getEnv, IS_PRODUCTION, tryGetEnv } from "./env";
 import { CompManager } from "../database/comps/comp-manager";
 import { createCompSrc } from "../database/models/tahash-comp.model";
 import { UserManager } from "../database/users/user-manager";
@@ -7,6 +7,12 @@ import { UserManager } from "../database/users/user-manager";
 let _connString: string | undefined = undefined;
 export const getConnectionString: () => string = () => {
   if (_connString) return _connString;
+
+  const env_conn = tryGetEnv("CONNECT_STR");
+  if (env_conn) {
+    _connString = env_conn;
+    return _connString;
+  }
   // retrieve mongodb host url
   const mongoUsername: string | undefined = tryGetEnv(
     "MONGO_INITDB_ROOT_USERNAME",

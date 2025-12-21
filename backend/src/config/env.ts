@@ -33,4 +33,5 @@ export const COOKIE_CONFIG = {
   SAMESITE: (getEnv("COOKIE_SAMESITE") === "lax"
     ? "lax"
     : "none") /*IS_PRODUCTION ? "none" : "lax"*/ as "lax" | "none",
+  DOMAIN: tryGetEnv("COOKIE_DOMAIN"),
 };

@@ -11,7 +11,12 @@ export function redirectToError(error: object): void {
   } else if (typeof error == "object") text = JSON.stringify(error);
   else text = error as string;
 
-  window.location.href = `/error?text=${encodeURIComponent(text)}${data}`;
+  console.error(
+    `Error occurred: ${text}
+`,
+    data,
+  );
+  // window.location.href = `/error?text=${encodeURIComponent(text)}${data}`;
 }
 
 export const isAbortError = (err: any): boolean => err.name === "AbortError";

@@ -3,7 +3,7 @@ import { TimeFormat } from "@shared/constants/time-formats";
 import { EventId } from "@shared/types/comp-event";
 import { UserInfo } from "@shared/interfaces/user-info";
 import { TahashUser, TahashUserDoc } from "../models/tahash-user.model";
-import { UserEventResult } from "../../types/user-event-result";
+import { UserEventResult } from "@shared/types/user-event-result";
 import { CompManager } from "../comps/comp-manager";
 import { PastCompResults } from "@shared/types/past-comp-results";
 

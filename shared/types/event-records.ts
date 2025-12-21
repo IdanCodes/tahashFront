@@ -4,7 +4,7 @@ import {
   MbldBestResults,
   MO3BestResults,
   ResultFormatMap,
-} from "../../backend/src/types/result-format";
+} from "./result-format";
 import { getPureCentis, NULL_TIME_CENTIS } from "@shared/utils/time-utils";
 import { PackedResult } from "@shared/interfaces/packed-result";
 

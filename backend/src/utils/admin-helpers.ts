@@ -20,6 +20,7 @@ export function refreshAdminCookie(req: Request, res: Response) {
   else
     res.cookie(CookieNames.isAdmin, JSON.stringify(isAdmin(userInfo.wcaId)), {
       httpOnly: false,
+      domain: COOKIE_CONFIG.DOMAIN,
       expires: req.session.cookie.expires ?? undefined,
       secure: COOKIE_CONFIG.SECURE,
       sameSite: COOKIE_CONFIG.SAMESITE,

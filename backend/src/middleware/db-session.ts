@@ -1,10 +1,11 @@
 import { RequestHandler } from "express";
 import session from "express-session";
-import { COOKIE_CONFIG, getEnv } from "../config/env";
+import { COOKIE_CONFIG, getEnv, tryGetEnv } from "../config/env";
 import MongoStore from "connect-mongo";
 import { MongoClient } from "mongodb";
 import { getConnectionString } from "../config/db-config";
 
+console.log(`COOKIE_DOMAIN: ${COOKIE_CONFIG.DOMAIN}`);
 export const SID_COOKIE_NAME = "connect.sid";
 export function createMongoSession(): RequestHandler {
   return session({
@@ -16,6 +17,7 @@ export function createMongoSession(): RequestHandler {
     cookie: {
       maxAge: 3 * 24 * 60 * 60 * 1000, // 3 days
       httpOnly: true,
+      domain: COOKIE_CONFIG.DOMAIN,
       secure: COOKIE_CONFIG.SECURE,
       sameSite: COOKIE_CONFIG.SAMESITE,
     },
