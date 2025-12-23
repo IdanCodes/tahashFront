@@ -65,6 +65,9 @@ function Results() {
             );
         }}
       />
+      <h3 className="text-center text-4xl font-semibold">
+        {currEvent.eventTitle}
+      </h3>
       {eventResults ? (
         <>
           {eventResults.length > 0 ? (

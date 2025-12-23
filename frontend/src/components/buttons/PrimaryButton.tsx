@@ -1,4 +1,4 @@
-import React, { JSX, MouseEventHandler } from "react";
+import React, { JSX, MouseEventHandler, ReactNode } from "react";
 import clsx from "clsx";
 import { ButtonSize } from "./ButtonSize";
 
@@ -11,7 +11,7 @@ export default function PrimaryButton({
   btnType = "button",
   colors = "bg-slate-100/70 hover:bg-slate-100/50 active:bg-slate-300/80",
 }: {
-  text?: string | number;
+  text?: string | number | JSX.Element;
   children?: React.ReactNode;
   onClick?: MouseEventHandler;
   disabled?: boolean;
@@ -36,7 +36,7 @@ export default function PrimaryButton({
           if (!disabled) onClick(e);
         }}
       >
-        <p
+        <div
           className={clsx(
             "font-[Arial] font-bold",
             buttonSize == ButtonSize.Small && "text-2xl",
@@ -44,8 +44,8 @@ export default function PrimaryButton({
             buttonSize == ButtonSize.Large && "m-1 text-4xl",
           )}
         >
-          {text}
-        </p>
+          <>{text}</>
+        </div>
       </button>
     </>
   );

@@ -15,14 +15,14 @@ export default function EventSelection({
   return (
     <>
       <CubingIconsSheet />
-      <div className="mx-auto flex w-95/100 flex-row flex-wrap place-content-center items-center gap-x-3 gap-y-7 py-4 pt-5">
+      <div className="mx-auto flex w-95/100 flex-row flex-wrap place-content-center items-center gap-x-2.5 gap-y-7 py-4 pt-5">
         {events.map((info, index) => (
           <EventBox
             key={index}
             handleClickEvent={handleClickEvent}
             das={info}
             boxOptions={{
-              size: 3.5,
+              size: 3.15,
               fontSize: 1,
               hasBorder: selectedEventId === info.eventId,
               animateHover: false,

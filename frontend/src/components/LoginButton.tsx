@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { ReactNode, useEffect, useState } from "react";
 import PrimaryButton from "./buttons/PrimaryButton";
 import { ButtonSize } from "./buttons/ButtonSize";
 import { sendGetRequest } from "../utils/API/apiUtils";
@@ -9,7 +9,7 @@ import { useNavigate } from "react-router-dom";
 import { RoutePath } from "@shared/constants/route-path";
 import { QueryParams } from "@shared/constants/query-params";
 
-function LoginButton({ text = "התחברות" }: { text?: string }) {
+function LoginButton({ content }: { content: React.JSX.Element }) {
   const [disableInteract, setDisableInteract] = useState(false);
   const userInfo = useUserInfo();
   const navigate = useNavigate();
@@ -35,7 +35,7 @@ function LoginButton({ text = "התחברות" }: { text?: string }) {
     <>
       <PrimaryButton
         disabled={disableInteract}
-        text={text}
+        text={content}
         buttonSize={ButtonSize.Medium}
         onClick={startLogin}
       />

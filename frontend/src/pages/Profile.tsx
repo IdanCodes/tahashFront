@@ -39,7 +39,10 @@ function ProfilePanel({ userInfo }: { userInfo: UserInfo }) {
             target="_blank"
             href={`https://www.worldcubeassociation.org/persons/${userInfo.wcaId ?? ""}`}
           >
-            <PrimaryButton text={"WCA Profile"} colors="bg-orange-500" />
+            <PrimaryButton
+              text={"WCA Profile"}
+              colors="bg-orange-500 hover:bg-orange-600/80 active:bg-orange-600"
+            />
           </a>
         </div>
       </div>

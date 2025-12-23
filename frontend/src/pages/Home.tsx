@@ -1,14 +1,10 @@
 import React, { JSX, useMemo } from "react";
-import PrimaryButton from "../components/buttons/PrimaryButton";
-import { ButtonSize } from "../components/buttons/ButtonSize";
-import { useNavigate } from "react-router-dom";
-import { useLoading } from "../context/LoadingContext";
-import { RoutePath } from "@shared/constants/route-path";
 import { useActiveComp } from "../context/ActiveCompContext";
 import { CompDisplayInfo } from "@shared/interfaces/comp-display-info";
 import LoadingSpinner from "../components/LoadingSpinner";
 import LoginButton from "../components/LoginButton";
 import EventBoxes, { EventBox, EventBoxIcon } from "../components/EventBoxes";
+import wcaLogo from "./../components/assets/WCALogo.png";
 import { CubingIconsSheet } from "../components/CubingIconsSheet";
 import { useUserInfo } from "../context/UserContext";
 
@@ -46,7 +42,22 @@ function Home(): JSX.Element {
         <div className="mx-auto flex w-4/5 flex-col">
           <AnnouncementsBox />
           <div className="my-1.5 flex place-items-center justify-center pb-2">
-            {userInfo.user ? <></> : <LoginButton />}
+            {userInfo.user ? (
+              <></>
+            ) : (
+              <LoginButton
+                content={
+                  <div className="flex flex-row gap-3">
+                    <img
+                      src={wcaLogo}
+                      alt="World Cube Association Logo"
+                      width={40}
+                    />
+                    <span className="my-auto">התחברות</span>
+                  </div>
+                }
+              />
+            )}
           </div>
           <ActiveCompData compInfo={activeComp.displayInfo} />
         </div>
@@ -110,7 +121,7 @@ function AnnouncementsBox() {
         עדכונים והודעות חשובות
       </h1>
       <ul
-        className="mt-3 mb-1 space-y-2.5 px-3"
+        className="mt-3 mb-1 list-disc space-y-2.5 px-3"
         dir="rtl"
         style={{ fontSize: "1.35rem" }}
       >
@@ -138,6 +149,7 @@ function AnnouncementsBox() {
           </a>
           .
         </li>
+        <li>{"המקצים FMC ו-MBLD יתווספו בהמשך"}</li>
         <li>{"בהצלחה לכולם :)"}</li>
       </ul>
     </div>
