@@ -15,6 +15,8 @@ export const RoutePath = {
         AdminPanelEvent: "/admin-panel/:eventId",
         Results: "/results",
         ResultsEvent: "/results/:eventId",
+        Instructions: "/instructions",
+        About: "/about",
 
         RedirectToAuth: "/redirect-to-auth",
         AuthCallback: "/auth-callback",

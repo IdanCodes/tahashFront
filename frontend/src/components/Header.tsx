@@ -2,7 +2,7 @@ import React, { JSX } from "react";
 import { NavLink } from "react-router-dom";
 import clsx from "clsx";
 import { useUserInfo } from "../context/UserContext";
-import logo from "./assets/ILSpeeddcubinglogo.svg";
+import logo from "./../components/assets/ILSpeeddcubinglogo.svg";
 import "./animations.css";
 import { RoutePath } from "@shared/constants/route-path";
 import { useActiveComp } from "../context/ActiveCompContext";
@@ -39,6 +39,15 @@ function Header(): JSX.Element {
           {userInfo.isLoggedIn ? <LoggedInLinks /> : <LoggedOutLinks />}
           <li>
             <NavbarButton to={RoutePath.Page.Results} text="Results" />
+          </li>
+          <li>
+            <NavbarButton
+              to={RoutePath.Page.Instructions}
+              text="Instructions"
+            />
+          </li>
+          <li>
+            <NavbarButton to={RoutePath.Page.About} text="About" />
           </li>
           {userInfo.isAdmin ? <AdminLinks /> : <></>}
         </ul>
