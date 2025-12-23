@@ -50,7 +50,7 @@ function Results() {
 
   return (
     <div>
-      <p className="p-5 text-center text-6xl font-bold">
+      <p className="p-5 text-center text-5xl font-bold">
         Results of Competition #{activeComp.displayInfo.compNumber - 1}
       </p>
       <EventSelection
@@ -68,7 +68,7 @@ function Results() {
       {eventResults ? (
         <>
           {eventResults.length > 0 ? (
-            <table className="mx-auto my-2 w-7/10 rounded-t-2xl bg-blue-700/55 text-2xl">
+            <table className="mx-auto my-2 w-7/10 rounded-t-2xl bg-blue-700/55 text-xl">
               <thead className="rounded-t-2xl bg-transparent text-[1.655rem] text-white/90">
                 <tr className="font-semibold">
                   <th className="pl-4">#</th>

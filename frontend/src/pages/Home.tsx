@@ -1,4 +1,4 @@
-import React, { JSX } from "react";
+import React, { JSX, useMemo } from "react";
 import PrimaryButton from "../components/buttons/PrimaryButton";
 import { ButtonSize } from "../components/buttons/ButtonSize";
 import { useNavigate } from "react-router-dom";
@@ -7,11 +7,14 @@ import { RoutePath } from "@shared/constants/route-path";
 import { useActiveComp } from "../context/ActiveCompContext";
 import { CompDisplayInfo } from "@shared/interfaces/comp-display-info";
 import LoadingSpinner from "../components/LoadingSpinner";
+import LoginButton from "../components/LoginButton";
+import EventBoxes, { EventBox, EventBoxIcon } from "../components/EventBoxes";
+import { CubingIconsSheet } from "../components/CubingIconsSheet";
+import { useUserInfo } from "../context/UserContext";
 
 function Home(): JSX.Element {
   const activeComp = useActiveComp();
-  const navigate = useNavigate();
-  const { addLoading, removeLoading } = useLoading("Home");
+  const userInfo = useUserInfo();
 
   /**
    * Welcome to the ILCubers weekly competition!
@@ -40,19 +43,13 @@ function Home(): JSX.Element {
         תחרות השבועית על שם יובל פורת ז"ל
       </h1>
       {activeComp.displayInfo ? (
-        <>
-          <div className="mx-auto flex w-4/5 flex-col">
-            <AnnouncementsBox />
-            <div className="mt-10 flex place-items-center justify-center">
-              <PrimaryButton
-                text="Log In"
-                buttonSize={ButtonSize.Medium}
-                onClick={() => navigate(RoutePath.Page.Login)}
-              />
-            </div>
+        <div className="mx-auto flex w-4/5 flex-col">
+          <AnnouncementsBox />
+          <div className="my-1.5 flex place-items-center justify-center pb-2">
+            {userInfo.user ? <></> : <LoginButton />}
           </div>
           <ActiveCompData compInfo={activeComp.displayInfo} />
-        </>
+        </div>
       ) : (
         <LoadingSpinner />
       )}
@@ -62,19 +59,61 @@ function Home(): JSX.Element {
 
 function ActiveCompData({ compInfo }: { compInfo: CompDisplayInfo }) {
   const activeComp = useActiveComp();
-
   if (!activeComp.displayInfo) return <>Loading...</>;
 
-  return <></>;
+  const formatDate = (date: Date) =>
+    `${date.getUTCDate() + 1}/${date.getMonth() + 1}/${date.getFullYear()}`;
+  const startDateString = useMemo<string>(() => {
+    return formatDate(new Date(compInfo.startDate));
+  }, [compInfo]);
+  const endDateString = useMemo<string>(() => {
+    return formatDate(new Date(compInfo.endDate));
+  }, [compInfo]);
+
+  return (
+    <div className="mx-auto mb-4 w-8/10 rounded-xl bg-blue-600/40 px-4 py-3">
+      <CubingIconsSheet />
+      <h1 className="text-center text-2xl font-semibold">
+        מידע על התחרות הנוכחית
+      </h1>
+      <ul className="my-2" dir="rtl" style={{ fontSize: "1.35rem" }}>
+        <li>
+          {"מספר תחרות: "} {compInfo.compNumber}
+        </li>
+        <li>
+          {"התחלת התחרות:"} {startDateString}
+        </li>
+        <li>
+          {"סיום התחרות:"} {endDateString}
+        </li>
+        <li>
+          <div className="flex flex-wrap gap-3">
+            מקצים:
+            {compInfo.events.map((evDisplay) => (
+              <EventBoxIcon
+                key={evDisplay.eventId}
+                iconName={evDisplay.iconName}
+                size={"1.75rem"}
+              />
+            ))}
+          </div>
+        </li>
+      </ul>
+    </div>
+  );
 }
 
 function AnnouncementsBox() {
   return (
-    <div className="rounded-2xl bg-gray-500/30 p-3">
-      <h1 className="text-center text-3xl font-semibold">
+    <div className="rounded-2xl pt-2">
+      <h1 className="text-center text-3xl font-semibold tracking-normal">
         עדכונים והודעות חשובות
       </h1>
-      <ul className="space-y-2.5" dir="rtl" style={{ fontSize: "1.35rem" }}>
+      <ul
+        className="mt-3 mb-1 space-y-2.5 px-3"
+        dir="rtl"
+        style={{ fontSize: "1.35rem" }}
+      >
         <li>ברוכים הבאים לתח"ש המחודש!!!</li>
         <li>
           {
@@ -90,7 +129,11 @@ function AnnouncementsBox() {
           {
             "במידה ואתם מוצאים תקלות, או שיש לכם רעיונות לשיפור או כל דבר, תהיה מערכת מסודרת בו תוכלו לכתוב לנו, ובינתיים אפשר "
           }
-          <a href={"https://www.google.com"} className="underline">
+          <a
+            href={"https://forms.gle/iGSigpAMqVs2RZRx6"}
+            className="underline"
+            target="_blank"
+          >
             {"לכתוב כאן"}
           </a>
           .

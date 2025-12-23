@@ -58,7 +58,7 @@ function LogoutButton({ logout }: { logout: () => Promise<void> }) {
     addLoading();
     await logout();
     removeLoading();
-    navigate(RoutePath.Page.Login);
+    navigate(RoutePath.Page.Home);
   }
 
   return (

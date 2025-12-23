@@ -18,7 +18,7 @@ function WcaAuthCallback() {
     const urlParams = new URLSearchParams(window.location.search);
     const authCode = urlParams.get("code");
     if (!authCode) {
-      navigate(RoutePath.Page.Login);
+      navigate(RoutePath.Page.Home);
       return;
     }
 

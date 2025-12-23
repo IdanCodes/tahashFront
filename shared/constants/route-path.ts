@@ -4,8 +4,7 @@
 export const RoutePath = {
     // page routes
     Page: {
-        HomeRedirect: "/",
-        Login: "/login",
+        Home: "/",
         Profile: "/profile",
         Scrambles: "/scrambles",
         Error: "/error",
@@ -20,7 +19,6 @@ export const RoutePath = {
 
         RedirectToAuth: "/redirect-to-auth",
         AuthCallback: "/auth-callback",
-        Home: "/home",
         UserPage: "/user/:wcaId",
     },
 

@@ -14,7 +14,7 @@ function RequireAuth({ children }: { children: ReactNode }) {
     addLoading();
     userInfo.onLoadCached(() => {
       removeLoading();
-      if (!userInfo.isLoggedIn) navigate(RoutePath.Page.Login);
+      if (!userInfo.isLoggedIn) navigate(RoutePath.Page.Home);
     });
   }, []);
 

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import PrimaryButton from "../components/buttons/PrimaryButton";
-import { ButtonSize } from "../components/buttons/ButtonSize";
+import PrimaryButton from "./buttons/PrimaryButton";
+import { ButtonSize } from "./buttons/ButtonSize";
 import { sendGetRequest } from "../utils/API/apiUtils";
 import { ResponseCode } from "@shared/types/response-code";
 import { redirectToError } from "../utils/errorUtils";
@@ -9,14 +9,10 @@ import { useNavigate } from "react-router-dom";
 import { RoutePath } from "@shared/constants/route-path";
 import { QueryParams } from "@shared/constants/query-params";
 
-function Login() {
+function LoginButton({ text = "התחברות" }: { text?: string }) {
   const [disableInteract, setDisableInteract] = useState(false);
   const userInfo = useUserInfo();
   const navigate = useNavigate();
-
-  useEffect(() => {
-    if (userInfo.user) navigate(RoutePath.Page.Profile);
-  });
 
   async function startLogin() {
     setDisableInteract(true);
@@ -37,19 +33,14 @@ function Login() {
 
   return (
     <>
-      <div className="text-center text-4xl">Login Page</div>
-      <div>
-        <div className="mt-10 flex place-items-center justify-center">
-          <PrimaryButton
-            disabled={disableInteract}
-            text="Log In With WCA"
-            buttonSize={ButtonSize.Medium}
-            onClick={startLogin}
-          />
-        </div>
-      </div>
+      <PrimaryButton
+        disabled={disableInteract}
+        text={text}
+        buttonSize={ButtonSize.Medium}
+        onClick={startLogin}
+      />
     </>
   );
 }
 
-export default Login;
+export default LoginButton;

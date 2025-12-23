@@ -2,7 +2,7 @@ import React, { JSX } from "react";
 import { NavLink } from "react-router-dom";
 import clsx from "clsx";
 import { useUserInfo } from "../context/UserContext";
-import logo from "./../components/assets/ILSpeeddcubinglogo.svg";
+import logo from "./../components/assets/TahashLogo.png";
 import "./animations.css";
 import { RoutePath } from "@shared/constants/route-path";
 import { useActiveComp } from "../context/ActiveCompContext";
@@ -12,23 +12,24 @@ function Header(): JSX.Element {
   const compInfo = useActiveComp();
 
   return (
-    <div className="flex h-auto w-full flex-col items-center justify-center gap-3 bg-gradient-to-br from-blue-700 via-blue-800 to-indigo-800 p-4 lg:h-[90px] lg:flex-row-reverse lg:justify-between lg:gap-0 lg:p-[1vw]">
+    <div className="flex h-auto w-full flex-col items-center justify-center gap-2 bg-gradient-to-br from-blue-700 via-blue-800 to-indigo-800 p-4 lg:h-[90px] lg:flex-row-reverse lg:justify-between lg:gap-0 lg:p-[1vw]">
       <div className="group relative flex flex-col items-center pb-[0.3vw]">
-        <div className="flex flex-row items-center gap-3 lg:items-center lg:gap-5">
+        <div className="flex flex-row-reverse items-center lg:gap-1">
           <img
             src={logo}
             alt="ILCubers Logo"
-            className="w-[45px] transition-transform duration-200 ease-in-out group-hover:scale-110 lg:w-[55px]"
+            className="right-[-8px] w-[60px] transition-transform duration-200 ease-in-out group-hover:scale-105 lg:w-[90px]"
           />
-          <h1 className="group-hover:animate-wave inline-block text-[clamp(1.2rem,2vw,2.5rem)] tracking-[0.03em] whitespace-nowrap text-blue-100 transition-all duration-200 ease-in-out select-none group-hover:scale-102">
-            ILCubers - Weekly Competition
-          </h1>
+          <div className="flex flex-col" dir="rtl">
+            <p className="group-hover:animate-wave inline-block text-[clamp(1.2rem,2vw,2.5rem)] tracking-[0.03em] whitespace-nowrap text-blue-100 transition-all duration-200 ease-in-out select-none group-hover:scale-110">
+              ILCubers
+            </p>
+            <p className="text absolute bottom-[10px] mx-auto w-fit text-[clamp(0.8rem,1.2vw,1.7rem)] text-white transition-all duration-200 group-hover:scale-105 group-hover:text-yellow-400">
+              {compInfo.displayInfo &&
+                `תחרות #` + `${compInfo.displayInfo.compNumber}`}
+            </p>
+          </div>
         </div>
-        {compInfo.displayInfo && (
-          <p className="absolute bottom-[-8px] text-[clamp(0.75rem,1vw,1.1rem)] text-white transition-all duration-200 group-hover:scale-105 group-hover:text-yellow-400">
-            Comp #{compInfo.displayInfo.compNumber}
-          </p>
-        )}
       </div>
 
       <nav className="pr-[2vw] max-lg:pr-0 lg:p-[2vw]">
@@ -36,7 +37,7 @@ function Header(): JSX.Element {
           <li>
             <NavbarButton to="/" text="Home" />
           </li>
-          {userInfo.isLoggedIn ? <LoggedInLinks /> : <LoggedOutLinks />}
+          {userInfo.isLoggedIn ? <LoggedInLinks /> : <></>}
           <li>
             <NavbarButton to={RoutePath.Page.Results} text="Results" />
           </li>
@@ -66,14 +67,6 @@ function LoggedInLinks() {
         <NavbarButton to="/scrambles" text="Scrambles" />
       </li>
     </>
-  );
-}
-
-function LoggedOutLinks() {
-  return (
-    <li>
-      <NavbarButton to="/login" text="Login" />
-    </li>
   );
 }
 

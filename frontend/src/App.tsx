@@ -4,7 +4,7 @@ import { JSX, useEffect } from "react";
 import Header from "./components/Header";
 import Home from "./pages/Home";
 import Error from "./pages/Error";
-import Login from "./pages/Login";
+import LoginButton from "./components/LoginButton";
 import Profile from "./pages/Profile";
 import WcaAuthCallback from "./pages/WcaAuthCallback";
 import { UserInfoProvider } from "./context/UserContext";
@@ -38,7 +38,7 @@ function AnimatedRoutes(): JSX.Element {
     <AnimatePresence mode="wait">
       <Routes location={location} key={location.pathname}>
         <Route
-          path={RoutePath.Page.HomeRedirect}
+          path={RoutePath.Page.Home}
           element={
             <PageTransition>
               <Home />
@@ -50,14 +50,6 @@ function AnimatedRoutes(): JSX.Element {
           element={
             <PageTransition>
               <Error />
-            </PageTransition>
-          }
-        />
-        <Route
-          path={RoutePath.Page.Login}
-          element={
-            <PageTransition>
-              <Login />
             </PageTransition>
           }
         />
