@@ -122,7 +122,8 @@ function CompetitorDataPanel({
 
   return (
     <>
-      <div className="my-2 mb-5 flex flex-col justify-center">
+      {/* Name and WCA link */}
+      <div className="my-2 mb-3 flex flex-col justify-center">
         <span className="p-2 text-center text-4xl font-[450]">
           {competitorData.userInfo.name}
         </span>
@@ -152,14 +153,20 @@ function CompetitorDataPanel({
           </a>
         </div>
       </div>
-      <RecordsPanel records={records} />
-      {pastResults.length > 0 ? (
+
+      {/* Records panel */}
+      <div className="py-2">
+        <p className="text-center text-4xl font-semibold">Records</p>
+        <RecordsPanel records={records} />
+      </div>
+
+      {/* Results History */}
+      <div className="py-2">
+        <p className="pt-2 pb-1 text-center text-4xl font-semibold">
+          Results History
+        </p>
         <PastResultsPanel pastResults={pastResults} />
-      ) : (
-        <>
-          <p className="text-center text-2xl">No past results</p>
-        </>
-      )}
+      </div>
 
       <UserPageEE wcaId={competitorData.userInfo.wcaId} />
     </>
@@ -171,9 +178,8 @@ function RecordsPanel({
 }: {
   records: [EventDisplayInfo, GeneralRecord][];
 }) {
-  return (
+  return records.length > 0 ? (
     <div className="w-full place-items-center">
-      <p className="text-center text-4xl font-semibold">Records</p>
       <table className="mx-auto my-2 w-7/10 rounded-t-2xl bg-blue-700/55 text-2xl">
         <thead className="rounded-t-2xl bg-transparent text-[1.655rem] text-white/90">
           <tr>
@@ -218,6 +224,10 @@ function RecordsPanel({
         </tbody>
       </table>
     </div>
+  ) : (
+    <>
+      <p></p>
+    </>
   );
 
   function RecordLabel({
@@ -243,6 +253,9 @@ function PastResultsPanel({
 }: {
   pastResults: [CompEvent, PastEventResults][];
 }) {
+  if (pastResults.length == 0)
+    return <p className="text-center text-2xl">No past results</p>;
+
   const [selectedEventId, setSelectedEventId] = useState<string>(
     () => pastResults[0][0].eventId,
   );
@@ -266,10 +279,7 @@ function PastResultsPanel({
 
   return (
     <>
-      <div className="w-full place-items-center">
-        <p className="pt-8 pb-1 text-center text-4xl font-semibold">
-          Results History
-        </p>
+      <div className="w-full place-items-center py-2">
         <EventSelection
           events={events}
           selectedEventId={selectedEventId}
