@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { CookieNames } from "@shared/constants/cookie-names";
-import { COOKIE_CONFIG } from "../config/env";
+import { COOKIE_OPTIONS } from "../config/env";
 
 export const ADMINS_LIST = [
   "2019SAHA01",
@@ -19,10 +19,8 @@ export function refreshAdminCookie(req: Request, res: Response) {
     res.clearCookie(CookieNames.isAdmin);
   else
     res.cookie(CookieNames.isAdmin, JSON.stringify(isAdmin(userInfo.wcaId)), {
+      ...COOKIE_OPTIONS,
       httpOnly: false,
-      domain: COOKIE_CONFIG.DOMAIN,
       expires: req.session.cookie.expires ?? undefined,
-      secure: COOKIE_CONFIG.SECURE,
-      sameSite: COOKIE_CONFIG.SAMESITE,
     });
 }

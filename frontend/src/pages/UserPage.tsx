@@ -7,6 +7,7 @@ import { errorObject } from "@shared/interfaces/error-object";
 import { isWcaIdFormat } from "@shared/interfaces/user-info";
 import { CompetitorData } from "@shared/types/competitor-data";
 import LoadingSpinner from "../components/LoadingSpinner";
+import wcaLogo from "@assets/WCALogo.png";
 import {
   eventRecordToGeneralRecords,
   GeneralRecord,
@@ -29,6 +30,9 @@ import {
   getBestResultStr,
 } from "@shared/utils/event-results-utils";
 import EventSelection from "../components/EventSelection";
+import PrimaryButton from "../components/buttons/PrimaryButton";
+import { ButtonSize } from "../components/buttons/ButtonSize";
+import { motion } from "motion/react";
 
 function UserPage() {
   const params = useParams();
@@ -118,7 +122,36 @@ function CompetitorDataPanel({
 
   return (
     <>
-      <p className="text-center text-3xl p-4">{competitorData.userInfo.name}</p>
+      <div className="my-2 mb-5 flex flex-col justify-center">
+        <span className="p-2 text-center text-4xl font-[450]">
+          {competitorData.userInfo.name}
+        </span>
+
+        <div className="m-auto">
+          <a
+            href={`https://www.worldcubeassociation.org/persons/${competitorData.userInfo.wcaId}`}
+          >
+            <PrimaryButton
+              content={
+                <div className="flex flex-row gap-2">
+                  <p
+                    className="my-auto"
+                    style={{ fontSize: "1.35rem", fontWeight: "475" }}
+                  >
+                    {competitorData.userInfo.wcaId}
+                  </p>
+                  <img
+                    src={wcaLogo}
+                    alt="World Cube Association Logo"
+                    width={28}
+                  />
+                </div>
+              }
+              buttonSize={ButtonSize.Small}
+            />
+          </a>
+        </div>
+      </div>
       <RecordsPanel records={records} />
       {pastResults.length > 0 ? (
         <PastResultsPanel pastResults={pastResults} />
@@ -127,6 +160,8 @@ function CompetitorDataPanel({
           <p className="text-center text-2xl">No past results</p>
         </>
       )}
+
+      <UserPageEE wcaId={competitorData.userInfo.wcaId} />
     </>
   );
 }
@@ -138,7 +173,7 @@ function RecordsPanel({
 }) {
   return (
     <div className="w-full place-items-center">
-      <p className="text-4xl text-center font-semibold">Records</p>
+      <p className="text-center text-4xl font-semibold">Records</p>
       <table className="mx-auto my-2 w-7/10 rounded-t-2xl bg-blue-700/55 text-2xl">
         <thead className="rounded-t-2xl bg-transparent text-[1.655rem] text-white/90">
           <tr>
@@ -232,7 +267,9 @@ function PastResultsPanel({
   return (
     <>
       <div className="w-full place-items-center">
-        <p className="pb-1 text-4xl text-center pt-8 font-semibold">Results History</p>
+        <p className="pt-8 pb-1 text-center text-4xl font-semibold">
+          Results History
+        </p>
         <EventSelection
           events={events}
           selectedEventId={selectedEventId}
@@ -246,7 +283,7 @@ function PastResultsPanel({
               <tr>
                 <th className="pl-4 text-center">Comp</th>
                 <th className="py-2 text-center">Place</th>
-                <th className="py-2 text-center ">Single</th>
+                <th className="py-2 text-center">Single</th>
                 <th className="py-2 text-center">Average</th>
                 <th className="py-2 text-center">Solves</th>
               </tr>
@@ -256,7 +293,7 @@ function PastResultsPanel({
                 resultEntries.map(([compNumber, result], index) => (
                   <tr
                     key={index}
-                    className="font-mono text-center odd:!bg-slate-50 even:!bg-slate-200"
+                    className="text-center font-mono odd:!bg-slate-50 even:!bg-slate-200"
                   >
                     <TableData>{compNumber}</TableData>
                     <TableData>#{result.place.toString()}</TableData>
@@ -267,7 +304,7 @@ function PastResultsPanel({
                       {getAverageStr(eventData, result.times)}
                     </TableData>
                     <TableData>
-                      <div className="flex w-[90%] justify-evenly text-center py-2">
+                      <div className="flex w-[90%] justify-evenly py-2 text-center">
                         {formatAttempts(eventData.timeFormat, result.times).map(
                           (str, index) => (
                             <span key={index}>{str}</span>
@@ -322,6 +359,37 @@ function PastResultsPanel({
       </td>
     );
   }
+}
+
+function UserPageEE({ wcaId }: { wcaId: string }) {
+  const [isDisabled, setIsDisabled] = useState(false);
+  const showEE = useMemo<boolean>(
+    () => ["2022HOTE01", "2019SAHA01", "2019TARA03"].includes(wcaId),
+    [wcaId],
+  );
+
+  return !isDisabled && showEE ? (
+    <motion.img
+      src={new URL(`../assets/ee/${wcaId}.jpg`, import.meta.url).href}
+      width={150}
+      alt="EE-Image"
+      animate={{
+        rotate: [0, 30, -10, 10, -30, 0, 30, -40, -30, -10, 20, 0],
+        x: [150, 350, 400, 600, 400, 300, 250, 400, 300, 200, 120, 150],
+        y: [-100, -250, -50, -175, -75, -100, -130, -170, -130, -90, -120, -90],
+      }}
+      transition={{
+        duration: 3.5,
+        repeat: Infinity,
+        ease: "easeInOut",
+      }}
+      onClick={() => {
+        setIsDisabled(true);
+      }}
+    />
+  ) : (
+    <></>
+  );
 }
 
 export default UserPage;

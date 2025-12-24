@@ -11,6 +11,7 @@ import { sendGetRequest } from "../utils/API/apiUtils";
 import { useLocalStorage } from "../hooks/useLocalStorage";
 import { getCookie, removeCookie } from "react-use-cookie";
 import { CookieNames } from "@shared/constants/cookie-names";
+import { ResponseCode } from "@shared/types/response-code";
 
 interface UserInfoContextType {
   user: UserInfo | null;
@@ -55,8 +56,26 @@ export function UserInfoProvider({ children }: { children: ReactNode }) {
   }
 
   async function logout() {
-    await sendGetRequest("/logout");
+    const res = await sendGetRequest("/logout");
+    if (res.aborted) return;
+    if (res.isError) {
+      console.error("Unable to log out. Please clear cookies");
+      return;
+    }
+    // deleteAllCookies();
     setUser(null);
+
+    // function deleteAllCookies() {
+    //   const cookies = document.cookie.split(";");
+    //
+    //   for (let i = 0; i < cookies.length; i++) {
+    //     const cookie = cookies[i];
+    //     const eqPos = cookie.indexOf("=");
+    //     const name = eqPos > -1 ? cookie.slice(0, eqPos) : cookie;
+    //     document.cookie =
+    //       name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/";
+    //   }
+    // }
   }
 
   // whether the user info storage is initialized

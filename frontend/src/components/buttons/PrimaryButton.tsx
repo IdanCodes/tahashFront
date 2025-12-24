@@ -3,7 +3,7 @@ import clsx from "clsx";
 import { ButtonSize } from "./ButtonSize";
 
 export default function PrimaryButton({
-  text = "",
+  content = "",
   onClick = () => {},
   disabled = false,
   buttonSize = ButtonSize.Medium,
@@ -11,7 +11,7 @@ export default function PrimaryButton({
   btnType = "button",
   colors = "bg-slate-100/70 hover:bg-slate-100/50 active:bg-slate-300/80",
 }: {
-  text?: string | number | JSX.Element;
+  content?: string | number | JSX.Element;
   children?: React.ReactNode;
   onClick?: MouseEventHandler;
   disabled?: boolean;
@@ -44,7 +44,7 @@ export default function PrimaryButton({
             buttonSize == ButtonSize.Large && "m-1 text-4xl",
           )}
         >
-          <>{text}</>
+          <>{content}</>
         </div>
       </button>
     </>

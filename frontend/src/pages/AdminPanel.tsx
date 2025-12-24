@@ -50,7 +50,7 @@ function AdminPanel() {
             className="absolute top-[3vw] left-[10vw] size-fit"
             onClick={() => navigate(RoutePath.Page.AdminPanel)}
           >
-            <PrimaryButton text={"Back"} />
+            <PrimaryButton content={"Back"} />
           </div>
           <EventPanel eventId={eventId.current} />
         </>
@@ -254,7 +254,13 @@ function EventSubmissionsPanel({
               key={submission.submitterData.id}
               className="flex h-fit w-fit flex-col rounded-xl border-3 bg-gray-400 p-4 text-2xl"
             >
-              <span className="">{submission.submitterData.name}</span>
+              <a
+                href={`/user/${submission.submitterData.wcaId}`}
+                target="_blank"
+                className="underline"
+              >
+                <span className="">{submission.submitterData.name}</span>
+              </a>
               <span className="">{submission.submitterData.wcaId}</span>
               <span className="">
                 State:{" "}
@@ -283,7 +289,7 @@ function EventSubmissionsPanel({
               {submission.submissionState === SubmissionState.Pending && (
                 <div className="flex flex-row justify-between px-2">
                   <PrimaryButton
-                    text="Accept"
+                    content="Accept"
                     colors="bg-[rgb(46,217,46)] hover:bg-[rgb(10,230,10)] active:bg-[rgb(10,210,10)]"
                     onClick={() =>
                       updateSubmissionState(
@@ -294,7 +300,7 @@ function EventSubmissionsPanel({
                     disabled={disableButtons}
                   />
                   <PrimaryButton
-                    text="Reject"
+                    content="Reject"
                     colors="bg-[rgb(217,9,9)] hover:bg-[rgb(230,30,30)] active:bg-[rgb(210,30,30)]"
                     onClick={() =>
                       updateSubmissionState(

@@ -2,8 +2,6 @@ import { Request, Response } from "express";
 import { ApiResponse, errorResponse } from "@shared/types/api-response";
 import { ResponseCode } from "@shared/types/response-code";
 import { isLoggedIn } from "../middleware/auth/require-auth";
-import { SID_COOKIE_NAME } from "../middleware/db-session";
-import { CookieNames } from "@shared/constants/cookie-names";
 import { logoutUser } from "../utils/session-helpers";
 
 // get the user info of a user who's logged in

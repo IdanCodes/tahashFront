@@ -39,7 +39,7 @@ export function ActiveCompProvider({ children }: { children: ReactNode }) {
               `Is the API running? ${res.data}`,
             ),
           ),
-        2000,
+        10000,
       );
     setDisplayInfo(res.data);
   }

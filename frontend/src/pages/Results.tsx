@@ -50,9 +50,9 @@ function Results() {
 
   return (
     <div>
-      <p className="p-5 text-center text-5xl font-bold">
+      <h1 className="mt-5 mb-2 text-center text-4xl font-bold">
         Results of Competition #{activeComp.displayInfo.compNumber - 1}
-      </p>
+      </h1>
       <EventSelection
         events={activeComp.displayInfo.events}
         selectedEventId={currEvent.eventId}
@@ -65,14 +65,14 @@ function Results() {
             );
         }}
       />
-      <h3 className="text-center text-4xl font-semibold">
+      <p className="text-center text-4xl font-semibold">
         {currEvent.eventTitle}
-      </h3>
+      </p>
       {eventResults ? (
         <>
           {eventResults.length > 0 ? (
-            <table className="mx-auto my-2 w-7/10 rounded-t-2xl bg-blue-700/55 text-xl">
-              <thead className="rounded-t-2xl bg-transparent text-[1.655rem] text-white/90">
+            <table className="mx-auto my-2 w-8/10 rounded-t-2xl bg-blue-700/55 text-xl">
+              <thead className="rounded-t-2xl bg-transparent text-[1.6rem] text-white/90">
                 <tr className="font-semibold">
                   <th className="pl-4">#</th>
                   <th className="py-2">Name</th>
@@ -85,18 +85,22 @@ function Results() {
                 {eventResults.map((result, index) => (
                   <tr
                     key={index}
-                    className="font-mono odd:!bg-slate-50 even:!bg-slate-200"
+                    className="font-mono text-[1.4rem] odd:!bg-slate-50 even:!bg-slate-200"
                   >
-                    <td className="pl-2 text-center text-[1.625rem]">
+                    <td className="pl-2 text-center text-[1.5rem]">
                       {result.place}
                     </td>
-                    <td className="py-2 text-center">{result.name}</td>
+                    <td className="py-2 text-center">
+                      <a href={`/user/${result.wcaId}`} className="underline">
+                        {result.name}
+                      </a>
+                    </td>
                     <td className="py-2 text-center">{result.best}</td>
                     <td className="py-2 text-center">{result.average}</td>
                     <td>
                       <div className="flex flex-row justify-center gap-8">
                         {result.solves.map((t, i) => (
-                          <span key={i} className="p-">
+                          <span key={i} className="">
                             {t}
                           </span>
                         ))}

@@ -1,4 +1,5 @@
 import { config } from "dotenv";
+import { CookieOptions } from "express-serve-static-core";
 config();
 
 /**
@@ -30,8 +31,14 @@ export const NODE_ENV = getEnv("NODE_ENV");
 export const IS_PRODUCTION = NODE_ENV == "production";
 export const COOKIE_CONFIG = {
   SECURE: getEnv("COOKIE_SECURE") === "true",
-  SAMESITE: (getEnv("COOKIE_SAMESITE") === "lax"
-    ? "lax"
-    : "none") /*IS_PRODUCTION ? "none" : "lax"*/ as "lax" | "none",
+  SAMESITE: (getEnv("COOKIE_SAMESITE") === "lax" ? "lax" : "none") as
+    | "lax"
+    | "none",
   DOMAIN: tryGetEnv("COOKIE_DOMAIN"),
+};
+export const COOKIE_OPTIONS: CookieOptions = {
+  domain: COOKIE_CONFIG.DOMAIN,
+  secure: COOKIE_CONFIG.SECURE,
+  sameSite: COOKIE_CONFIG.SAMESITE,
+  path: "/",
 };

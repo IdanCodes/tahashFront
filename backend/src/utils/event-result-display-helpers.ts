@@ -21,6 +21,7 @@ export async function submissionToResultDisplay(
   return {
     place: submission.place,
     name: userInfo.name,
+    wcaId: userInfo.wcaId,
     best: getBestResultStr(eventData, submission.times),
     average: getAverageStr(eventData, submission.times),
     solves: formatAttempts(eventData.timeFormat, submission.times),

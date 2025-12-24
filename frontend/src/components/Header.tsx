@@ -2,7 +2,7 @@ import React, { JSX } from "react";
 import { NavLink } from "react-router-dom";
 import clsx from "clsx";
 import { useUserInfo } from "../context/UserContext";
-import logo from "./../components/assets/TahashLogo.png";
+import logo from "@assets/TahashLogo.png";
 import "./animations.css";
 import { RoutePath } from "@shared/constants/route-path";
 import { useActiveComp } from "../context/ActiveCompContext";
@@ -46,6 +46,9 @@ function Header(): JSX.Element {
               to={RoutePath.Page.Instructions}
               text="Instructions"
             />
+          </li>
+          <li>
+            <NavbarButton to={RoutePath.Page.YuvalPorat} text="Yuval Porat" />
           </li>
           <li>
             <NavbarButton to={RoutePath.Page.About} text="About" />

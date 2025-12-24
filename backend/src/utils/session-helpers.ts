@@ -2,9 +2,8 @@ import { Request, Response } from "express";
 import { WcaOAuthTokenResponse } from "@shared/interfaces/wca-api/wcaOAuth";
 import { UserInfo } from "@shared/interfaces/user-info";
 import { isLoggedIn } from "../middleware/auth/require-auth";
-import { COOKIE_CONFIG } from "../config/env";
+import { COOKIE_CONFIG, COOKIE_OPTIONS } from "../config/env";
 import { CookieNames } from "@shared/constants/cookie-names";
-import { SID_COOKIE_NAME } from "../middleware/db-session";
 import { refreshAdminCookie } from "./admin-helpers";
 
 /**
@@ -34,11 +33,9 @@ export function updateAndSaveSession(
  */
 export function refreshLoginCookie(req: Request, res: Response) {
   res.cookie(CookieNames.isLoggedIn, JSON.stringify(isLoggedIn(req)), {
+    ...COOKIE_OPTIONS,
     httpOnly: false,
-    domain: COOKIE_CONFIG.DOMAIN,
     expires: req.session.cookie.expires ?? undefined,
-    secure: COOKIE_CONFIG.SECURE,
-    sameSite: COOKIE_CONFIG.SAMESITE,
   });
 }
 
@@ -50,9 +47,9 @@ export function logoutUser(
   req.session.destroy((err) => {
     if (err) return cb(err);
 
-    res.clearCookie(SID_COOKIE_NAME);
-    res.clearCookie(CookieNames.isLoggedIn);
-    res.clearCookie(CookieNames.isAdmin);
+    res.clearCookie(CookieNames.SID_COOKIE, COOKIE_OPTIONS);
+    res.clearCookie(CookieNames.isLoggedIn, COOKIE_OPTIONS);
+    res.clearCookie(CookieNames.isAdmin, COOKIE_OPTIONS);
     return cb();
   });
 }

@@ -24,6 +24,7 @@ import { ActiveCompProvider } from "./context/ActiveCompContext";
 import UserPage from "./pages/UserPage";
 import InstructionsPage from "./pages/InstructionsPage";
 import AboutPage from "./pages/AboutPage";
+import YuvalPorat from "./pages/YuvalPorat";
 
 function AnimatedRoutes(): JSX.Element {
   const location = useLocation();
@@ -111,15 +112,62 @@ function AnimatedRoutes(): JSX.Element {
             </RequireAuth>
           }
         />
-        <Route path={RoutePath.Page.Results} element={<Results />} />
-        <Route path={RoutePath.Page.ResultsEvent} element={<Results />} />
-        <Route path={RoutePath.Page.UserPage} element={<UserPage />} />
+        <Route
+          path={RoutePath.Page.Results}
+          element={
+            <PageTransition>
+              <Results />
+            </PageTransition>
+          }
+        />
+        <Route
+          path={RoutePath.Page.ResultsEvent}
+          element={
+            <PageTransition>
+              <Results />
+            </PageTransition>
+          }
+        />
+        <Route
+          path={RoutePath.Page.UserPage}
+          element={
+            <PageTransition>
+              <UserPage />
+            </PageTransition>
+          }
+        />
         <Route
           path={RoutePath.Page.Instructions}
-          element={<InstructionsPage />}
+          element={
+            <PageTransition>
+              <InstructionsPage />
+            </PageTransition>
+          }
         />
-        <Route path={RoutePath.Page.About} element={<AboutPage />} />
-        <Route path="*" element={<NotFoundPage />} />
+        <Route
+          path={RoutePath.Page.YuvalPorat}
+          element={
+            <PageTransition>
+              <YuvalPorat />
+            </PageTransition>
+          }
+        />
+        <Route
+          path={RoutePath.Page.About}
+          element={
+            <PageTransition>
+              <AboutPage />
+            </PageTransition>
+          }
+        />
+        <Route
+          path="*"
+          element={
+            <PageTransition>
+              <NotFoundPage />
+            </PageTransition>
+          }
+        />
       </Routes>
     </AnimatePresence>
   );
@@ -133,8 +181,7 @@ function App(): JSX.Element {
           <ActiveCompProvider>
             <UserInfoProvider>
               <Header />
-
-              <div className="align-start flex justify-center pb-6">
+              <div className="align-start flex justify-center pb-2">
                 <div className="min-h-[calc(100vh-5rem)] w-[90%] overflow-hidden rounded-b-2xl border border-t-0 border-white/20 bg-white/80 shadow-xl backdrop-blur-md">
                   <LoadingWrapper>
                     <AnimatedRoutes />
@@ -144,6 +191,18 @@ function App(): JSX.Element {
             </UserInfoProvider>
           </ActiveCompProvider>
         </LoadingProvider>
+
+        <div className="mx-auto w-fit py-2">
+          <span
+            className="mx-auto"
+            style={{
+              fontSize: "1.4rem",
+              height: "2rem",
+            }}
+          >
+            {"Made with ❤️ by Idan Sahar"}
+          </span>
+        </div>
       </div>
     </BrowserRouter>
   );

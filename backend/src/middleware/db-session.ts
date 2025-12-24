@@ -1,26 +1,26 @@
 import { RequestHandler } from "express";
 import session from "express-session";
-import { COOKIE_CONFIG, getEnv, tryGetEnv } from "../config/env";
+import { COOKIE_CONFIG, COOKIE_OPTIONS, getEnv } from "../config/env";
 import MongoStore from "connect-mongo";
 import { MongoClient } from "mongodb";
 import { getConnectionString } from "../config/db-config";
+import { CookieNames } from "@shared/constants/cookie-names";
 
-console.log(`COOKIE_DOMAIN: ${COOKIE_CONFIG.DOMAIN}`);
-export const SID_COOKIE_NAME = "connect.sid";
+export const SID_COOKIE_OPTIONS = {
+  ...COOKIE_OPTIONS,
+  maxAge: 3 * 24 * 60 * 60 * 1000, // 3 days
+  httpOnly: true,
+};
+console.log(`SID COOKIE OPTIONS: ${SID_COOKIE_OPTIONS}`);
+
 export function createMongoSession(): RequestHandler {
   return session({
     secret: getEnv("MONGO_SESSION_SECRET"),
     resave: false, // don't force save if unmodified
     saveUninitialized: false, // don't save empty sessions
     rolling: true, // update expiry of the cookie even when not changed
-    name: SID_COOKIE_NAME,
-    cookie: {
-      maxAge: 3 * 24 * 60 * 60 * 1000, // 3 days
-      httpOnly: true,
-      domain: COOKIE_CONFIG.DOMAIN,
-      secure: COOKIE_CONFIG.SECURE,
-      sameSite: COOKIE_CONFIG.SAMESITE,
-    },
+    name: CookieNames.SID_COOKIE,
+    cookie: SID_COOKIE_OPTIONS,
     store: MongoStore.create({
       clientPromise: MongoClient.connect(getConnectionString(), {
         serverSelectionTimeoutMS: 1500, // initial connection timeout

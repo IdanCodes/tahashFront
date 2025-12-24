@@ -330,7 +330,7 @@ function PenaltySelector({
   return (
     <div className="my-2 flex w-[70%] place-items-center gap-[5%]">
       <PrimaryButton
-        text="+2"
+        content="+2"
         buttonSize={ButtonSize.Small}
         className={clsx("flex-1")}
         onClick={penalties.togglePlusTwo}
@@ -342,7 +342,7 @@ function PenaltySelector({
         disabled={penalties.currPenalty == Penalties.DNF || !timeIsValid}
       />
       <PrimaryButton
-        text="DNF"
+        content="DNF"
         buttonSize={ButtonSize.Small}
         className={clsx("flex-1")}
         colors={
@@ -379,7 +379,7 @@ function PreviewAndSubmitBtn({
         <div className="m-auto w-fit">
           <PrimaryButton
             disabled={isDisabled}
-            text={isLastScramble ? "Submit" : "Next"}
+            content={isLastScramble ? "Submit" : "Next"}
             buttonSize={ButtonSize.Small}
             onClick={onSubmitTime}
             className={clsx(
@@ -725,7 +725,7 @@ function Compete() {
     <>
       <CubingIconsSheet />
       {/*Event Title*/}
-      <div className="flex justify-center gap-2 text-center text-4xl text-blue-950">
+      <div className="my-1 flex justify-center gap-2 py-1 text-center text-4xl text-blue-950">
         <p className="font-bold">{competeData.eventData.eventTitle} </p>
         <span className={`cubing-icon ${competeData.eventData.iconName}`} />
       </div>

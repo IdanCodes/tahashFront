@@ -16,6 +16,7 @@ export const RoutePath = {
         ResultsEvent: "/results/:eventId",
         Instructions: "/instructions",
         About: "/about",
+        YuvalPorat: "/yuval-porat",
 
         RedirectToAuth: "/redirect-to-auth",
         AuthCallback: "/auth-callback",

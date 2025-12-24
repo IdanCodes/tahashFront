@@ -4,7 +4,7 @@ import { CompDisplayInfo } from "@shared/interfaces/comp-display-info";
 import LoadingSpinner from "../components/LoadingSpinner";
 import LoginButton from "../components/LoginButton";
 import EventBoxes, { EventBox, EventBoxIcon } from "../components/EventBoxes";
-import wcaLogo from "./../components/assets/WCALogo.png";
+import wcaLogo from "@assets/WCALogo.png";
 import { CubingIconsSheet } from "../components/CubingIconsSheet";
 import { useUserInfo } from "../context/UserContext";
 
@@ -39,7 +39,7 @@ function Home(): JSX.Element {
         תחרות השבועית על שם יובל פורת ז"ל
       </h1>
       {activeComp.displayInfo ? (
-        <div className="mx-auto flex w-4/5 flex-col">
+        <div className="mx-auto mb-6 flex w-4/5 flex-col">
           <AnnouncementsBox />
           <div className="my-1.5 flex place-items-center justify-center pb-2">
             {userInfo.user ? (

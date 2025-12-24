@@ -1,4 +1,4 @@
-import React, { JSX, ReactNode, useEffect, useState } from "react";
+import React, { JSX, ReactNode, useState } from "react";
 import { useUserInfo } from "../context/UserContext";
 import { useNavigate } from "react-router-dom";
 import PrimaryButton from "../components/buttons/PrimaryButton";
@@ -23,6 +23,8 @@ function ProfileAttribute({
 }
 
 function ProfilePanel({ userInfo }: { userInfo: UserInfo }) {
+  const navigate = useNavigate();
+
   return (
     <>
       <div className="mx-auto flex w-35/100 flex-col gap-4">
@@ -30,9 +32,10 @@ function ProfilePanel({ userInfo }: { userInfo: UserInfo }) {
         <ProfileAttribute name="WCA ID:" value={userInfo.wcaId} />
         <ProfileAttribute name="Country:" value={userInfo.country} />
         <div className="flex justify-center">
-          <a href={`/user/${userInfo.wcaId}`}>
-            <PrimaryButton text={"Stats"} />
-          </a>
+          <PrimaryButton
+            content={"Stats"}
+            onClick={() => navigate(`/user/${userInfo.wcaId}`)}
+          />
         </div>
         <div className="flex justify-center">
           <a
@@ -40,7 +43,7 @@ function ProfilePanel({ userInfo }: { userInfo: UserInfo }) {
             href={`https://www.worldcubeassociation.org/persons/${userInfo.wcaId ?? ""}`}
           >
             <PrimaryButton
-              text={"WCA Profile"}
+              content={"WCA Profile"}
               colors="bg-orange-500 hover:bg-orange-600/80 active:bg-orange-600"
             />
           </a>
@@ -61,6 +64,7 @@ function LogoutButton({ logout }: { logout: () => Promise<void> }) {
     addLoading();
     await logout();
     removeLoading();
+    console.log("logged out");
     navigate(RoutePath.Page.Home);
   }
 
@@ -68,7 +72,7 @@ function LogoutButton({ logout }: { logout: () => Promise<void> }) {
     <div className="m-3 flex place-content-center justify-center">
       <PrimaryButton
         buttonSize={ButtonSize.Large}
-        text="Logout"
+        content="Logout"
         disabled={disableLogout}
         onClick={onClickLogout}
         colors="bg-red-500 hover:bg-red-600 active:bg-red-600/90"
@@ -82,7 +86,7 @@ function Profile() {
 
   return (
     <>
-      <p className="m-3 text-center text-5xl font-bold">Profile</p>
+      <h1 className="m-3 text-center text-5xl font-bold">Profile</h1>
 
       {userInfo.user && (
         <>

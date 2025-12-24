@@ -7,6 +7,7 @@ import {
 import { errorObject } from "@shared/interfaces/error-object";
 
 const basePath = import.meta.env.VITE_API_PATH || "/api";
+// const basePath = "https://api.ilcubers.com/api";
 console.log("requestbasepath:", basePath);
 enum RequestMethod {
   GET = "GET",

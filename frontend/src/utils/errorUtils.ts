@@ -16,7 +16,10 @@ export function redirectToError(error: object): void {
 `,
     data,
   );
-  // window.location.href = `/error?text=${encodeURIComponent(text)}${data}`;
+  const res = confirm(`Error occurred: ${text}. Check console`);
+  if (res)
+    // if the user accepts, redirect to error page
+    window.location.href = `/error?text=${encodeURIComponent(text)}${data}`;
 }
 
 export const isAbortError = (err: any): boolean => err.name === "AbortError";

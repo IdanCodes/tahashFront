@@ -2,7 +2,18 @@
 
 * {
     font-family: "Rubik", serif;
+}
+
+p, li {
     letter-spacing: 0.015rem;
+}
+
+h1 {
+    letter-spacing: 0.025rem;
+}
+
+th {
+    font-weight: 500;
 }
 
 @theme {

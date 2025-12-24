@@ -35,7 +35,7 @@ function LoginButton({ content }: { content: React.JSX.Element }) {
     <>
       <PrimaryButton
         disabled={disableInteract}
-        text={content}
+        content={content}
         buttonSize={ButtonSize.Medium}
         onClick={startLogin}
       />
