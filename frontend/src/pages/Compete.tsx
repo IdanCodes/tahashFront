@@ -15,6 +15,7 @@ import PrimaryButton from "../components/buttons/PrimaryButton";
 import {
   comparePackedResults,
   formatPackedResult,
+  formatPackedResults,
   formatSolveResult,
   getPureCentis,
   getPureCentisArr,
@@ -28,7 +29,10 @@ import { ButtonSize } from "../components/buttons/ButtonSize";
 import { packResult, SolveResult } from "@shared/interfaces/solve-result";
 import { Penalties, Penalty } from "@shared/constants/penalties";
 import LoadingSpinner from "../components/LoadingSpinner";
-import { getResultStr } from "@shared/utils/event-results-utils";
+import {
+  formatAttempts,
+  getResultStr,
+} from "@shared/utils/event-results-utils";
 import { getTimeFormatName, TimeFormat } from "@shared/constants/time-formats";
 
 const hideImageEvents = Object.freeze(["333bf", "444bf", "555bf", "333mbf"]);
@@ -49,7 +53,7 @@ function ScrambleMenuButton({
   return (
     <button
       className={clsx(
-        `group relative my-auto flex overflow-hidden rounded-2xl p-2 text-2xl shadow-xl transition-[flex] duration-[400ms] select-none`,
+        `group relative my-auto flex overflow-hidden rounded-2xl p-2 text-2xl shadow-xl transition-all duration-[400ms] select-none`,
         isAccessible && `cursor-pointer`,
         !isAccessible && "opacity-60",
         isActiveScramble && "flex-[4] origin-top-left bg-slate-500/90",
@@ -58,8 +62,15 @@ function ScrambleMenuButton({
       onClick={() => loadScramble()}
       disabled={!isAccessible}
     >
-      <p className="absolute pl-[1%] text-center font-bold">{scrNumber}.</p>
-      <p className="ml-2 w-full text-center">{resultStr}</p>
+      <p className="absolue pl-[2%] text-center font-bold">{scrNumber}.</p>
+      <p
+        className={clsx(
+          "w-9/10 pr-1 text-center transition-all",
+          isActiveScramble && "scale-103 pr-[2%] font-semibold",
+        )}
+      >
+        {resultStr}
+      </p>
     </button>
   );
 }
@@ -67,13 +78,13 @@ function ScrambleMenuButton({
 function ScramblesMenu({
   scrambles,
   activeScramble,
-  allTimes,
+  timeStrs,
   loadScramble,
   isScrambleAccessible,
 }: {
   scrambles: string[];
   activeScramble: number;
-  allTimes: PackedResult[];
+  timeStrs: string[];
   loadScramble: (scrIndex: number) => void;
   isScrambleAccessible: (scrIndex: number) => boolean;
 }) {
@@ -85,7 +96,7 @@ function ScramblesMenu({
           isAccessible={isScrambleAccessible(i)}
           isActiveScramble={activeScramble === i}
           loadScramble={() => loadScramble(i)}
-          resultStr={formatPackedResult(allTimes[i])}
+          resultStr={timeStrs[i]}
           scrNumber={i + 1}
         />
       ))}
@@ -489,6 +500,13 @@ function Compete() {
   // const { addLoading, removeLoading } = useLoading("Compete");
   const userInfo = useUserInfo();
   const navigate = useNavigate();
+  const timeStrs = useMemo(
+    () =>
+      finishedEvent.current && competeData
+        ? formatAttempts(competeData.eventData.timeFormat, allTimes)
+        : formatPackedResults(allTimes),
+    [finishedEvent.current, competeData],
+  );
 
   async function initCompeteData(competeData: UserCompeteData) {
     hideImage.current = hideImageEvents.includes(competeData.eventData.eventId);
@@ -752,7 +770,7 @@ function Compete() {
         <ScramblesMenu
           scrambles={competeData.scrambles}
           activeScramble={activeScramble}
-          allTimes={allTimes}
+          timeStrs={timeStrs}
           loadScramble={loadScramble}
           isScrambleAccessible={isScrambleAccessible}
         />
