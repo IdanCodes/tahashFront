@@ -17,3 +17,5 @@ dist/
 
 .DS_Store
 *.tsbuildinfo
+cmds.txt
+exec.py
