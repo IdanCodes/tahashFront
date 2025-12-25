@@ -301,13 +301,6 @@ const tahashUserSchema = new Schema<
                 eventRecordToGeneralRecords(format, existingRecords),
               )
             : eventRecords;
-          if (existingRecords) {
-            console.log(
-              "old:",
-              eventRecordToGeneralRecords(format, existingRecords),
-            );
-            console.log("new:", eventRecords);
-          }
           if (
             newRecord.single.penalty === Penalties.DNF &&
             (!newRecord.average || isNullCentis(newRecord.averageComp))

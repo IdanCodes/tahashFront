@@ -1,38 +1,56 @@
 import { SubmissionData } from "@shared/interfaces/submission-data";
-import { SubmissionDataDisplay } from "@shared/interfaces/submission-data-display";
+import { SubmissionDataDisplay } from "@shared/types/submission-data-display";
 import { UserManager } from "../database/users/user-manager";
-
-export async function getSubmissionDisplay(
-  submission: SubmissionData,
-): Promise<SubmissionDataDisplay | undefined> {
-  const userInfo = await UserManager.getInstance().getUserInfoById(
-    submission.userId,
-  );
-
-  return userInfo
-    ? ({
-        submissionState: submission.submissionState,
-        times: submission.times,
-        single: submission.single,
-        average: submission.average,
-        submitterData: userInfo,
-        place: submission.place ?? undefined,
-      } as SubmissionDataDisplay)
-    : undefined;
-}
+import { TahashUser } from "../database/models/tahash-user.model";
+import {
+  formatAttempts,
+  getAverageStr,
+  getBestResultStr,
+} from "@shared/utils/event-results-utils";
+import { CompEvent } from "@shared/types/comp-event";
 
 export async function getSubmissionDisplays(
+  eventData: CompEvent,
   eventSubmissions: SubmissionData[],
 ) {
-  const displays: SubmissionDataDisplay[] = [];
+  // Stage 1: fetch users by their ids
+  const userIds = eventSubmissions.map((s) => s.userId);
+  const usersInfo: {
+    id: number;
+    wcaId: string;
+    name: string;
+  }[] = await TahashUser.findUsersByIds(userIds, [
+    {
+      $project: {
+        _id: 0,
+        id: "$userInfo.id",
+        wcaId: "$userInfo.wcaId",
+        name: "$userInfo.name",
+      },
+    },
+  ]);
+
+  // lookup map for O(1) lookups
+  const userLookup = new Map(usersInfo.map((user) => [user.id, user]));
+
+  // Stage 2: iterate over submissions and map to users
+  const result: SubmissionDataDisplay[] = [];
   for (const submission of eventSubmissions) {
-    const newDisplay = await getSubmissionDisplay(submission);
-    if (newDisplay) displays.push(newDisplay);
-    else
-      console.warn(
-        `Could not find user ${submission.userId} when constructing SubmissionDataDisplay for getSubmissionDisplays; skipping`,
-      );
+    const userData = userLookup.get(submission.userId);
+
+    if (userData)
+      result.push({
+        submitterData: {
+          userId: userData.id,
+          name: userData.name,
+          wcaId: userData.wcaId,
+        },
+        best: getBestResultStr(eventData, submission.times),
+        average: getAverageStr(eventData, submission.times),
+        solves: formatAttempts(eventData.timeFormat, submission.times),
+        submissionState: submission.submissionState,
+      } as SubmissionDataDisplay);
   }
 
-  return displays;
+  return result;
 }

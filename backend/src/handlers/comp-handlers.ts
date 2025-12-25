@@ -51,7 +51,7 @@ async function eventsDisplayAndStatus(req: Request, res: Response) {
 }
 
 // response contains a CompEvent[] of all the events of the competition
-export function compEventsDisplays(_: Request, res: Response) {
+function compEventsDisplays(_: Request, res: Response) {
   const displayInfos =
     CompManager.getInstance().getActiveComp().eventDisplayInfos;
   res.json(new ApiResponse(ResponseCode.Success, displayInfos));
@@ -105,7 +105,7 @@ async function userEventData(req: UserEventDataRequest, res: Response) {
  *
  * requireLogin
  */
-export async function updateTimes(req: UpdateTimesRequest, res: Response) {
+async function updateTimes(req: UpdateTimesRequest, res: Response) {
   const { eventId, times } = req.body as UpdateTimesBodyInput;
 
   const eventData = getEventById(eventId);
@@ -149,10 +149,7 @@ export async function updateTimes(req: UpdateTimesRequest, res: Response) {
   await activeComp.save();
 }
 
-export async function eventsAndSubmissionOverviews(
-  req: Request,
-  res: Response,
-) {
+async function eventsAndSubmissionOverviews(req: Request, res: Response) {
   const compNumberStr = req.params.compNumber;
   if (!compNumberStr)
     return res.json(errorResponse("Path parameter compNumber is required"));
@@ -180,14 +177,12 @@ export async function eventsAndSubmissionOverviews(
 }
 
 // response is SubmissionDataDisplay[]
-export async function eventSubmissions(
-  req: EventSubmissionsRequest,
-  res: Response,
-) {
+async function eventSubmissions(req: EventSubmissionsRequest, res: Response) {
   const { [HttpHeaders.EVENT_ID]: eventId } =
     req.headers as EventSubmissionsHeadersInput;
 
-  if (!getEventById(eventId))
+  const eventData = getEventById(eventId);
+  if (!eventData)
     return res.json(errorResponse(`Invalid event id "${eventId}"`));
 
   const eventSubmissions = CompManager.getInstance()
@@ -204,7 +199,7 @@ export async function eventSubmissions(
   res.json(
     new ApiResponse(
       ResponseCode.Success,
-      await getSubmissionDisplays(eventSubmissions),
+      await getSubmissionDisplays(eventData, eventSubmissions),
     ),
   );
 }
@@ -249,7 +244,7 @@ async function updateSubmissionState(
   res.json(new ApiResponse(ResponseCode.Success, "Updated successfully"));
 }
 
-export async function activeCompInfo(_: Request, res: Response) {
+async function activeCompInfo(_: Request, res: Response) {
   return res.json(
     new ApiResponse(
       ResponseCode.Success,
@@ -258,7 +253,7 @@ export async function activeCompInfo(_: Request, res: Response) {
   );
 }
 
-export async function compDisplayInfo(req: Request, res: Response) {
+async function compDisplayInfo(req: Request, res: Response) {
   const compNumberStr = req.params.compNumber;
   if (!compNumberStr)
     return res.json(errorResponse("Path parameter compNumber is required"));
@@ -279,7 +274,7 @@ export async function compDisplayInfo(req: Request, res: Response) {
 
 // /:compNumber/:eventId
 // response contains EventResultDisplay[]
-export async function eventResultDisplays(req: Request, res: Response) {
+async function eventResultDisplays(req: Request, res: Response) {
   const compNumberStr = req.params.compNumber;
   const eventId = req.params.eventId;
   if (!compNumberStr || !eventId)
@@ -317,7 +312,7 @@ export async function eventResultDisplays(req: Request, res: Response) {
   res.json(new ApiResponse(ResponseCode.Success, eventResultDisplays));
 }
 
-export async function competitorData(req: Request, res: Response) {
+async function competitorData(req: Request, res: Response) {
   const wcaId = req.params.wcaId.toUpperCase();
   if (!isWcaIdFormat(wcaId))
     return res.json(errorResponse(`Invalid WCA ID "${wcaId}"`));

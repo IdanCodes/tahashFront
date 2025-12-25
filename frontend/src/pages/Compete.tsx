@@ -697,7 +697,7 @@ function Compete() {
 
     if (isLastScramble) {
       const confirmed = confirm(
-        "Are you sue you want to submit? You will not be able to edit the results.",
+        "Are you sure you want to submit? You will not be able to edit the results.",
       );
       if (!confirmed) return;
     }

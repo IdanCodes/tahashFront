@@ -8,7 +8,7 @@ import LoadingSpinner from "../components/LoadingSpinner";
 import { useNavigate, useParams } from "react-router-dom";
 import { useUserInfo } from "../context/UserContext";
 import { HttpHeaders } from "@shared/constants/http-headers";
-import { SubmissionDataDisplay } from "@shared/interfaces/submission-data-display";
+import { SubmissionDataDisplay } from "@shared/types/submission-data-display";
 import {
   SubmissionState,
   submissionStateStr,
@@ -23,6 +23,7 @@ import PrimaryButton from "../components/buttons/PrimaryButton";
 import { SubmissionsOverview } from "@shared/types/SubmissionsOverview";
 import { useActiveComp } from "../context/ActiveCompContext";
 import { CubingIconsSheet } from "../components/CubingIconsSheet";
+import { errorObject } from "@shared/interfaces/error-object";
 
 function AdminPanel() {
   const params = useParams();
@@ -147,23 +148,11 @@ function EventPanel({ eventId }: { eventId: string }) {
   const [submissions, setSubmissions] = useState<
     SubmissionDataDisplay[] | undefined
   >(undefined);
-  const [displayInfo, setDisplayInfo] = useState<EventDisplayInfo | undefined>(
-    undefined,
-  );
+  const [eventDisplay, setEventDisplay] = useState<
+    EventDisplayInfo | undefined
+  >(undefined);
 
   async function initEventPanel() {
-    // display info
-    const displayInfoRes = await sendGetRequest(
-      RoutePath.Get.EventDisplayInfo,
-      {
-        [HttpHeaders.EVENT_ID]: eventId,
-      },
-    );
-    if (displayInfoRes.aborted) return;
-    if (displayInfoRes.isError) redirectToError(displayInfoRes.data);
-
-    setDisplayInfo(displayInfoRes.data);
-
     // submissions
     sendGetRequest(RoutePath.Get.EventSubmissions, {
       [HttpHeaders.EVENT_ID]: eventId,
@@ -171,6 +160,15 @@ function EventPanel({ eventId }: { eventId: string }) {
       if (res.aborted) return;
       if (res.isError) return redirectToError(res.data);
       setSubmissions(res.data);
+    });
+
+    // display info
+    sendGetRequest(RoutePath.Get.EventDisplayInfo, {
+      [HttpHeaders.EVENT_ID]: eventId,
+    }).then((displayInfoRes) => {
+      if (displayInfoRes.aborted) return;
+      if (displayInfoRes.isError) return redirectToError(displayInfoRes.data);
+      setEventDisplay(displayInfoRes.data);
     });
   }
 
@@ -185,15 +183,26 @@ function EventPanel({ eventId }: { eventId: string }) {
 
   return (
     <>
-      {displayInfo ? (
+      <CubingIconsSheet />
+      {eventDisplay ? (
         <>
-          <p className="p-4 text-center text-5xl font-bold">
-            {displayInfo.eventTitle}
-          </p>
+          <div className="my-1 flex justify-center gap-2 py-1 text-center text-5xl text-blue-950">
+            <p className="text-center font-bold">{eventDisplay.eventTitle}</p>
+            <span className={`cubing-icon ${eventDisplay.iconName}`} />
+          </div>
           {submissions ? (
             <EventSubmissionsPanel
+              setSubmissionState={(userId, state) => {
+                setSubmissions((prev) =>
+                  prev?.map((sub) =>
+                    sub.submitterData.userId === userId
+                      ? { ...sub, submissionState: state }
+                      : sub,
+                  ),
+                );
+              }}
               submissions={submissions}
-              eventId={displayInfo.eventId}
+              eventId={eventDisplay.eventId}
             />
           ) : (
             <LoadingSpinner />
@@ -210,9 +219,11 @@ function EventPanel({ eventId }: { eventId: string }) {
 
 function EventSubmissionsPanel({
   submissions,
+  setSubmissionState,
   eventId,
 }: {
   submissions: SubmissionDataDisplay[];
+  setSubmissionState: (userId: number, state: SubmissionState) => void;
   eventId: string;
 }) {
   const [disableButtons, setDisableButtons] = useState<boolean>(false);
@@ -226,15 +237,20 @@ function EventSubmissionsPanel({
 
   async function updateSubmissionState(
     userId: number,
-    submissionState: SubmissionState,
+    newState: SubmissionState,
   ) {
     setDisableButtons(true);
-    await sendPostRequest(RoutePath.Post.UpdateSubmissionState, {
+    const res = await sendPostRequest(RoutePath.Post.UpdateSubmissionState, {
       eventId,
       userId,
-      submissionState,
+      submissionState: newState,
     });
-    window.location.reload();
+    if (res.aborted) return;
+    if (res.isError)
+      return redirectToError(
+        errorObject("Couldn't update submission's state.", res.data),
+      );
+    setSubmissionState(userId, newState);
   }
 
   function acceptResult(userId: number) {}
@@ -251,7 +267,7 @@ function EventSubmissionsPanel({
         <div className="mx-auto mt-2 mb-2 flex w-8/10 flex-wrap place-content-center gap-x-9.5 gap-y-11 pt-10 pb-4">
           {submissions.map((submission, _) => (
             <div
-              key={submission.submitterData.id}
+              key={submission.submitterData.userId}
               className="flex h-fit w-fit flex-col rounded-xl border-3 bg-gray-400 p-4 text-2xl"
             >
               <a
@@ -261,7 +277,7 @@ function EventSubmissionsPanel({
               >
                 <span className="">{submission.submitterData.name}</span>
               </a>
-              <span className="">{submission.submitterData.wcaId}</span>
+              {/*<span className="">{submission.submitterData.wcaId}</span>*/}
               <span className="">
                 State:{" "}
                 <span
@@ -275,17 +291,15 @@ function EventSubmissionsPanel({
               </span>
               <span>Times:</span>
               <div className="flex gap-3">
-                {formatPackedResults(submission.times).map((t, i) => (
+                {submission.solves.map((t, i) => (
                   <span key={i}>
                     {t}
-                    {i < submission.times.length - 1 ? "," : ""}
+                    {i < submission.solves.length - 1 ? "," : ""}
                   </span>
                 ))}
               </div>
-              <span>Single: {formatPackedResult(submission.single)}</span>
-              <span>
-                Average: {formatCentis(submission.average ?? NULL_TIME_CENTIS)}
-              </span>
+              <span>Single: {submission.best}</span>
+              <span>Average: {submission.average}</span>
               {submission.submissionState === SubmissionState.Pending && (
                 <div className="flex flex-row justify-between px-2">
                   <PrimaryButton
@@ -293,7 +307,7 @@ function EventSubmissionsPanel({
                     colors="bg-[rgb(46,217,46)] hover:bg-[rgb(10,230,10)] active:bg-[rgb(10,210,10)]"
                     onClick={() =>
                       updateSubmissionState(
-                        submission.submitterData.id,
+                        submission.submitterData.userId,
                         SubmissionState.Approved,
                       )
                     }
@@ -304,7 +318,7 @@ function EventSubmissionsPanel({
                     colors="bg-[rgb(217,9,9)] hover:bg-[rgb(230,30,30)] active:bg-[rgb(210,30,30)]"
                     onClick={() =>
                       updateSubmissionState(
-                        submission.submitterData.id,
+                        submission.submitterData.userId,
                         SubmissionState.Rejected,
                       )
                     }

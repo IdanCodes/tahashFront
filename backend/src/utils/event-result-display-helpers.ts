@@ -18,12 +18,7 @@ export async function submissionsToResultDisplays(
     id: number;
     wcaId: string;
     name: string;
-  }[] = await TahashUser.aggregate([
-    {
-      $match: {
-        "userInfo.id": { $in: userIds },
-      },
-    },
+  }[] = await TahashUser.findUsersByIds(userIds, [
     {
       $project: {
         _id: 0,
@@ -42,8 +37,7 @@ export async function submissionsToResultDisplays(
   for (const submission of eventSubmissions) {
     const userData = userLookup.get(submission.userId);
 
-    if (userData) {
-      // Only push if the user exists (Merging + Filtering in one step)
+    if (userData)
       result.push({
         place: submission.place,
         name: userData.name,
@@ -52,7 +46,6 @@ export async function submissionsToResultDisplays(
         average: getAverageStr(eventData, submission.times),
         solves: formatAttempts(eventData.timeFormat, submission.times),
       } as EventResultDisplay);
-    }
   }
 
   return result;
