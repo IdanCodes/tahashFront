@@ -119,7 +119,7 @@ export interface TahashCompMethods {
   isActive(): boolean;
 
   /**
-   * Get the {@link CompEventResults} of an event (not a clone).
+   * Get a reference to the {@link CompEventResults} of an event (not a clone).
    * @param eventId The id of the event.
    * @return
    * - If the event exists in the competition, returns its {@link CompEventResults}.
@@ -293,6 +293,7 @@ export const TahashCompSchema = new Schema<
           newSubmissionState;
 
         if (newSubmissionState === SubmissionState.Approved) {
+          // manual approve
           const eventData = getEventById(eventId);
           if (!eventData) return true;
 

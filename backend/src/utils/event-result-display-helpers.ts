@@ -1,45 +1,58 @@
-// null if userId is invalid
 import { CompEvent } from "@shared/types/comp-event";
 import { SubmissionData } from "@shared/interfaces/submission-data";
 import { EventResultDisplay } from "@shared/types/event-result-display";
-import { UserManager } from "../database/users/user-manager";
 import {
   formatAttempts,
   getAverageStr,
   getBestResultStr,
 } from "@shared/utils/event-results-utils";
-
-export async function submissionToResultDisplay(
-  eventData: CompEvent,
-  submission: SubmissionData,
-): Promise<EventResultDisplay | null> {
-  const userInfo = await UserManager.getInstance().getUserInfoById(
-    submission.userId,
-  );
-  if (!userInfo) return null;
-
-  return {
-    place: submission.place,
-    name: userInfo.name,
-    wcaId: userInfo.wcaId,
-    best: getBestResultStr(eventData, submission.times),
-    average: getAverageStr(eventData, submission.times),
-    solves: formatAttempts(eventData.timeFormat, submission.times),
-  } as EventResultDisplay;
-}
+import { TahashUser } from "../database/models/tahash-user.model";
 
 export async function submissionsToResultDisplays(
   eventData: CompEvent,
   eventSubmissions: SubmissionData[],
 ): Promise<EventResultDisplay[]> {
-  const result: EventResultDisplay[] = [];
+  // Stage 1: fetch users by their ids
+  const userIds = eventSubmissions.map((s) => s.userId);
+  const usersInfo: {
+    id: number;
+    wcaId: string;
+    name: string;
+  }[] = await TahashUser.aggregate([
+    {
+      $match: {
+        "userInfo.id": { $in: userIds },
+      },
+    },
+    {
+      $project: {
+        _id: 0,
+        id: "$userInfo.id",
+        wcaId: "$userInfo.wcaId",
+        name: "$userInfo.name",
+      },
+    },
+  ]);
 
-  for (let i = 0; i < eventSubmissions.length; i++) {
-    const resultDisplay = await submissionToResultDisplay(
-      eventData,
-      eventSubmissions[i],
-    );
-    if (resultDisplay) result.push(resultDisplay);
+  // lookup map for O(1) lookups
+  const userLookup = new Map(usersInfo.map((user) => [user.id, user]));
+
+  // Stage 2: iterate over submissions and map to users
+  const result: EventResultDisplay[] = [];
+  for (const submission of eventSubmissions) {
+    const userData = userLookup.get(submission.userId);
+
+    if (userData) {
+      // Only push if the user exists (Merging + Filtering in one step)
+      result.push({
+        place: submission.place,
+        name: userData.name,
+        wcaId: userData.wcaId,
+        best: getBestResultStr(eventData, submission.times),
+        average: getAverageStr(eventData, submission.times),
+        solves: formatAttempts(eventData.timeFormat, submission.times),
+      } as EventResultDisplay);
+    }
   }
 
   return result;

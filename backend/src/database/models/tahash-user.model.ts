@@ -1,10 +1,6 @@
-import mongoose, { Model, Schema } from "mongoose";
+import mongoose, { Model, PipelineStage, Schema } from "mongoose";
 import { UserInfo } from "@shared/interfaces/user-info";
-import {
-  EventId,
-  getEventById,
-  getEventFormat,
-} from "@shared/types/comp-event";
+import { EventId, getEventFormat } from "@shared/types/comp-event";
 import { UserEventResult } from "@shared/types/user-event-result";
 import {
   EventRecords,
@@ -26,15 +22,7 @@ import {
   comparePackedResults,
   isFullPackedTimesArr,
   isNullCentis,
-  NULL_TIME_CENTIS,
 } from "@shared/utils/time-utils";
-import {
-  AO5BestResults,
-  BO3BestResults,
-  FMCBestResults,
-  MbldBestResults,
-  MO3BestResults,
-} from "@shared/types/result-format";
 import { CompManager } from "../comps/comp-manager";
 import { PastCompResults } from "@shared/types/past-comp-results";
 import { CompetitorData } from "@shared/types/competitor-data";
@@ -173,6 +161,16 @@ export interface TahashUserStatics {
    * Find a user by their WCA Id
    */
   findUserByWcaId(wcaId: string): Promise<TahashUserDoc | null>;
+
+  /**
+   * Using an aggregating pipeline, retrieve data about multiple users by their userId.
+   * @param ids The ids of the users to find
+   * @param restOfPipeline The rest of the pipeline to execute
+   */
+  findUsersByIds<T>(
+    ids: number[],
+    restOfPipeline?: PipelineStage[],
+  ): Promise<T[]>;
 }
 
 const updateWCADataInterval: Readonly<number> = 7; /* number of days to wait between updating wca data */
@@ -330,21 +328,22 @@ const tahashUserSchema = new Schema<
         ): GeneralRecord {
           let result: GeneralRecord = { ...oldRecords };
 
-          if (comparePackedResults(newRecords.single, oldRecords.single) < 0) {
+          if (
+            comparePackedResults(newRecords.single, oldRecords.single) < 0 ||
+            oldRecords.singleComp < 0
+          ) {
             result.single = JSON.parse(JSON.stringify(newRecords.single));
             result.singleComp = newRecords.singleComp;
           }
 
-          if (newRecords.average < oldRecords.average) {
+          if (
+            newRecords.average < oldRecords.average ||
+            oldRecords.averageComp < 0 // never completed average (wca)
+          ) {
             result.average = JSON.parse(JSON.stringify(newRecords.average));
             result.averageComp = newRecords.averageComp;
           }
 
-          console.log("old.single", oldRecords.single);
-          console.log("new.single", newRecords.single);
-          console.log("old.average", oldRecords.average);
-          console.log("new.average", newRecords.average);
-          console.log("result:", result);
           return result;
 
           // if (eventId === "333fm") {
@@ -473,6 +472,21 @@ const tahashUserSchema = new Schema<
         return await this.findOne({
           "userInfo.wcaId": wcaId,
         }).exec();
+      },
+
+      async findUsersByIds<T>(
+        this: Model<ITahashUser>,
+        userIds: number[],
+        restOfPipeline: PipelineStage[] = [],
+      ): Promise<T[]> {
+        return this.aggregate([
+          {
+            $match: {
+              "userInfo.id": { $in: userIds },
+            },
+          },
+          ...restOfPipeline,
+        ]);
       },
     },
   },

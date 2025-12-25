@@ -1,0 +1,21 @@
+
+docker compose -f deploy/docker_compose.yml build
+docker push idoshahar/tahash-backend:v0.1
+docker push idoshahar/tahash-frontend:v0.1
+
+
+
+
+Upload API:
+
+- Connect to idan@api.ilcubers.com (filezilla)
+- Navigate locally to /Volumes/Macintosh HD/Users/idan/Documents/Projects/tahash/tahashFront2/backend/
+- Upload (and overwrite) folders/files:
+    * dist
+    * tsconfig.json
+    * package.json
+- Restart API
+
+
+Upload Frontend:
+-
