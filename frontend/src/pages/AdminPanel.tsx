@@ -257,7 +257,7 @@ function EventSubmissionsPanel({
               <a
                 href={`/user/${submission.submitterData.wcaId}`}
                 target="_blank"
-                className="underline"
+                className="w-fit underline"
               >
                 <span className="">{submission.submitterData.name}</span>
               </a>

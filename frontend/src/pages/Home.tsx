@@ -73,7 +73,7 @@ function ActiveCompData({ compInfo }: { compInfo: CompDisplayInfo }) {
   if (!activeComp.displayInfo) return <>Loading...</>;
 
   const formatDate = (date: Date) =>
-    `${date.getUTCDate() + 1}/${date.getMonth() + 1}/${date.getFullYear()}`;
+    `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
   const startDateString = useMemo<string>(() => {
     return formatDate(new Date(compInfo.startDate));
   }, [compInfo]);
