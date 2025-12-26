@@ -1,4 +1,4 @@
-import mongoose, { Model, PipelineStage, Schema } from "mongoose";
+import mongoose, { FlattenMaps, Model, PipelineStage, Schema } from "mongoose";
 import { UserInfo } from "@shared/interfaces/user-info";
 import { EventId, getEventFormat } from "@shared/types/comp-event";
 import { UserEventResult } from "@shared/types/user-event-result";
@@ -27,6 +27,7 @@ import { CompManager } from "../comps/comp-manager";
 import { PastCompResults } from "@shared/types/past-comp-results";
 import { CompetitorData } from "@shared/types/competitor-data";
 import { Penalties } from "@shared/constants/penalties";
+import { UserManager } from "../users/user-manager";
 
 const userInfoSchema = new mongoose.Schema(
   {
@@ -167,7 +168,7 @@ export interface TahashUserStatics {
    * @param ids The ids of the users to find
    * @param restOfPipeline The rest of the pipeline to execute
    */
-  findUsersByIds<T>(
+  aggregateMatchUsersById<T>(
     ids: number[],
     restOfPipeline?: PipelineStage[],
   ): Promise<T[]>;
@@ -467,7 +468,7 @@ const tahashUserSchema = new Schema<
         }).exec();
       },
 
-      async findUsersByIds<T>(
+      async aggregateMatchUsersById<T>(
         this: Model<ITahashUser>,
         userIds: number[],
         restOfPipeline: PipelineStage[] = [],
@@ -499,8 +500,13 @@ tahashUserSchema.virtual("eventStatuses").get(function () {
   return statuses;
 });
 
+tahashUserSchema.post("save", (doc) => {
+  UserManager.getInstance().updateUserDataCache(doc.toJSON());
+});
+
 export const TahashUser = mongoose.model("TahashUser", tahashUserSchema);
 export type TahashUserDoc = mongoose.Document &
   ITahashUser &
   TahashUserMethods &
   TahashUserVirtuals;
+export type LeanTahashUser = FlattenMaps<ITahashUser>;

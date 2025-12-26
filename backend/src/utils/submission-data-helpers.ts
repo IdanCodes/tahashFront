@@ -8,49 +8,26 @@ import {
   getBestResultStr,
 } from "@shared/utils/event-results-utils";
 import { CompEvent } from "@shared/types/comp-event";
+import { EventResultDisplay } from "@shared/types/event-result-display";
 
 export async function getSubmissionDisplays(
   eventData: CompEvent,
   eventSubmissions: SubmissionData[],
 ) {
-  // Stage 1: fetch users by their ids
-  const userIds = eventSubmissions.map((s) => s.userId);
-  const usersInfo: {
-    id: number;
-    wcaId: string;
-    name: string;
-  }[] = await TahashUser.findUsersByIds(userIds, [
-    {
-      $project: {
-        _id: 0,
-        id: "$userInfo.id",
-        wcaId: "$userInfo.wcaId",
-        name: "$userInfo.name",
-      },
-    },
-  ]);
-
-  // lookup map for O(1) lookups
-  const userLookup = new Map(usersInfo.map((user) => [user.id, user]));
-
-  // Stage 2: iterate over submissions and map to users
-  const result: SubmissionDataDisplay[] = [];
-  for (const submission of eventSubmissions) {
-    const userData = userLookup.get(submission.userId);
-
-    if (userData)
-      result.push({
+  return await UserManager.getInstance().hydrateWithUsers(
+    eventSubmissions,
+    (submission, userData) => {
+      return {
         submitterData: {
-          userId: userData.id,
-          name: userData.name,
-          wcaId: userData.wcaId,
+          userId: userData.userInfo.id,
+          name: userData.userInfo.name,
+          wcaId: userData.userInfo.wcaId,
         },
         best: getBestResultStr(eventData, submission.times),
         average: getAverageStr(eventData, submission.times),
         solves: formatAttempts(eventData.timeFormat, submission.times),
         submissionState: submission.submissionState,
-      } as SubmissionDataDisplay);
-  }
-
-  return result;
+      } as SubmissionDataDisplay;
+    },
+  );
 }

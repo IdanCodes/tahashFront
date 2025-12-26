@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { sendGetRequest, sendPostRequest } from "../utils/API/apiUtils";
 import { RoutePath } from "@shared/constants/route-path";
 import { redirectToError } from "../utils/errorUtils";
-import EventBoxes, { EventBox } from "../components/EventBoxes";
+import { EventBox } from "../components/EventBoxes";
 import { EventDisplayInfo } from "@shared/interfaces/event-display-info";
 import LoadingSpinner from "../components/LoadingSpinner";
 import { useNavigate, useParams } from "react-router-dom";
@@ -13,12 +13,6 @@ import {
   SubmissionState,
   submissionStateStr,
 } from "@shared/constants/submission-state";
-import {
-  formatCentis,
-  formatPackedResult,
-  formatPackedResults,
-  NULL_TIME_CENTIS,
-} from "@shared/utils/time-utils";
 import PrimaryButton from "../components/buttons/PrimaryButton";
 import { SubmissionsOverview } from "@shared/types/SubmissionsOverview";
 import { useActiveComp } from "../context/ActiveCompContext";
@@ -251,6 +245,7 @@ function EventSubmissionsPanel({
         errorObject("Couldn't update submission's state.", res.data),
       );
     setSubmissionState(userId, newState);
+    setDisableButtons(false);
   }
 
   function acceptResult(userId: number) {}

@@ -30,7 +30,7 @@ export const RoutePath = {
         Logout: "/logout",
         CompEventsDisplays: "/comp-events-displays",
         EventsAndSubmissionOverviews: "/events-and-submission-overviews",
-        EventsDisplayAndStatus: "/comp-display-status",
+        EventsDisplayAndStatus: "/events-display-status",
         UserEventData: "/user-event-data",
         EventDisplayInfo: "/event-display-info",
         ActiveCompInfo: "/active-comp-info",

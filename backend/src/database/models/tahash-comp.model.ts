@@ -297,7 +297,8 @@ export const TahashCompSchema = new Schema<
           const eventData = getEventById(eventId);
           if (!eventData) return true;
 
-          const userDoc = await UserManager.getInstance().getUserById(userId);
+          const userDoc =
+            await UserManager.getInstance().getUserDocById(userId);
           const rec = submissionDataToRecord(
             this.compNumber,
             results.submissions[submissionIndex],
@@ -389,7 +390,8 @@ export const TahashCompSchema = new Schema<
 
         /* update users' past results in database */
         for (const [userId, pastResults] of pastResultsMap) {
-          const userDoc = await UserManager.getInstance().getUserById(userId);
+          const userDoc =
+            await UserManager.getInstance().getUserDocById(userId);
           userDoc.setCompResults(this.compNumber, pastResults);
           await userDoc.save();
         }

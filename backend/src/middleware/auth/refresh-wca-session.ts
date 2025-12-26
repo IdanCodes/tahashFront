@@ -5,7 +5,7 @@ import {
 } from "../../utils/wcaApiUtils";
 import { isErrorObject } from "@shared/interfaces/error-object";
 import { errorResponse } from "@shared/types/api-response";
-import { updateAndSaveSession } from "../../utils/session-helpers";
+import { logoutUser, updateAndSaveSession } from "../../utils/session-helpers";
 import { refreshAdminCookie } from "../../utils/admin-helpers";
 
 /**
@@ -20,8 +20,7 @@ export const refreshWcaSession = async (
   next: NextFunction,
 ) => {
   const userSession = req.session.userSession;
-  if (!userSession || userSession.expiration < new Date().getTime())
-    return next();
+  if (!userSession || userSession.expiration > Date.now()) return next();
 
   // get new access token
   const tokenRes = await renewAuthentication(userSession.refresh_token);

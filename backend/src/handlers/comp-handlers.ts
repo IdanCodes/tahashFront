@@ -29,6 +29,13 @@ import { eventRecordToGeneralRecords } from "@shared/types/event-records";
 import { isWcaIdFormat } from "@shared/interfaces/user-info";
 import { getSubmissionDisplays } from "../utils/submission-data-helpers";
 import { submissionsToResultDisplays } from "../utils/event-result-display-helpers";
+import { LeanTahashUser } from "../database/models/tahash-user.model";
+import {
+  getCompetitorData,
+  getUserEventResult,
+  userEventStatuses,
+} from "../database/users/tahash-user-helpers";
+import { UserEventResult } from "@shared/types/user-event-result";
 
 /**
  * Get all event displays and statuses
@@ -39,8 +46,14 @@ async function eventsDisplayAndStatus(req: Request, res: Response) {
     CompManager.getInstance().getActiveComp().eventDisplayInfos;
 
   const userInfo = req.session.userSession!.userInfo;
-  const tahashUser = await UserManager.getInstance().getUserById(userInfo.id);
-  const eventStatuses = tahashUser.eventStatuses;
+  const tahashUser = await UserManager.getInstance().resolveUserById(
+    userInfo.id,
+  );
+  if (!tahashUser)
+    return res.json(
+      errorResponse("Invalid user. Please log out and try again."),
+    );
+  const eventStatuses = userEventStatuses(tahashUser);
 
   res.json(
     new ApiResponse(
@@ -81,8 +94,14 @@ async function userEventData(req: UserEventDataRequest, res: Response) {
     );
 
   const userId = req.session.userSession!.userInfo.id;
-  const userDoc = await UserManager.getInstance().getUserById(userId);
-  const results = userDoc.getEventResult(eventId) ?? {
+  const userData: LeanTahashUser | null =
+    await UserManager.getInstance().resolveUserById(userId);
+  if (!userData)
+    return res.json(
+      errorResponse("Invalid user. Please log out and try again."),
+    );
+
+  const results: UserEventResult = getUserEventResult(userData, eventId) ?? {
     finished: false,
     times: getEmptyPackedResults(eventData),
   };
@@ -120,7 +139,7 @@ async function updateTimes(req: UpdateTimesRequest, res: Response) {
     );
 
   const userId = req.session.userSession!.userInfo.id;
-  const userDoc = await UserManager.getInstance().getUserById(userId);
+  const userDoc = await UserManager.getInstance().getUserDocById(userId);
   userDoc.setEventTimes(eventId, times);
   await userDoc.save();
 
@@ -227,8 +246,8 @@ async function updateSubmissionState(
   if (!getEventById(eventId))
     return res.json(errorResponse(`Invalid event id "${eventId}"`));
 
-  const userDoc = await UserManager.getInstance().getUserById(userId);
-  if (!userDoc)
+  const userData = await UserManager.getInstance().resolveUserById(userId);
+  if (!userData)
     return res.json(
       errorResponse(
         errorObject(
@@ -317,11 +336,11 @@ async function competitorData(req: Request, res: Response) {
   if (!isWcaIdFormat(wcaId))
     return res.json(errorResponse(`Invalid WCA ID "${wcaId}"`));
 
-  const userDoc = await UserManager.getInstance().getUserDocByWcaId(wcaId);
+  const userDoc = await UserManager.getInstance().resolveUserByWcaId(wcaId);
   if (!userDoc)
-    return res.json(errorResponse(`The user "${wcaId}" is not registered`));
+    return res.json(errorResponse(`The user ${wcaId} is not registered`));
 
-  res.json(new ApiResponse(ResponseCode.Success, userDoc.getCompetitorData()));
+  res.json(new ApiResponse(ResponseCode.Success, getCompetitorData(userDoc)));
 }
 
 export const compHandlers = {

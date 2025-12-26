@@ -23,25 +23,47 @@ interface QueuedRequest {
 }
 
 const requestQueue: QueuedRequest[] = [];
-let isProcessing = false;
+const currentlyProcessed: QueuedRequest[] = [];
+// let isProcessing = false;
+const isProcessing = (() => currentlyProcessed.length > 0)();
 
 /**
  * The "worker" that processes the queue.
  */
 async function processQueue() {
-  if (isProcessing || requestQueue.length === 0) return;
-  isProcessing = true;
+  const MAX_WAIT = 10;
+  // if (isProcessing || requestQueue.length === 0) return;
+  if (requestQueue.length === 0) return;
+  // isProcessing = true;
 
-  const { task, resolve, reject } = requestQueue.shift()!;
-  try {
-    const response = await task();
-    resolve(response);
-  } catch (err) {
-    reject(err);
-  } finally {
-    isProcessing = false;
+  const desiredRequest = requestQueue.shift()!;
+  if (currentlyProcessed.includes(desiredRequest)) return;
+  currentlyProcessed.push(desiredRequest);
+
+  const { task, resolve, reject } = desiredRequest;
+
+  let handledReq = false;
+  const promResponse = task();
+  setTimeout(() => {
+    if (handledReq) return;
+    handledReq = true;
     processQueue().then();
-  }
+  }, MAX_WAIT);
+  promResponse.then((response) => {
+    try {
+      resolve(response);
+    } catch (err) {
+      reject(err);
+    } finally {
+      // isProcessing = false;
+      const i = currentlyProcessed.indexOf(desiredRequest);
+      if (i >= 0) currentlyProcessed.splice(i, 1);
+      if (!handledReq) {
+        processQueue().then();
+        handledReq = true;
+      }
+    }
+  });
 }
 
 /**

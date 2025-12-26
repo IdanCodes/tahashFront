@@ -2,9 +2,12 @@ import { EventRecords } from "@shared/types/event-records";
 import { TimeFormat } from "@shared/constants/time-formats";
 import { EventId } from "@shared/types/comp-event";
 import { UserInfo } from "@shared/interfaces/user-info";
-import { TahashUser, TahashUserDoc } from "../models/tahash-user.model";
+import {
+  LeanTahashUser,
+  TahashUser,
+  TahashUserDoc,
+} from "../models/tahash-user.model";
 import { UserEventResult } from "@shared/types/user-event-result";
-import { CompManager } from "../comps/comp-manager";
 import { PastCompResults } from "@shared/types/past-comp-results";
 
 /**
@@ -16,6 +19,13 @@ export class UserManager {
    * @private
    */
   private static instance: UserManager | undefined = undefined;
+
+  private readonly MAX_CACHE_SIZE = 50;
+  private userDataCache = new Map<number, LeanTahashUser>();
+
+  // wcaid to userid cache
+  private readonly MAX_WCAID_CACHE_SIZE = 125;
+  private wcaIdCache = new Map<string, number>();
 
   /**
    * Construct a {@link UserManager}.
@@ -52,15 +62,19 @@ export class UserManager {
     return this.instance;
   }
 
-  /**
-   * Get a user's document from the database by their id.
-   * @param userId The requested user's id.
-   * @return
-   * - If the user doesn't exist in the database, returns `null`.
-   * - Otherwise, returns the document of the user.
-   */
-  private async getUserDocById(userId: number): Promise<TahashUserDoc | null> {
-    return TahashUser.findUserById(userId);
+  private addUserToCache(id: number, data: LeanTahashUser) {
+    // If the cache is full, delete the first (oldest) item
+    if (this.userDataCache.size >= this.MAX_CACHE_SIZE) {
+      const oldestKey = this.userDataCache.keys().next().value;
+      if (oldestKey) this.userDataCache.delete(oldestKey);
+    }
+    this.userDataCache.set(id, data);
+
+    if (this.wcaIdCache.size >= this.MAX_WCAID_CACHE_SIZE) {
+      const oldestKey = this.wcaIdCache.keys().next().value;
+      if (oldestKey) this.wcaIdCache.delete(oldestKey);
+    }
+    this.wcaIdCache.set(data.userInfo.wcaId, id);
   }
 
   /**
@@ -69,11 +83,11 @@ export class UserManager {
    * @param userId
    * @param saveIfCreated if true and the user doesn't exist in the database, fetches the user's WCA data and results and saves the user in the database.
    */
-  public async getUserById(
+  public async getUserDocById(
     userId: number,
     saveIfCreated: boolean = true,
   ): Promise<TahashUserDoc> {
-    let userDoc = await this.getUserDocById(userId);
+    let userDoc = await TahashUser.findUserById(userId);
 
     let userInfo: UserInfo = {
       id: userId,
@@ -106,25 +120,100 @@ export class UserManager {
   }
 
   /**
-   * Get (a clone of) a user's {@link UserInfo}.
-   * @param userId The user's id.
-   * @return
-   * - If the user wasn't found in the database, returns `null`.
-   * - Otherwise, returns the requested {@link UserInfo}.
+   * Resolve a user's lean data by their id
+   * @param userId The user's id
    */
-  async getUserInfoById(userId: number): Promise<UserInfo | null> {
-    const userDoc: TahashUserDoc | null = await this.getUserDocById(userId);
-    return userDoc ? userDoc.userInfo : null;
+  public async resolveUserById(userId: number): Promise<LeanTahashUser | null> {
+    const cachedData = this.userDataCache.get(userId);
+    if (cachedData) {
+      this.userDataCache.delete(userId);
+      this.userDataCache.set(userId, cachedData);
+      return cachedData;
+    }
+
+    // fetch user
+    const userData = await TahashUser.findOne({
+      "userInfo.id": userId,
+    }).lean();
+    if (!userData) return null;
+
+    this.addUserToCache(userId, userData);
+    return userData;
   }
 
   /**
-   * Get a user's document from the database by their WCA ID.
-   * @param wcaId The requested user's WCA ID.
-   * @return
-   * - If the user doesn't exist in the database, returns `null`.
-   * - Otherwise, returns the document of the user.
+   * Hydrate an array of items with userIds with the users' data. Returns the result.
+   * - Maintains the order of the original array!
+   * - Skips users if they don't exist in the database
+   * @param items The array of items to hydrate
+   * @param factory The factory used to calculate the data to return
    */
-  async getUserDocByWcaId(wcaId: string): Promise<TahashUserDoc | null> {
-    return TahashUser.findUserByWcaId(wcaId);
+  async hydrateWithUsers<T extends { userId: number }, V>(
+    items: T[],
+    factory: (item: T, userData: LeanTahashUser) => V,
+  ) {
+    // Identify missing users
+    const missingIds = new Set<number>();
+    for (const item of items) {
+      if (!this.userDataCache.has(item.userId)) missingIds.add(item.userId);
+    }
+
+    // Fetch missing from DB and add to cache
+    if (missingIds.size > 0) {
+      const dbUsers: LeanTahashUser[] = await TahashUser.find({
+        "userInfo.id": { $in: Array.from(missingIds) },
+      }).lean();
+
+      for (const user of dbUsers) this.addUserToCache(user.userInfo.id, user);
+    }
+
+    const result: V[] = [];
+    for (const item of items) {
+      const userData = this.userDataCache.get(item.userId);
+      if (!userData) continue;
+
+      // Refresh LRU position on access
+      this.userDataCache.delete(item.userId);
+      this.userDataCache.set(item.userId, userData);
+
+      result.push(factory(item, userData));
+    }
+    return result;
+  }
+
+  /**
+   * Get users' data by their ids
+   * @param userIds The users' ids
+   */
+  public async getUsersDataByIds(userIds: number[]): Promise<LeanTahashUser[]> {
+    return this.hydrateWithUsers(
+      userIds.map((id) => ({ userId: id })),
+      (_, userData) => userData,
+    );
+  }
+
+  /**
+   * Resolve a user's lean data by their WCA id
+   * @param wcaId The user's WCA id
+   */
+  async resolveUserByWcaId(wcaId: string): Promise<LeanTahashUser | null> {
+    let userId = this.wcaIdCache.get(wcaId);
+    if (userId) {
+      this.wcaIdCache.delete(wcaId);
+      this.wcaIdCache.set(wcaId, userId);
+      return await this.resolveUserById(userId);
+    }
+
+    const user = await TahashUser.findOne({ "userInfo.wcaId": wcaId }).lean();
+    if (!user) return null;
+
+    this.addUserToCache(user.userInfo.id, user);
+    return user;
+  }
+
+  // update a user's cached data
+  updateUserDataCache(userData: LeanTahashUser) {
+    const cachedData = this.userDataCache.get(userData.userInfo.id);
+    if (cachedData) this.addUserToCache(userData.userInfo.id, userData);
   }
 }

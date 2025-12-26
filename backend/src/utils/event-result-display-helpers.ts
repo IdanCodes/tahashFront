@@ -7,18 +7,33 @@ import {
   getBestResultStr,
 } from "@shared/utils/event-results-utils";
 import { TahashUser } from "../database/models/tahash-user.model";
+import { UserManager } from "../database/users/user-manager";
 
 export async function submissionsToResultDisplays(
   eventData: CompEvent,
   eventSubmissions: SubmissionData[],
 ): Promise<EventResultDisplay[]> {
+  await UserManager.getInstance().hydrateWithUsers(
+    eventSubmissions,
+    (submission, userData) => {
+      return {
+        place: submission.place,
+        name: userData.userInfo.name,
+        wcaId: userData.userInfo.wcaId,
+        best: getBestResultStr(eventData, submission.times),
+        average: getAverageStr(eventData, submission.times),
+        solves: formatAttempts(eventData.timeFormat, submission.times),
+      } as EventResultDisplay;
+    },
+  );
+
   // Stage 1: fetch users by their ids
   const userIds = eventSubmissions.map((s) => s.userId);
   const usersInfo: {
     id: number;
     wcaId: string;
     name: string;
-  }[] = await TahashUser.findUsersByIds(userIds, [
+  }[] = await TahashUser.aggregateMatchUsersById(userIds, [
     {
       $project: {
         _id: 0,
