@@ -7,7 +7,6 @@ import {
 import { errorObject } from "@shared/interfaces/error-object";
 
 const basePath = import.meta.env.VITE_API_PATH || "/api";
-// const basePath = "https://api.ilcubers.com/api";
 console.log("requestbasepath:", basePath);
 enum RequestMethod {
   GET = "GET",
@@ -23,44 +22,32 @@ interface QueuedRequest {
 }
 
 const requestQueue: QueuedRequest[] = [];
-const currentlyProcessed: QueuedRequest[] = [];
-// let isProcessing = false;
-const isProcessing = (() => currentlyProcessed.length > 0)();
 
 /**
  * The "worker" that processes the queue.
  */
 async function processQueue() {
-  const MAX_WAIT = 10;
-  // if (isProcessing || requestQueue.length === 0) return;
+  const MAX_WAIT_MS = 0;
   if (requestQueue.length === 0) return;
-  // isProcessing = true;
 
-  const desiredRequest = requestQueue.shift()!;
-  if (currentlyProcessed.includes(desiredRequest)) return;
-  currentlyProcessed.push(desiredRequest);
-
-  const { task, resolve, reject } = desiredRequest;
-
-  let handledReq = false;
+  const { task, resolve, reject } = requestQueue.shift()!;
+  let calledNext = false;
   const promResponse = task();
+
   setTimeout(() => {
-    if (handledReq) return;
-    handledReq = true;
+    if (calledNext) return;
+    calledNext = true;
     processQueue().then();
-  }, MAX_WAIT);
+  }, MAX_WAIT_MS);
   promResponse.then((response) => {
     try {
       resolve(response);
     } catch (err) {
       reject(err);
     } finally {
-      // isProcessing = false;
-      const i = currentlyProcessed.indexOf(desiredRequest);
-      if (i >= 0) currentlyProcessed.splice(i, 1);
-      if (!handledReq) {
+      if (!calledNext) {
         processQueue().then();
-        handledReq = true;
+        calledNext = true;
       }
     }
   });

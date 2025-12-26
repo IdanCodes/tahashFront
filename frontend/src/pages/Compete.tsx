@@ -795,8 +795,7 @@ function Compete() {
               y: -15,
             },
             show: {
-              opacity: [0.9, 1],
-              rotate: 0,
+              opacity: [0.95, 1],
               scale: 1,
               y: 0,
             },

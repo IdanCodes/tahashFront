@@ -153,7 +153,11 @@ function EventPanel({ eventId }: { eventId: string }) {
     }).then((res) => {
       if (res.aborted) return;
       if (res.isError) return redirectToError(res.data);
-      setSubmissions(res.data);
+      setSubmissions(
+        (res.data as SubmissionDataDisplay[]).toSorted((a, b) =>
+          a.submissionState === SubmissionState.Pending ? -1 : 1,
+        ),
+      );
     });
 
     // display info
