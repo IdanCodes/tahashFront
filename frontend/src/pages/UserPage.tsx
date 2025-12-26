@@ -374,7 +374,8 @@ function PastResultsPanel({
 function UserPageEE({ wcaId }: { wcaId: string }) {
   const [isDisabled, setIsDisabled] = useState(false);
   const showEE = useMemo<boolean>(
-    () => ["2022HOTE01", "2019SAHA01", "2019TARA03"].includes(wcaId),
+    () =>
+      ["2022HOTE01", "2019SAHA01", "2019TARA03", "2022ATSM01"].includes(wcaId),
     [wcaId],
   );
 

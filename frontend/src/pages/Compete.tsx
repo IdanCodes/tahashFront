@@ -34,6 +34,8 @@ import {
   getResultStr,
 } from "@shared/utils/event-results-utils";
 import { getTimeFormatName, TimeFormat } from "@shared/constants/time-formats";
+import { PageTransitionProps } from "../components/PageTransition";
+import { motion } from "motion/react";
 
 const hideImageEvents = Object.freeze(["333bf", "444bf", "555bf", "333mbf"]);
 
@@ -67,6 +69,7 @@ function ScrambleMenuButton({
         className={clsx(
           "w-9/10 pr-1 text-center transition-all",
           isActiveScramble && "scale-103 pr-[2%] font-semibold",
+          !isActiveScramble && "scale-95",
         )}
       >
         {resultStr}
@@ -494,6 +497,9 @@ function Compete() {
   const numScrambles = useRef<number>(0);
   const finishedEvent = useRef<boolean>(false);
   const attemptResultStr = useRef<string | undefined>(undefined);
+  const scrTransitionTimeout = useRef<NodeJS.Timeout | undefined>(undefined);
+  const [scrTransitionRunning, setScrTransitionRunning] =
+    useState<boolean>(false);
   const [loadingScrTxt, setLoadingScrTxt] = useState<boolean>(true);
 
   const params = useParams();
@@ -505,7 +511,7 @@ function Compete() {
       finishedEvent.current && competeData
         ? formatAttempts(competeData.eventData.timeFormat, allTimes)
         : formatPackedResults(allTimes),
-    [finishedEvent.current, competeData],
+    [finishedEvent.current, competeData, allTimes],
   );
 
   async function initCompeteData(competeData: UserCompeteData) {
@@ -631,7 +637,6 @@ function Compete() {
           return window.location.reload();
 
         loadDisplayData();
-
         if (activeScramble != lastOpenScramble) return;
         setLastOpenScramble(activeScramble + 1);
         loadScramble(activeScramble);
@@ -642,10 +647,19 @@ function Compete() {
     loadDisplayData();
 
     function loadDisplayData() {
-      setActiveScramble(scrIndex);
-      setCurrPenalty(allTimes[scrIndex].penalty);
-      setCurrentResult(unpackResult(allTimes[scrIndex]));
-      if (scrIndex > lastOpenScramble) setLastOpenScramble(scrIndex);
+      const timeoutId = setTimeout(() => {
+        if (scrTransitionTimeout.current != timeoutId) return;
+        scrTransitionTimeout.current = undefined;
+        setScrTransitionRunning(false);
+
+        setActiveScramble(scrIndex);
+        setCurrPenalty(allTimes[scrIndex].penalty);
+        setCurrentResult(unpackResult(allTimes[scrIndex]));
+        if (scrIndex > lastOpenScramble) setLastOpenScramble(scrIndex);
+      }, 100);
+
+      scrTransitionTimeout.current = timeoutId;
+      setScrTransitionRunning(true);
     }
   }
 
@@ -755,7 +769,7 @@ function Compete() {
       <div
         className={clsx(`transition-opacity`)}
         style={{
-          opacity: loadingScrTxt ? "0" : "1",
+          opacity: loadingScrTxt ? 0 : 1,
         }}
       >
         {/* Result String */}
@@ -774,7 +788,30 @@ function Compete() {
           loadScramble={loadScramble}
           isScrambleAccessible={isScrambleAccessible}
         />
-        <div className="mx-auto w-8/10 rounded-2xl border-2 border-transparent bg-gradient-to-r from-slate-400/70 to-slate-400/80 shadow-xl">
+        <motion.div
+          variants={{
+            hide: {
+              scale: 0.98,
+              y: -15,
+            },
+            show: {
+              opacity: [0.9, 1],
+              rotate: 0,
+              scale: 1,
+              y: 0,
+            },
+          }}
+          initial={{
+            opacity: 1,
+          }}
+          transition={{
+            ease: "easeIn",
+            type: "spring",
+            bounce: 0.5,
+          }}
+          animate={scrTransitionRunning ? "hide" : "show"}
+          className="mx-auto w-8/10 rounded-2xl border-2 border-transparent bg-gradient-to-r from-slate-400/70 to-slate-400/80 shadow-xl"
+        >
           {/*Scramble & Image*/}
           <ScrambleAndImage
             scrText={scrambles[activeScramble]}
@@ -802,7 +839,7 @@ function Compete() {
               activeScramble={activeScramble}
             />
           )}
-        </div>
+        </motion.div>
       </div>
     </>
   );

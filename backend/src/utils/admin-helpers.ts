@@ -3,10 +3,11 @@ import { CookieNames } from "@shared/constants/cookie-names";
 import { COOKIE_OPTIONS } from "../config/env";
 
 export const ADMINS_LIST = [
-  "2019SAHA01",
-  "2019KEHI01",
-  "2022STON03",
-  "2025TRIV01",
+  "2019SAHA01", // Idan Sahar
+  "2019KEHI01", // Omri Kehila
+  "2022STON03", // Tuval Stone
+  "2025TRIV01", // Sol Trivish
+  "2022HOTE01", // Maor Hoter
 ];
 
 export function isAdmin(wcaId: string) {
