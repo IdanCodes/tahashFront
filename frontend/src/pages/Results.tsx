@@ -71,47 +71,49 @@ function Results() {
       {eventResults ? (
         <>
           {eventResults.length > 0 ? (
-            <table className="mx-auto my-2 w-8/10 rounded-t-2xl bg-blue-700/55 text-xl">
-              <thead className="rounded-t-2xl bg-transparent text-[1.6rem] text-white/90">
-                <tr className="font-semibold">
-                  <th className="pl-4">#</th>
-                  <th className="py-2">Name</th>
-                  <th className="py-2">Best</th>
-                  <th className="py-2">Average</th>
-                  <th className="text-center">Solves</th>
-                </tr>
-              </thead>
-              <tbody>
-                {eventResults.map((result, index) => (
-                  <tr
-                    key={index}
-                    className="font-mono text-[1.4rem] odd:!bg-slate-50 even:!bg-slate-200"
-                  >
-                    <td className="pl-2 text-center text-[1.5rem]">
-                      {result.place}
-                    </td>
-                    <td className="py-2 text-center">
-                      <a href={`/user/${result.wcaId}`} className="underline">
-                        {result.name}
-                      </a>
-                    </td>
-                    <td className="py-2 text-center">{result.best}</td>
-                    <td className="py-2 text-center">{result.average}</td>
-                    <td>
-                      <div className="flex flex-row justify-center gap-8">
-                        {result.solves.map((t, i) => (
-                          <span key={i} className="">
-                            {t}
-                          </span>
-                        ))}
-                      </div>
-                    </td>
+            <div className="overflow-x-auto">
+              <table className="mx-auto table-auto my-2 w-8/10 rounded-t-2xl bg-blue-700/55 text-xl">
+                <thead className="rounded-t-2xl bg-transparent text-[clamp(1.1rem,2vw,1.6rem)] text-white/90">
+                  <tr className="font-semibold">
+                    <th className="pl-4 ">#</th>
+                    <th className="py-2">Name</th>
+                    <th className="py-2 px-2">Best</th>
+                    <th className="py-2">Average</th>
+                    <th className="text-center">Solves</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {eventResults.map((result, index) => (
+                    <tr
+                      key={index}
+                      className="font-mono text-[clamp(1rem,1.8vw,1.5rem)] odd:!bg-slate-50 even:!bg-slate-200"
+                    >
+                      <td className="pl-2 text-center text-[clamp(1rem,1.8vw,1.5rem)]">
+                        {result.place}
+                      </td>
+                      <td className="py-2 text-center">
+                        <a href={`/user/${result.wcaId}`} className="underline">
+                          {result.name}
+                        </a>
+                      </td>
+                      <td className="py-2 text-center">{result.best}</td>
+                      <td className="py-2 text-center">{result.average}</td>
+                      <td>
+                        <div className="flex flex-row justify-center p-1 gap-3 xl:gap-8">
+                          {result.solves.map((t, i) => (
+                            <span key={i} className="">
+                              {t}
+                            </span>
+                          ))}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           ) : (
-            <p className="py-2 text-center text-3xl">
+            <p className="py-2 text-center text-[clamp(1.5rem,2vw,1.875rem)]">
               There were no submissions for this event
             </p>
           )}

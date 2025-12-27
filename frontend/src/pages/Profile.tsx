@@ -15,7 +15,7 @@ function ProfileAttribute({
   value: ReactNode;
 }): JSX.Element {
   return (
-    <div className="my-1 flex flex-row place-items-center justify-between text-2xl">
+    <div className="my-1 flex flex-row place-items-center justify-between gap-2 text-[clamp(1.1rem,1.4vw,1.4rem)]">
       <p className="font-semibold">{name}</p>
       <p className="">{value}</p>
     </div>

@@ -184,7 +184,7 @@ function EventPanel({ eventId }: { eventId: string }) {
       <CubingIconsSheet />
       {eventDisplay ? (
         <>
-          <div className="my-1 flex justify-center gap-2 py-1 text-center text-5xl text-blue-950">
+          <div className="my-1 flex justify-center gap-2 py-1 pt-4 text-center text-5xl text-blue-950">
             <p className="text-center font-bold">{eventDisplay.eventTitle}</p>
             <span className={`cubing-icon ${eventDisplay.iconName}`} />
           </div>
