@@ -55,11 +55,13 @@ function ScrambleMenuButton({
   return (
     <button
       className={clsx(
-        `group relative my-auto flex overflow-hidden rounded-2xl p-2 text-2xl shadow-xl transition-all duration-[400ms] select-none`,
+        `group relative my-auto flex overflow-hidden rounded-2xl p-2 text-[clamp(1rem,1.8vw,1.5rem)] shadow-xl transition-all duration-[400ms] select-none`,
         isAccessible && `cursor-pointer`,
         !isAccessible && "opacity-60",
-        isActiveScramble && "flex-[4] origin-top-left bg-slate-500/90",
-        !isActiveScramble && "flex-[3] bg-slate-400 hover:bg-slate-500/70",
+        isActiveScramble &&
+          "flex-[4] origin-top-left bg-slate-500/90 max-xl:w-[25%] max-xl:flex-none",
+        !isActiveScramble &&
+          "flex-[3] bg-slate-400 hover:bg-slate-500/70 max-xl:w-[25%] max-xl:flex-none",
       )}
       onClick={() => loadScramble()}
       disabled={!isAccessible}
@@ -67,7 +69,7 @@ function ScrambleMenuButton({
       <p className="absolue pl-[2%] text-center font-bold">{scrNumber}.</p>
       <p
         className={clsx(
-          "w-9/10 pr-1 text-center transition-all",
+          "w-9/10 pr-2 text-center transition-all",
           isActiveScramble && "scale-103 pr-[2%] font-semibold",
           !isActiveScramble && "scale-95",
         )}
@@ -92,7 +94,7 @@ function ScramblesMenu({
   isScrambleAccessible: (scrIndex: number) => boolean;
 }) {
   return (
-    <div className="mx-auto my-4 box-border flex w-80/100 justify-between gap-6">
+    <div className="mx-auto my-4 max-xl:flex-wrap max-xl:justify-center box-border flex w-80/100 justify-between gap-6">
       {scrambles.map((_, i) => (
         <ScrambleMenuButton
           key={i}
