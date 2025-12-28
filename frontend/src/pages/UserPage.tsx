@@ -179,10 +179,10 @@ function RecordsPanel({
   records: [EventDisplayInfo, GeneralRecord][];
 }) {
   return records.length > 0 ? (
-    <div className="w-full place-items-center">
-      <table className="mx-auto my-2 w-7/10 rounded-t-2xl bg-blue-700/55 text-2xl">
+    <div className="w-full place-items-center overflow-x-auto">
+      <table className="mx-auto my-2 w-8/10 table-auto rounded-t-2xl bg-blue-700/55 text-lg md:text-2xl">
         <thead className="rounded-t-2xl bg-transparent text-[1.655rem] text-white/90">
-          <tr>
+          <tr className="text-lg md:text-2xl">
             <th className="py-2 text-center">Event</th>
             <th className="py-2 text-center">Single</th>
             <th className="py-2 text-center">Average</th>
@@ -203,14 +203,12 @@ function RecordsPanel({
                   <p className="text-center">{displayInfo.eventTitle}</p>
                 </td>
                 <td className="size-fit py-2 text-center">
-                  <div className="flex items-baseline justify-center gap-2">
-                    <RecordLabel
-                      timeCentis={getPureCentis(record.single)}
-                      compNum={record.singleComp}
-                    />
-                  </div>
+                  <RecordLabel
+                    timeCentis={getPureCentis(record.single)}
+                    compNum={record.singleComp}
+                  />
                 </td>
-                <td className="flex items-baseline justify-center gap-2">
+                <td className="size-fit py-2 text-center">
                   <RecordLabel
                     timeCentis={record.average}
                     compNum={record.averageComp}
@@ -238,12 +236,12 @@ function RecordsPanel({
     compNum: number;
   }) {
     return (
-      <>
+      <div className="flex items-baseline justify-center">
         {formatCentis(timeCentis)}
-        <p className="text-sm text-gray-400">
+        <p className="text-xs text-gray-400 md:text-sm">
           {!compNum || compNum === 0 ? "WCA" : compNum}
         </p>
-      </>
+      </div>
     );
   }
 }
@@ -287,14 +285,14 @@ function PastResultsPanel({
             setSelectedEventId(eventId);
           }}
         />
-        <div className="min-h-[40vh] w-full">
-          <table className="mx-auto my-2 w-8/10 rounded-t-2xl bg-blue-700/55 text-2xl">
-            <thead className="rounded-t-2xl bg-transparent text-[1.655rem] text-white/90">
+        <div className="w-95/100 overflow-x-auto md:w-9/10 lg:w-8/10">
+          <table className="my-2 w-full min-w-max table-auto rounded-t-2xl bg-blue-700/55 text-lg md:text-2xl">
+            <thead className="rounded-t-2xl bg-transparent text-xl text-white/90 md:text-[1.655rem]">
               <tr>
                 <th className="pl-4 text-center">Comp</th>
-                <th className="py-2 text-center">Place</th>
+                <th className="px-2 py-2 text-center">Place</th>
                 <th className="py-2 text-center">Single</th>
-                <th className="py-2 text-center">Average</th>
+                <th className="px-2 py-2 text-center">Average</th>
                 <th className="py-2 text-center">Solves</th>
               </tr>
             </thead>
@@ -314,10 +312,12 @@ function PastResultsPanel({
                       {getAverageStr(eventData, result.times)}
                     </TableData>
                     <TableData>
-                      <div className="flex w-[90%] justify-evenly py-2 text-center">
+                      <div className="flex justify-evenly py-2 text-center">
                         {formatAttempts(eventData.timeFormat, result.times).map(
                           (str, index) => (
-                            <span key={index}>{str}</span>
+                            <span key={index} className="px-1">
+                              {str}
+                            </span>
                           ),
                         )}
                       </div>
@@ -365,7 +365,7 @@ function PastResultsPanel({
   function TableData({ children }: { children: ReactNode }) {
     return (
       <td>
-        <div className="justify-center gap-2">{children}</div>
+        <div className="justify-center gap-2 whitespace-nowrap">{children}</div>
       </td>
     );
   }

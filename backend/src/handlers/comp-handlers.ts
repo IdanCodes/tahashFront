@@ -29,7 +29,10 @@ import { eventRecordToGeneralRecords } from "@shared/types/event-records";
 import { isWcaIdFormat } from "@shared/interfaces/user-info";
 import { getSubmissionDisplays } from "../utils/submission-data-helpers";
 import { submissionsToResultDisplays } from "../utils/event-result-display-helpers";
-import { LeanTahashUser } from "../database/models/tahash-user.model";
+import {
+  LeanTahashUser,
+  TahashUserDoc,
+} from "../database/models/tahash-user.model";
 import {
   getCompetitorData,
   getUserEventResult,
@@ -46,14 +49,13 @@ async function eventsDisplayAndStatus(req: Request, res: Response) {
     CompManager.getInstance().getActiveComp().eventDisplayInfos;
 
   const userInfo = req.session.userSession!.userInfo;
-  const tahashUser = await UserManager.getInstance().resolveUserById(
-    userInfo.id,
-  );
+  const tahashUser: TahashUserDoc | null =
+    await UserManager.getInstance().getUserDocById(userInfo.id);
   if (!tahashUser)
     return res.json(
       errorResponse("Invalid user. Please log out and try again."),
     );
-  const eventStatuses = userEventStatuses(tahashUser);
+  const eventStatuses = tahashUser.eventStatuses;
 
   res.json(
     new ApiResponse(

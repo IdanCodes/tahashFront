@@ -18,6 +18,7 @@ import { SubmissionsOverview } from "@shared/types/SubmissionsOverview";
 import { useActiveComp } from "../context/ActiveCompContext";
 import { CubingIconsSheet } from "../components/CubingIconsSheet";
 import { errorObject } from "@shared/interfaces/error-object";
+import { ButtonSize } from "../components/buttons/ButtonSize";
 
 function AdminPanel() {
   const params = useParams();
@@ -42,7 +43,7 @@ function AdminPanel() {
       ) : mode == "eventPanel" ? (
         <>
           <div
-            className="absolute top-[3vw] left-[10vw] size-fit"
+            className="relative top-[3vw] left-[10vw] size-fit md:absolute"
             onClick={() => navigate(RoutePath.Page.AdminPanel)}
           >
             <PrimaryButton content={"Back"} />
@@ -267,7 +268,7 @@ function EventSubmissionsPanel({
           {submissions.map((submission, _) => (
             <div
               key={submission.submitterData.userId}
-              className="flex h-fit w-fit flex-col rounded-xl border-3 bg-gray-400 p-4 text-2xl"
+              className="flex h-fit w-fit flex-col rounded-xl border-3 bg-gray-400 p-4 text-lg lg:text-2xl"
             >
               <a
                 href={`/user/${submission.submitterData.wcaId}`}
@@ -311,6 +312,7 @@ function EventSubmissionsPanel({
                       )
                     }
                     disabled={disableButtons}
+                    buttonSize={ButtonSize.Small}
                   />
                   <PrimaryButton
                     content="Reject"
@@ -322,6 +324,7 @@ function EventSubmissionsPanel({
                       )
                     }
                     disabled={disableButtons}
+                    buttonSize={ButtonSize.Small}
                   />
                 </div>
               )}

@@ -8,7 +8,7 @@ function YuvalPorat() {
       <h1 className="my-2 mb-5 text-center text-4xl font-semibold">
         יובל פורת ז״ל
       </h1>
-      <div className="flex flex-row justify-between gap-4">
+      <div className="flex flex-row flex-wrap-reverse justify-between gap-4 md:flex-nowrap">
         <ul className="w-8/10 space-y-3 text-2xl font-[450]">
           <li>
             {

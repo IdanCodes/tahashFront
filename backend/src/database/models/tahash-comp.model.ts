@@ -383,7 +383,7 @@ export const TahashCompSchema = new Schema<
               submissions[j].userId,
               eventId,
               (this.data[i].result.submissions[j].place = place),
-              submissions[0].times,
+              submissions[j].times,
             );
           }
         }

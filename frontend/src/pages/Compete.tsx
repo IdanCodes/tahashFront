@@ -55,7 +55,7 @@ function ScrambleMenuButton({
   return (
     <button
       className={clsx(
-        `group relative my-auto flex overflow-hidden rounded-2xl p-2 text-[clamp(1rem,1.8vw,1.5rem)] shadow-xl transition-all duration-[400ms] select-none`,
+        `group relative my-auto flex overflow-hidden rounded-2xl p-2 text-[clamp(1.2rem,1.8vw,1.7rem)] shadow-xl transition-all duration-[400ms] select-none`,
         isAccessible && `cursor-pointer`,
         !isAccessible && "opacity-60",
         isActiveScramble &&
@@ -94,7 +94,7 @@ function ScramblesMenu({
   isScrambleAccessible: (scrIndex: number) => boolean;
 }) {
   return (
-    <div className="mx-auto my-4 max-xl:flex-wrap max-xl:justify-center box-border flex w-80/100 justify-between gap-6">
+    <div className="mx-auto my-4 box-border flex w-80/100 justify-between gap-6 max-xl:flex-wrap max-xl:justify-center">
       {scrambles.map((_, i) => (
         <ScrambleMenuButton
           key={i}
@@ -118,7 +118,7 @@ function ScrambleAndImage({
   scrImg: string | undefined;
   setLoading: (isLoading: boolean) => void;
 }) {
-  const fontSizeLow = 10;
+  const fontSizeLow = 5;
   const fontSizeHigh = 40;
   const imgParentRef = useRef<HTMLDivElement | null>(null);
   const textElRef = useRef<HTMLParagraphElement | null>(null);
@@ -260,7 +260,7 @@ function ScrambleAndImage({
   }
 
   return (
-    <div className="flex flex-row justify-between gap-[5%] px-5 py-4">
+    <div className="flex flex-row flex-wrap justify-around gap-[5%] px-5 py-4 lg:flex-nowrap">
       {/* Scramble */}
       <div
         className="my-auto h-fit w-full text-center whitespace-pre-wrap"
@@ -344,7 +344,7 @@ function PenaltySelector({
   timeIsValid: boolean;
 }) {
   return (
-    <div className="my-2 flex w-[70%] place-items-center gap-[5%]">
+    <div className="my-2 flex w-[70%] place-items-center justify-center gap-[5%]">
       <PrimaryButton
         content="+2"
         buttonSize={ButtonSize.Small}
@@ -435,7 +435,7 @@ function SubmitSection({
   const timeIsValid: boolean = currentResult.time !== null;
 
   return (
-    <div className="mx-auto flex w-6/10 flex-row justify-between gap-[15%] p-2">
+    <div className="mx-auto flex w-6/10 flex-row flex-wrap justify-between gap-[15%] p-2 lg:flex-nowrap">
       {/*Time Input & Penalty*/}
       {!finishedEvent && (
         <div className="flex w-full flex-col items-center">

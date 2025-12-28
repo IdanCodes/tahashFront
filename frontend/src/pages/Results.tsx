@@ -10,8 +10,11 @@ import { RoutePath } from "@shared/constants/route-path";
 import { redirectToError } from "../utils/errorUtils";
 import { EventResultDisplay } from "@shared/types/event-result-display";
 import EventSelection from "../components/EventSelection";
+import { useUserInfo } from "../context/UserContext";
+import clsx from "clsx";
 
 function Results() {
+  const userInfo = useUserInfo();
   const [currEventIndex, setCurrEventIndex] = useState<number>(0);
   const [eventResults, setEventResults] = useState<EventResultDisplay[] | null>(
     null,
@@ -22,14 +25,19 @@ function Results() {
       activeComp.displayInfo
         ? activeComp.displayInfo.events[currEventIndex]
         : EMPTY_DISPLAY_INFO,
-    [currEventIndex],
+    [currEventIndex, eventResults],
+  );
+  const rowWithUser = useMemo<number>(
+    () =>
+      eventResults && userInfo.user
+        ? eventResults.findIndex((er) => er.wcaId === userInfo.user!.wcaId)
+        : -1,
+    [eventResults, currEvent, userInfo],
   );
 
   // TODO: Add option to abort if the user switches the event mid-fetch
   useEffect(() => {
     if (!activeComp.displayInfo) return;
-
-    setEventResults(null);
 
     const eventId = activeComp.displayInfo.events[currEventIndex].eventId;
     sendGetRequest(
@@ -72,12 +80,12 @@ function Results() {
         <>
           {eventResults.length > 0 ? (
             <div className="overflow-x-auto">
-              <table className="mx-auto table-auto my-2 w-8/10 rounded-t-2xl bg-blue-700/55 text-xl">
+              <table className="mx-auto my-2 w-85/100 table-auto rounded-t-2xl bg-blue-700/55 text-xl">
                 <thead className="rounded-t-2xl bg-transparent text-[clamp(1.1rem,2vw,1.6rem)] text-white/90">
                   <tr className="font-semibold">
-                    <th className="pl-4 ">#</th>
+                    <th className="pl-4">#</th>
                     <th className="py-2">Name</th>
-                    <th className="py-2 px-2">Best</th>
+                    <th className="px-2 py-2">Best</th>
                     <th className="py-2">Average</th>
                     <th className="text-center">Solves</th>
                   </tr>
@@ -86,9 +94,14 @@ function Results() {
                   {eventResults.map((result, index) => (
                     <tr
                       key={index}
-                      className="font-mono text-[clamp(1rem,1.8vw,1.5rem)] odd:!bg-slate-50 even:!bg-slate-200"
+                      className={clsx(
+                        "font-mono text-[clamp(1rem,1.8vw,1.5rem)]",
+                        index === rowWithUser && "bg-blue-300/90",
+                        index !== rowWithUser &&
+                          "odd:!bg-slate-50 even:!bg-slate-200",
+                      )}
                     >
-                      <td className="pl-2 text-center text-[clamp(1rem,1.8vw,1.5rem)]">
+                      <td className="pr-1 pl-2 text-center text-[clamp(1.1rem,1.8vw,1.5rem)]">
                         {result.place}
                       </td>
                       <td className="py-2 text-center">
@@ -99,7 +112,7 @@ function Results() {
                       <td className="py-2 text-center">{result.best}</td>
                       <td className="py-2 text-center">{result.average}</td>
                       <td>
-                        <div className="flex flex-row justify-center p-1 gap-3 xl:gap-8">
+                        <div className="flex flex-row justify-center gap-3 p-1 xl:gap-8">
                           {result.solves.map((t, i) => (
                             <span key={i} className="">
                               {t}
