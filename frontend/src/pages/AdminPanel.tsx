@@ -42,13 +42,10 @@ function AdminPanel() {
         <ChooseEventPage />
       ) : mode == "eventPanel" ? (
         <>
-          <div
-            className="relative top-[3vw] left-[10vw] size-fit md:absolute"
-            onClick={() => navigate(RoutePath.Page.AdminPanel)}
-          >
-            <PrimaryButton content={"Back"} />
-          </div>
-          <EventPanel eventId={eventId.current} />
+          <EventPanel
+            eventId={eventId.current}
+            onBack={() => navigate(RoutePath.Page.AdminPanel)}
+          />
         </>
       ) : (
         <LoadingSpinner />
@@ -138,7 +135,13 @@ function OverviewTexts({ overview }: { overview: number[] }) {
   );
 }
 
-function EventPanel({ eventId }: { eventId: string }) {
+function EventPanel({
+  eventId,
+  onBack,
+}: {
+  eventId: string;
+  onBack: () => void;
+}) {
   const navigate = useNavigate();
   const [submissions, setSubmissions] = useState<
     SubmissionDataDisplay[] | undefined
@@ -185,9 +188,21 @@ function EventPanel({ eventId }: { eventId: string }) {
       <CubingIconsSheet />
       {eventDisplay ? (
         <>
-          <div className="my-1 flex justify-center gap-2 py-1 pt-4 text-center text-5xl text-blue-950">
-            <p className="text-center font-bold">{eventDisplay.eventTitle}</p>
-            <span className={`cubing-icon ${eventDisplay.iconName}`} />
+          <div className="mx-auto mt-4 grid w-11/12 grid-cols-[auto_1fr] items-center gap-4">
+            <PrimaryButton content="Back" onClick={onBack} />
+
+            <div className="flex flex-col items-center justify-center gap-2">
+              <div className="flex items-center justify-center gap-2 text-5xl text-blue-950">
+                <p className="font-bold">{eventDisplay.eventTitle}</p>
+                <span className={`cubing-icon ${eventDisplay.iconName}`} />
+              </div>
+
+              {submissions?.length === 0 && (
+                <p className="mt-2 text-center text-3xl">
+                  No submissions for this event yet
+                </p>
+              )}
+            </div>
           </div>
           {submissions ? (
             <EventSubmissionsPanel
@@ -257,83 +272,81 @@ function EventSubmissionsPanel({
 
   function rejectResult(userId: number) {}
 
-  return (
-    <>
-      {submissions.length == 0 ? (
-        <p className="text-center text-3xl">
-          No submissions for this event yet
-        </p>
-      ) : (
-        <div className="mx-auto mt-2 mb-2 flex w-8/10 flex-wrap place-content-center gap-x-9.5 gap-y-11 pt-10 pb-4">
-          {submissions.map((submission, _) => (
-            <div
-              key={submission.submitterData.userId}
-              className="flex h-fit w-fit flex-col rounded-xl border-3 bg-gray-400 p-4 text-lg lg:text-2xl"
+ return (
+  <>
+    <div className="mx-auto mt-2 mb-2 flex w-8/10 flex-wrap place-content-center gap-x-9.5 gap-y-11 pt-10 pb-4">
+      {submissions.map((submission) => (
+        <div
+          key={submission.submitterData.userId}
+          className="flex h-fit w-fit flex-col rounded-xl border-3 bg-gray-400 p-4 text-lg lg:text-2xl"
+        >
+          <a
+            href={`/user/${submission.submitterData.wcaId}`}
+            target="_blank"
+            className="w-fit underline"
+          >
+            {submission.submitterData.name}
+          </a>
+
+          <span>
+            State:{" "}
+            <span
+              className="font-semibold"
+              style={{
+                color: submissionStateColor(submission.submissionState),
+              }}
             >
-              <a
-                href={`/user/${submission.submitterData.wcaId}`}
-                target="_blank"
-                className="w-fit underline"
-              >
-                <span className="">{submission.submitterData.name}</span>
-              </a>
-              {/*<span className="">{submission.submitterData.wcaId}</span>*/}
-              <span className="">
-                State:{" "}
-                <span
-                  className="font-semibold"
-                  style={{
-                    color: submissionStateColor(submission.submissionState),
-                  }}
-                >
-                  {submissionStateStr[submission.submissionState]}
-                </span>
+              {submissionStateStr[submission.submissionState]}
+            </span>
+          </span>
+
+          <span>Times:</span>
+          <div className="flex gap-3">
+            {submission.solves.map((t, i) => (
+              <span key={i}>
+                {t}
+                {i < submission.solves.length - 1 ? "," : ""}
               </span>
-              <span>Times:</span>
-              <div className="flex gap-3">
-                {submission.solves.map((t, i) => (
-                  <span key={i}>
-                    {t}
-                    {i < submission.solves.length - 1 ? "," : ""}
-                  </span>
-                ))}
-              </div>
-              <span>Single: {submission.best}</span>
-              <span>Average: {submission.average}</span>
-              {submission.submissionState === SubmissionState.Pending && (
-                <div className="flex flex-row justify-between px-2">
-                  <PrimaryButton
-                    content="Accept"
-                    colors="bg-[rgb(46,217,46)] hover:bg-[rgb(10,230,10)] active:bg-[rgb(10,210,10)]"
-                    onClick={() =>
-                      updateSubmissionState(
-                        submission.submitterData.userId,
-                        SubmissionState.Approved,
-                      )
-                    }
-                    disabled={disableButtons}
-                    buttonSize={ButtonSize.Small}
-                  />
-                  <PrimaryButton
-                    content="Reject"
-                    colors="bg-[rgb(217,9,9)] hover:bg-[rgb(230,30,30)] active:bg-[rgb(210,30,30)]"
-                    onClick={() =>
-                      updateSubmissionState(
-                        submission.submitterData.userId,
-                        SubmissionState.Rejected,
-                      )
-                    }
-                    disabled={disableButtons}
-                    buttonSize={ButtonSize.Small}
-                  />
-                </div>
-              )}
+            ))}
+          </div>
+
+          <span>Single: {submission.best}</span>
+          <span>Average: {submission.average}</span>
+
+          {submission.submissionState === SubmissionState.Pending && (
+            <div className="flex justify-between px-2">
+              <PrimaryButton
+                content="Accept"
+                colors="bg-[rgb(46,217,46)] hover:bg-[rgb(10,230,10)] active:bg-[rgb(10,210,10)]"
+                onClick={() =>
+                  updateSubmissionState(
+                    submission.submitterData.userId,
+                    SubmissionState.Approved,
+                  )
+                }
+                disabled={disableButtons}
+                buttonSize={ButtonSize.Small}
+              />
+              <PrimaryButton
+                content="Reject"
+                colors="bg-[rgb(217,9,9)] hover:bg-[rgb(230,30,30)] active:bg-[rgb(210,30,30)]"
+                onClick={() =>
+                  updateSubmissionState(
+                    submission.submitterData.userId,
+                    SubmissionState.Rejected,
+                  )
+                }
+                disabled={disableButtons}
+                buttonSize={ButtonSize.Small}
+              />
             </div>
-          ))}
+          )}
         </div>
-      )}
-    </>
-  );
+      ))}
+    </div>
+  </>
+);
 }
+
 
 export default AdminPanel;
