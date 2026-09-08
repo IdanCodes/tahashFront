@@ -1,5 +1,4 @@
 # Frontend Dockerfile for production
-
 # Stage 1: Build the frontend
 FROM node:20 AS build
 WORKDIR /app
@@ -13,7 +12,8 @@ COPY frontend/. ./
 COPY shared/. ../shared/
 
 # Environment variables
-ENV VITE_API_HOST="backend"
+ARG VITE_API_PATH
+ENV VITE_API_PATH=${VITE_API_PATH}
 
 # Build static assets
 RUN npm run build

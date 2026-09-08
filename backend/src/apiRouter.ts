@@ -22,6 +22,7 @@ import {
 import { requireAdmin } from "./middleware/require-admin";
 import { CompManager } from "./database/comps/comp-manager";
 import { createCompSrc } from "./database/models/tahash-comp.model";
+import { ApiLogger } from "./utils/api-logger";
 
 const router = Router();
 
@@ -135,11 +136,13 @@ router.post(
 // -- test endpoints
 
 router.get("/new", requireAuth, requireAdmin, async (req, res) => {
+  ApiLogger.getInstance().logCompClose("ADMIN");
   await CompManager.getInstance().validateActiveComp(
     createCompSrc(CompManager.getInstance().getActiveCompNum() + 1, []),
     true,
   );
-  res.send("ok");
+  ApiLogger.getInstance().logCompOpen("ADMIN");
+  res.send("Ok");
 });
 
 router.get("/curr", (req: Request, res: Response) => {

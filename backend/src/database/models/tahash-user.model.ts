@@ -273,7 +273,7 @@ const tahashUserSchema = new Schema<
         const recordsResponse = await getWCARecordsOfUser(this.userInfo.wcaId);
         if (isErrorObject(recordsResponse)) {
           console.error(
-            `User ${this.userInfo.wcaId} encountered an error (get user records) in TahashUserDoc.tryUpdateWcaData().\nError:${recordsResponse.error} - ${recordsResponse.context}`,
+            `User ${this.userInfo.wcaId} encountered an error (get user records) in TahashUserDoc.tryUpdateWcaData().\nError:${recordsResponse.error} - ${recordsResponse.context}.\nUser Info: ${JSON.stringify(this.userInfo)}\n`,
           );
           return false;
         }
@@ -286,8 +286,8 @@ const tahashUserSchema = new Schema<
             eventRecordToGeneralRecords(format, eventRecord),
           );
         }
-        this.updateRecords(generalRecordsMap);
 
+        this.updateRecords(generalRecordsMap);
         this.lastUpdatedWcaData = Date.now();
         return true;
       },
@@ -428,7 +428,7 @@ const tahashUserSchema = new Schema<
 
       validateCompResults(): void {
         const newCompNum = CompManager.getInstance().getActiveCompNum();
-        if (this.lastComp === newCompNum) return;
+        if (this.lastComp == newCompNum) return;
 
         this.lastComp = newCompNum;
         this.eventResults.clear();

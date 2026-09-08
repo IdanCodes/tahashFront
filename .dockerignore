@@ -1,0 +1,13 @@
+# Ignore local dependencies
+frontend/node_modules/
+**/node_modules/
+
+# Ignore local build artifacts
+dist/
+**/dist/
+
+# Ignore environment files and git
+#.env
+.git
+.gitignore
+.DS_Store

@@ -2,7 +2,6 @@
 services:
   # mongo container
   mongo:
-    # TODO: Add "docker pull mongo" before runner.py to README.md
     image: mongo
     container_name: mongodb
     restart: always
@@ -16,17 +15,11 @@ services:
 
   # backend container
   backend:
-    build:
-      context: ../backend
-      dockerfile: Dockerfile
-      platforms:
-        - linux/amd64
-        - linux/arm64
+    image: idoshahar/tahash-backend:v0.1
     container_name: backend
-    environment: # Environment variables
+    environment:
       - NODE_ENV=production
       - MONGO_SERVICE=mongodb
-    image: idoshahar/tahash-backend:v0.1
     ports:
       - "3000:3000"
     volumes:
@@ -37,20 +30,14 @@ services:
       - mongo
 
   frontend:
-    build:
-      context: ../.
-      dockerfile: frontend/Dockerfile
-      platforms:
-        - linux/amd64
-        - linux/arm64
-      args:
-        - VITE_API_PATH=https://comp.ilcubers.com/api
-    environment: # Environment variables
-      - NODE_ENV=production
     image: idoshahar/tahash-frontend:v0.1
     container_name: frontend
+    environment:
+      - NODE_ENV=production
+    args:
+      - VITE_API_PATH=http://comp.ilcubers.com/api
     ports:
-      - "80:80"
+      - "443:443"
     volumes:
       - ../frontend:/app
     depends_on:

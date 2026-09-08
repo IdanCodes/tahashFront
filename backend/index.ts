@@ -11,6 +11,7 @@ import mongoose from "mongoose";
 import { connectToDb } from "./src/config/db-config";
 import cookieParser from "cookie-parser";
 import { HttpHeaders } from "@shared/constants/http-headers";
+import { ApiLogger } from "./src/utils/api-logger";
 
 // Database
 (async () => await connectToDb())();
@@ -47,11 +48,14 @@ if (tryGetEnv("LOG_TO_FILE") === "true") {
   });
   const logStdout = process.stdout;
 
-  console.log = function (d) {
-    logFile.write(util.format(d) + "\n");
-    logStdout.write(util.format(d) + "\n");
+  console.log = function (d, ...params: any[]) {
+    logFile.write(util.format(d, params) + "\n");
+    logStdout.write(util.format(d, params) + "\n");
   };
 }
+
+// init API Logger
+ApiLogger.init(__dirname + "/api_log.log");
 
 if (IS_PRODUCTION) {
   app.use(function (req, res, next) {

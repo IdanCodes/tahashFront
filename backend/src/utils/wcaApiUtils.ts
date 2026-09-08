@@ -59,7 +59,7 @@ const WCA_API_PATH = "/api/v0";
  * https://wca-rest-api.robiningelbrecht.be/#section/Introduction
  */
 const WCA_REST_API_PATH =
-  "https://raw.githubusercontent.com/robiningelbrecht/wca-rest-api/master/api";
+  "https://raw.githubusercontent.com/robiningelbrecht/wca-rest-api/refs/heads/v1";
 
 /**
  * Get the WCA auth url given the host's base url

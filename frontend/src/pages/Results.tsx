@@ -65,12 +65,13 @@ function Results() {
         events={activeComp.displayInfo.events}
         selectedEventId={currEvent.eventId}
         handleClickEvent={(eventId) => {
-          if (eventResults && currEvent.eventId !== eventId)
-            setCurrEventIndex(
-              activeComp.displayInfo!.events.findIndex(
-                (e) => e.eventId === eventId,
-              ),
-            );
+          if (eventResults && currEvent.eventId == eventId) return;
+          setEventResults(null);
+          setCurrEventIndex(
+            activeComp.displayInfo!.events.findIndex(
+              (e) => e.eventId === eventId,
+            ),
+          );
         }}
       />
       <p className="text-center text-4xl font-semibold">

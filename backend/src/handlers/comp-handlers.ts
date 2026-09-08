@@ -21,7 +21,11 @@ import { UserCompeteData } from "@shared/interfaces/user-compete-data";
 import { getEmptyPackedResults } from "../utils/packed-result-utils";
 import { errorObject } from "@shared/interfaces/error-object";
 import { SubmissionState } from "@shared/constants/submission-state";
-import { shouldAutoApprove } from "@shared/utils/event-results-utils";
+import {
+  calcEventResult,
+  getResultStr,
+  shouldAutoApprove,
+} from "@shared/utils/event-results-utils";
 import { TahashCompDoc } from "../database/models/tahash-comp.model";
 import { isAlphanumeric, isInteger } from "@shared/utils/global-utils";
 import { EventResultDisplay } from "@shared/types/event-result-display";
@@ -39,6 +43,7 @@ import {
   userEventStatuses,
 } from "../database/users/tahash-user-helpers";
 import { UserEventResult } from "@shared/types/user-event-result";
+import { ApiLogger } from "../utils/api-logger";
 
 /**
  * Get all event displays and statuses
@@ -96,14 +101,14 @@ async function userEventData(req: UserEventDataRequest, res: Response) {
     );
 
   const userId = req.session.userSession!.userInfo.id;
-  const userData: LeanTahashUser | null =
-    await UserManager.getInstance().resolveUserById(userId);
+  const userData: TahashUserDoc | null =
+    await UserManager.getInstance().getUserDocById(userId);
   if (!userData)
     return res.json(
       errorResponse("Invalid user. Please log out and try again."),
     );
 
-  const results: UserEventResult = getUserEventResult(userData, eventId) ?? {
+  const results: UserEventResult = userData.getEventResult(eventId) ?? {
     finished: false,
     times: getEmptyPackedResults(eventData),
   };
@@ -152,6 +157,12 @@ async function updateTimes(req: UpdateTimesRequest, res: Response) {
   const activeComp = CompManager.getInstance().getActiveComp();
   activeComp.submitResults(eventData, userId, times);
 
+  ApiLogger.getInstance().logResultSubmission(
+    `${userDoc.userInfo.wcaId} (${userDoc.userInfo.id})`,
+    eventId,
+    getResultStr(eventData, times),
+  );
+
   const record = userDoc.getEventRecord(eventId);
   if (
     record &&
@@ -160,12 +171,18 @@ async function updateTimes(req: UpdateTimesRequest, res: Response) {
       eventRecordToGeneralRecords(eventData.timeFormat, record),
       times,
     )
-  )
+  ) {
+    ApiLogger.getInstance().logChangeSubmissionState(
+      `${userDoc.userInfo.wcaId} (${userDoc.userInfo.id})`,
+      eventId,
+      SubmissionState.Approved,
+    );
     await activeComp.setSubmissionState(
       eventId,
       userId,
       SubmissionState.Approved,
     );
+  }
 
   await activeComp.save();
 }
@@ -262,6 +279,13 @@ async function updateSubmissionState(
   const activeComp = CompManager.getInstance().getActiveComp();
   await activeComp.setSubmissionState(eventId, userId, submissionState);
   await activeComp.save();
+  ApiLogger.getInstance().logChangeSubmissionState(
+    `${userData.userInfo.wcaId} (${userData.userInfo.id})`,
+    eventId,
+    submissionState,
+    req.session.userSession?.userInfo.wcaId ??
+      `[UNKNOWN ADMIN - SID: ${req.session.id}]`,
+  );
   res.json(new ApiResponse(ResponseCode.Success, "Updated successfully"));
 }
 
@@ -297,7 +321,7 @@ async function compDisplayInfo(req: Request, res: Response) {
 // response contains EventResultDisplay[]
 async function eventResultDisplays(req: Request, res: Response) {
   const compNumberStr = req.params.compNumber;
-  const eventId = req.params.eventId;
+  const eventId = req.params.eventId as string | undefined;
   if (!compNumberStr || !eventId)
     return res.json(
       errorResponse("Path parameters compNumber and eventId are required"),
@@ -334,7 +358,9 @@ async function eventResultDisplays(req: Request, res: Response) {
 }
 
 async function competitorData(req: Request, res: Response) {
-  const wcaId = req.params.wcaId.toUpperCase();
+  const wcaId = req.params.wcaId
+    ? (req.params.wcaId as string).toUpperCase()
+    : req.params.wcaId;
   if (!isWcaIdFormat(wcaId))
     return res.json(errorResponse(`Invalid WCA ID "${wcaId}"`));
 
