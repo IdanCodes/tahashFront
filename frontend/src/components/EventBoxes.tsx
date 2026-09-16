@@ -58,10 +58,12 @@ export function EventBoxTitle({
       }}
       initial={{
         opacity: 0,
+        scale: 0.99,
       }}
       variants={{
         hover: {
           opacity: 1,
+          scale: 1,
         },
       }}
       transition={{

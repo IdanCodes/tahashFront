@@ -4,12 +4,17 @@ import { easeInOut } from "motion";
 
 export const PageTransitionProps: MotionProps = {
   transition: {
-    duration: 0.12,
+    duration: 0.14,
     ease: easeInOut,
   },
   variants: {
-    active: { opacity: 1 },
-    inactive: { opacity: 0 },
+    active: { opacity: 1,
+      scale: 1
+    },
+    inactive: { opacity: 0,
+      scale: 0.99
+
+    },
   },
 };
 
@@ -20,6 +25,7 @@ export function PageTransition({
 }): JSX.Element {
   return (
     <motion.div
+    key={location.pathname}
       {...PageTransitionProps}
       initial="inactive"
       animate="active"
