@@ -36,3 +36,10 @@ export function PageTransition({
     </motion.div>
   );
 }
+
+
+/**
+ * mongodump --uri="mongodb://localhost:27017/your_database_name" --out="./backup_directory"
+
+docker exec -it mongodb mongosh -u 7qH6Tx4iAN7k.n-DzvEmtbMhGTZtEj -p qtYW74JUvn8w-qUVw!.uCVvficFUCC
+ */

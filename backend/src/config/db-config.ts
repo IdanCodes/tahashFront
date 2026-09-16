@@ -57,7 +57,7 @@ export async function connectToDb(): Promise<void> {
   // validate current comp
   await CompManager.getInstance().validateActiveComp(
     createCompSrc(CompManager.getInstance().getActiveCompNum() + 1, [
-      /* TODO: extra events here */
+      /* TODO: extra events here NOT */
     ]),
   );
 }

@@ -138,7 +138,9 @@ router.post(
 router.get("/new", requireAuth, requireAdmin, async (req, res) => {
   ApiLogger.getInstance().logCompClose("ADMIN");
   await CompManager.getInstance().validateActiveComp(
-    createCompSrc(CompManager.getInstance().getActiveCompNum() + 1, []),
+    createCompSrc(CompManager.getInstance().getActiveCompNum() + 1, [
+      /* Add extra events here */
+    ]),
     true,
   );
   ApiLogger.getInstance().logCompOpen("ADMIN");
