@@ -38,6 +38,7 @@ import { PageTransitionProps } from "../components/PageTransition";
 import { motion } from "motion/react";
 
 const hideImageEvents = Object.freeze(["333bf", "444bf", "555bf", "333mbf"]);
+// const Timeout = useRef<ReturnType<typeof setTimeout> | null>(null)>(null);
 
 function ScrambleMenuButton({
   isAccessible,
@@ -499,7 +500,7 @@ function Compete() {
   const numScrambles = useRef<number>(0);
   const finishedEvent = useRef<boolean>(false);
   const attemptResultStr = useRef<string | undefined>(undefined);
-  const scrTransitionTimeout = useRef<NodeJS.Timeout | undefined>(undefined);
+  const scrTransitionTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [scrTransitionRunning, setScrTransitionRunning] =
     useState<boolean>(false);
   const [loadingScrTxt, setLoadingScrTxt] = useState<boolean>(true);
@@ -651,7 +652,7 @@ function Compete() {
     function loadDisplayData() {
       const timeoutId = setTimeout(() => {
         if (scrTransitionTimeout.current != timeoutId) return;
-        scrTransitionTimeout.current = undefined;
+        scrTransitionTimeout.current = null;
         setScrTransitionRunning(false);
 
         setActiveScramble(scrIndex);

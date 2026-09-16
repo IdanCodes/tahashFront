@@ -27,6 +27,9 @@ COPY frontend/nginx.conf /etc/nginx/conf.d/default.conf
 # Copy build output from previous stage
 COPY --from=build /app/dist /usr/share/nginx/html
 
+# Grant read/execute permissions so the nginx user can serve the files (like workers)
+RUN chmod -R 755 /usr/share/nginx/html
+
 EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]
 
