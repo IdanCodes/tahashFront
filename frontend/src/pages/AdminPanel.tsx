@@ -7,6 +7,7 @@ import { EventDisplayInfo } from "@shared/interfaces/event-display-info";
 import LoadingSpinner from "../components/LoadingSpinner";
 import { useNavigate, useParams } from "react-router-dom";
 import { useUserInfo } from "../context/UserContext";
+import clsx from "clsx";
 import { HttpHeaders } from "@shared/constants/http-headers";
 import { SubmissionDataDisplay } from "@shared/types/submission-data-display";
 import {
