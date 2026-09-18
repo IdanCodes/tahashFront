@@ -12,6 +12,7 @@ import { EventResultDisplay } from "@shared/types/event-result-display";
 import EventSelection from "../components/EventSelection";
 import { useUserInfo } from "../context/UserContext";
 import clsx from "clsx";
+import { motion, AnimatePresence } from "motion/react";
 
 function Results() {
   const userInfo = useUserInfo();
@@ -74,70 +75,106 @@ function Results() {
           );
         }}
       />
-      <p className="text-center text-4xl font-semibold">
-        {currEvent.eventTitle}
-      </p>
-      {eventResults ? (
-        <>
-          {eventResults.length > 0 ? (
-            <div className="overflow-x-auto">
-              <table className="mx-auto my-2 w-85/100 table-auto rounded-t-2xl bg-blue-700/55 text-xl">
-                <thead className="rounded-t-2xl bg-transparent text-[clamp(1.1rem,2vw,1.6rem)] text-white/90">
-                  <tr className="font-semibold">
-                    <th className="pl-4">#</th>
-                    <th className="py-2">Name</th>
-                    <th className="px-2 py-2">Best</th>
-                    <th className="py-2">Average</th>
-                    <th className="text-center">Solves</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {eventResults.map((result, index) => (
-                    <tr
-                      key={index}
-                      className={clsx(
-                        "font-mono text-[clamp(1rem,1.8vw,1.5rem)]",
-                        index === rowWithUser && "bg-blue-300/90",
-                        index !== rowWithUser &&
-                          "odd:!bg-slate-50 even:!bg-slate-200",
-                      )}
-                    >
-                      <td className="pr-1 pl-2 text-center text-[clamp(1.1rem,1.8vw,1.5rem)]">
-                        {result.place}
-                      </td>
-                      <td className="py-2 text-center">
-                        <a href={`/user/${result.wcaId}`} className="underline">
-                          {result.name}
-                        </a>
-                      </td>
-                      <td className="py-2 text-center">{result.best}</td>
-                      <td className="py-2 text-center">{result.average}</td>
-                      <td>
-                        <div className="flex flex-row justify-center gap-3 p-1 xl:gap-8">
-                          {result.solves.map((t, i) => (
-                            <span key={i} className="">
-                              {t}
-                            </span>
-                          ))}
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={`${currEvent.eventId}`}
+          transition={{ duration: 0.1 }}
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.9 }}
+        >
+          <p className="text-center text-4xl font-semibold">
+            {currEvent.eventTitle}
+          </p>
+        </motion.div>
+      </AnimatePresence>
+
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={currEvent.eventId}
+          transition={{ duration: 0.1, delay: 0.04 }}
+          initial={{ opacity: 0, scale: 0.97 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.97 }}
+        >
+          {eventResults ? (
+            <ResultsTable
+              eventResults={eventResults}
+              rowWithUser={rowWithUser}
+            />
           ) : (
-            <p className="py-2 text-center text-[clamp(1.5rem,2vw,1.875rem)]">
-              There were no submissions for this event
-            </p>
+            <>
+              <LoadingSpinner />
+            </>
           )}
-        </>
-      ) : (
-        <>
-          <LoadingSpinner />
-        </>
-      )}
+        </motion.div>
+      </AnimatePresence>
     </div>
+  );
+}
+
+export function ResultsTable({
+  eventResults,
+  rowWithUser,
+}: {
+  eventResults: EventResultDisplay[];
+  rowWithUser: number;
+}) {
+  return (
+    <>
+      {eventResults.length > 0 ? (
+        <div className="overflow-x-auto">
+          <table className="mx-auto my-2 w-85/100 table-auto rounded-t-2xl bg-blue-700/55 text-xl">
+            <thead className="rounded-t-2xl bg-transparent text-[clamp(1.1rem,2vw,1.6rem)] text-white/90">
+              <tr className="font-semibold">
+                <th className="pl-4">#</th>
+                <th className="py-2">Name</th>
+                <th className="px-2 py-2">Best</th>
+                <th className="py-2">Average</th>
+                <th className="text-center">Solves</th>
+              </tr>
+            </thead>
+            <tbody>
+              {eventResults.map((result, index) => (
+                <tr
+                  key={index}
+                  className={clsx(
+                    "font-mono text-[clamp(1rem,1.8vw,1.5rem)]",
+                    index === rowWithUser && "bg-blue-300/90",
+                    index !== rowWithUser &&
+                      "odd:!bg-slate-50 even:!bg-slate-200",
+                  )}
+                >
+                  <td className="pr-1 pl-2 text-center text-[clamp(1.1rem,1.8vw,1.5rem)]">
+                    {result.place}
+                  </td>
+                  <td className="py-2 text-center">
+                    <a href={`/user/${result.wcaId}`} className="underline">
+                      {result.name}
+                    </a>
+                  </td>
+                  <td className="py-2 text-center">{result.best}</td>
+                  <td className="py-2 text-center">{result.average}</td>
+                  <td>
+                    <div className="flex flex-row justify-center gap-3 p-1 xl:gap-8">
+                      {result.solves.map((t, i) => (
+                        <span key={i} className="">
+                          {t}
+                        </span>
+                      ))}
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ) : (
+        <p className="py-2 text-center text-[clamp(1.5rem,2vw,1.875rem)]">
+          There were no submissions for this event
+        </p>
+      )}
+    </>
   );
 }
 

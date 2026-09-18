@@ -137,8 +137,10 @@ export function EventBox({
         onHoverStart={() => setHovered(true)}
         onHoverEnd={() => setHovered(false)}
         className={clsx(
-          `box-content grid w-fit cursor-pointer place-content-center items-center rounded-2xl`,
-          boxOptions.hasBorder && "border-black outline-[2.5px]",
+          "box-content grid w-fit cursor-pointer place-content-center items-center rounded-2xl",
+          boxOptions.hasBorder
+            ? "border-3 border-black transition-[border-color] duration-500 ease-in-out"
+            : "border-3 border-transparent transition-[border-color] duration-300 ease-in-out",
         )}
         style={{
           backgroundColor: boxColors.default,
