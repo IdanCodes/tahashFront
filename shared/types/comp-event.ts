@@ -1,4 +1,8 @@
-import {isAverageFormat, NumScrambles, TimeFormat} from "../constants/time-formats";
+import {
+  isAverageFormat,
+  NumScrambles,
+  TimeFormat,
+} from "../constants/time-formats";
 import { EventDisplayInfo } from "../interfaces/event-display-info";
 import { ExtraArgs } from "./extra-args";
 
@@ -48,11 +52,11 @@ export class CompEvent {
    * The event's display information as a {@link EventDisplayInfo}.
    */
   public get displayInfo(): EventDisplayInfo {
-      return {
-          eventId: this.eventId ?? "-",
-          eventTitle: this.eventTitle ?? "-",
-          iconName: this.iconName ?? "-",
-      };
+    return {
+      eventId: this.eventId ?? "-",
+      eventTitle: this.eventTitle ?? "-",
+      iconName: this.iconName ?? "-",
+    };
   }
 
   /**
@@ -101,14 +105,7 @@ export const WCAEvents: Readonly<CompEvent[]> = [
   // TODO: new CompEvent("FMC", "333fm", "333fm", "event-333fm", TimeFormat.bo3, 0, 0),
   new CompEvent("3x3 OH", "333oh", "333", "event-333oh", TimeFormat.ao5),
   new CompEvent("Clock", "clock", "clkwca", "event-clock", TimeFormat.ao5),
-  new CompEvent(
-    "Megaminx",
-    "minx",
-    "mgmp",
-    "event-minx",
-    TimeFormat.ao5,
-    70,
-  ),
+  new CompEvent("Megaminx", "minx", "mgmp", "event-minx", TimeFormat.ao5, 70),
   new CompEvent(
     "Pyraminx",
     "pyram",
@@ -119,8 +116,22 @@ export const WCAEvents: Readonly<CompEvent[]> = [
   ),
   new CompEvent("Skewb", "skewb", "skbso", "event-skewb", TimeFormat.ao5),
   new CompEvent("Square-1", "sq1", "sqrs", "event-sq1", TimeFormat.ao5),
-  new CompEvent("4x4 BLD", "444bf", "444bld", "event-444bf", TimeFormat.bo3, 40),
-  new CompEvent("5x5 BLD", "555bf", "555bld", "event-555bf", TimeFormat.bo3, 60),
+  new CompEvent(
+    "4x4 BLD",
+    "444bf",
+    "444bld",
+    "event-444bf",
+    TimeFormat.bo3,
+    40,
+  ),
+  new CompEvent(
+    "5x5 BLD",
+    "555bf",
+    "555bld",
+    "event-555bf",
+    TimeFormat.bo3,
+    60,
+  ),
   // TODO: new CompEvent(
   //   "3x3 MBLD",
   //   "333mbf",
@@ -190,12 +201,10 @@ export function getEventById(eventId: EventId): CompEvent | undefined {
  * @returns {T | undefined} A default-initialized object of type T if the event ID is recognized,
  *                          or undefined otherwise.
  */
-export function createEmptyArgs<T extends ExtraArgs>(
-  eventId: EventId,
-): T {
-    let result: object = {};
+export function createEmptyArgs<T extends ExtraArgs>(eventId: EventId): T {
+  let result: object = {};
   if (eventId === "333fm") result = { fmcSolution: [] };
-  else if (eventId === "333mbf") result ={ numSuccess: -1, numAttempt: -1 };
+  else if (eventId === "333mbf") result = { numSuccess: -1, numAttempt: -1 };
   return result as T;
 }
 
@@ -218,14 +227,14 @@ export function getEventDisplayInfo(eventId: EventId): EventDisplayInfo {
  * @return If the event was found, its TimeFormat; Otherwise - TimeFormat.ao5
  */
 export const getEventFormat = (eventId: EventId): TimeFormat => {
-    const eventData = getEventById(eventId);
-    return eventData ? eventData.timeFormat : TimeFormat.ao5;
-}
+  const eventData = getEventById(eventId);
+  return eventData ? eventData.timeFormat : TimeFormat.ao5;
+};
 
 /**
  * @return Similar to TimeFormat.isAverageFormat; the fallback return value is true if the event was not found
  */
 export const isAverageEvent = (eventId: EventId): boolean => {
-    const eventData = getEventById(eventId);
-    return eventData ? isAverageFormat(eventData.timeFormat) : true;
-}
+  const eventData = getEventById(eventId);
+  return eventData ? isAverageFormat(eventData.timeFormat) : true;
+};
