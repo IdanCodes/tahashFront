@@ -167,8 +167,6 @@ function CompetitorDataPanel({
         </p>
         <PastResultsPanel pastResults={pastResults} />
       </div>
-
-      <UserPageEE wcaId={competitorData.userInfo.wcaId} />
     </>
   );
 }
@@ -369,38 +367,6 @@ function PastResultsPanel({
       </td>
     );
   }
-}
-
-function UserPageEE({ wcaId }: { wcaId: string }) {
-  const [isDisabled, setIsDisabled] = useState(false);
-  const showEE = useMemo<boolean>(
-    () =>
-      ["2022HOTE01", "2019SAHA01", "2019TARA03", "2022ATSM01"].includes(wcaId),
-    [wcaId],
-  );
-
-  return !isDisabled && showEE ? (
-    <motion.img
-      src={new URL(`../assets/ee/${wcaId}.jpg`, import.meta.url).href}
-      width={150}
-      alt="EE-Image"
-      animate={{
-        rotate: [0, 30, -10, 10, -30, 0, 30, -40, -30, -10, 20, 0],
-        x: [150, 350, 400, 600, 400, 300, 250, 400, 300, 200, 120, 150],
-        y: [-100, -250, -50, -175, -75, -100, -130, -170, -130, -90, -120, -90],
-      }}
-      transition={{
-        duration: 3.5,
-        repeat: Infinity,
-        ease: "easeInOut",
-      }}
-      onClick={() => {
-        setIsDisabled(true);
-      }}
-    />
-  ) : (
-    <></>
-  );
 }
 
 export default UserPage;
