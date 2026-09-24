@@ -462,7 +462,7 @@ export const TahashCompSchema = new Schema<
         // make sure startDate is first
         if (fields.endDate < fields.startDate) {
           console.warn(
-            "Attempted to create a TahashComp with endDate < startDate. Switching dates.",
+            "Warning: Attempted to create a TahashComp with endDate < startDate. Switching dates.",
           );
           const temp = fields.endDate;
           fields.endDate = fields.startDate;

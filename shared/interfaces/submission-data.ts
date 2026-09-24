@@ -1,11 +1,14 @@
-import {SubmissionState} from "../constants/submission-state";
-import {PackedResult} from "./packed-result";
-import {getAverageCentis, getBestResult,} from "../utils/event-results-utils";
-import {CompEvent} from "../types/comp-event";
-import {comparePackedResults, NULL_TIME_CENTIS} from "../utils/time-utils";
-import {isAverageFormat, TimeFormat} from "../constants/time-formats";
-import {compareMultiResults, ExtraArgsMbld} from "./event-extra-args/extra-args-mbld";
-import {compareNumbers} from "../utils/global-utils";
+import { SubmissionState } from "../constants/submission-state";
+import { PackedResult } from "./packed-result";
+import { getAverageCentis, getBestResult } from "../utils/event-results-utils";
+import { CompEvent } from "../types/comp-event";
+import { comparePackedResults, NULL_TIME_CENTIS } from "../utils/time-utils";
+import { isAverageFormat, TimeFormat } from "../constants/time-formats";
+import {
+  compareMultiResults,
+  ExtraArgsMbld,
+} from "./event-extra-args/extra-args-mbld";
+import { compareNumbers } from "../utils/global-utils";
 
 /**
  * Submission data of an attempt in a Tahash Comp.
@@ -26,20 +29,20 @@ export interface SubmissionData<ArgType = any> {
    */
   times: PackedResult<ArgType>[];
 
-    /**
-     * The best single solve of the attempt.
-     */
+  /**
+   * The best single solve of the attempt.
+   */
   single: PackedResult<ArgType>;
 
-    /**
-     * The attempt's average (calculated with the event's average method)
-     */
+  /**
+   * The attempt's average (calculated with the event's average method)
+   */
   average: number;
 
-    /**
-     * The submission's place in the event
-     */
-    place?: number;
+  /**
+   * The submission's place in the event
+   */
+  place?: number;
 }
 
 /**
@@ -53,15 +56,16 @@ export function initSubmissionData(
   eventData: CompEvent,
   times: PackedResult[],
 ) {
-    const single: PackedResult = getBestResult(eventData, times);
-    const average: number = (getAverageCentis(eventData ,times)) ?? NULL_TIME_CENTIS ;
+  const single: PackedResult = getBestResult(eventData, times);
+  const average: number =
+    getAverageCentis(eventData, times) ?? NULL_TIME_CENTIS;
 
   return {
-      userId: userId,
-      submissionState: SubmissionState.Pending,
-      times: times,
-      single,
-      average,
+    userId: userId,
+    submissionState: SubmissionState.Pending,
+    times: times,
+    single,
+    average,
   } as SubmissionData;
 }
 
@@ -69,15 +73,23 @@ export function initSubmissionData(
  * Get the comparison function of a TimeFormat for two SubmissionDatas
  * @param format The submissions' time format
  */
-export const getSubmissionCompareFunc = (format: TimeFormat): ((r1: SubmissionData, r2: SubmissionData) => 0 | 1 | -1) => {
-    if (format === TimeFormat.multi)
-        return (r1: SubmissionData, r2: SubmissionData) => compareMultiResults(r1.single as PackedResult<ExtraArgsMbld>, r2.single as PackedResult<ExtraArgsMbld>);
+export const getSubmissionCompareFunc = (
+  format: TimeFormat,
+): ((r1: SubmissionData, r2: SubmissionData) => 0 | 1 | -1) => {
+  if (format === TimeFormat.multi)
+    return (r1: SubmissionData, r2: SubmissionData) =>
+      compareMultiResults(
+        r1.single as PackedResult<ExtraArgsMbld>,
+        r2.single as PackedResult<ExtraArgsMbld>,
+      );
 
-    if (isAverageFormat(format))
-        return (r1: SubmissionData, r2: SubmissionData) => compareNumbers(r1.average, r2.average);
+  if (isAverageFormat(format))
+    return (r1: SubmissionData, r2: SubmissionData) =>
+      compareNumbers(r1.average, r2.average);
 
-    return (r1: SubmissionData, r2: SubmissionData) => comparePackedResults(r1.single, r2.single);
-}
+  return (r1: SubmissionData, r2: SubmissionData) =>
+    comparePackedResults(r1.single, r2.single);
+};
 
 /**
  * Compare the final results of 2 submissions
@@ -89,6 +101,10 @@ export const getSubmissionCompareFunc = (format: TimeFormat): ((r1: SubmissionDa
  * - Both null => 0
  * - One is null => The null one is bigger
  */
-export function compareSubmissions<T extends TimeFormat>(format: T, r1: SubmissionData, r2: SubmissionData): 0 | 1 | -1 {
-    return getSubmissionCompareFunc(format)(r1, r2);
+export function compareSubmissions<T extends TimeFormat>(
+  format: T,
+  r1: SubmissionData,
+  r2: SubmissionData,
+): 0 | 1 | -1 {
+  return getSubmissionCompareFunc(format)(r1, r2);
 }

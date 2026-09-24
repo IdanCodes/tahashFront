@@ -101,7 +101,9 @@ export const WCAEvents: Readonly<CompEvent[]> = [
   new CompEvent("5x5x5", "555", "555wca", "event-555", TimeFormat.ao5, 60),
   new CompEvent("6x6x6", "666", "666wca", "event-666", TimeFormat.mo3, 80),
   new CompEvent("7x7x7", "777", "777wca", "event-777", TimeFormat.mo3, 100),
-  new CompEvent("3x3 BLD", "333bf", "333ni", "event-333bf", TimeFormat.bo3),
+  new CompEvent("3x3 BLD", "333bf", "333ni", "event-333bf", TimeFormat.bo3), // TODO: REMOVE ASAP
+  // new CompEvent("3x3 BLD", "333bf-5", "333ni", "event-333bf", TimeFormat.bo5),
+  // new CompEvent("3x3 BLD", "333bf-5", "333ni", "event-333bf", TimeFormat.bo5),
   // TODO: new CompEvent("FMC", "333fm", "333fm", "event-333fm", TimeFormat.bo3, 0, 0),
   new CompEvent("3x3 OH", "333oh", "333", "event-333oh", TimeFormat.ao5),
   new CompEvent("Clock", "clock", "clkwca", "event-clock", TimeFormat.ao5),
@@ -132,6 +134,7 @@ export const WCAEvents: Readonly<CompEvent[]> = [
     TimeFormat.bo3,
     60,
   ),
+  // new CompEvent("FTO", "fto", "ftoso", "unofficial-fto", TimeFormat.ao5),
   // TODO: new CompEvent(
   //   "3x3 MBLD",
   //   "333mbf",
@@ -148,6 +151,13 @@ Object.freeze(WCAEvents);
  */
 const allEvents: Readonly<CompEvent[]> = WCAEvents.concat([
   // extra events here
+  // new CompEvent(
+  //   "3x3 BLD (Old Format)",
+  //   "333bf",
+  //   "333ni",
+  //   "event-333bf",
+  //   TimeFormat.bo3,
+  // ),
 ]);
 
 // freeze each event instance in allEvents.

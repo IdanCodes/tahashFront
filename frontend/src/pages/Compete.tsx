@@ -37,7 +37,13 @@ import { getTimeFormatName, TimeFormat } from "@shared/constants/time-formats";
 import { PageTransitionProps } from "../components/PageTransition";
 import { motion } from "motion/react";
 
-const hideImageEvents = Object.freeze(["333bf", "444bf", "555bf", "333mbf"]);
+const hideImageEvents = Object.freeze([
+  "333bf",
+  "444bf",
+  "555bf",
+  "333mbf",
+  "333bf-5",
+]);
 // const Timeout = useRef<ReturnType<typeof setTimeout> | null>(null)>(null);
 
 function ScrambleMenuButton({
@@ -500,7 +506,9 @@ function Compete() {
   const numScrambles = useRef<number>(0);
   const finishedEvent = useRef<boolean>(false);
   const attemptResultStr = useRef<string | undefined>(undefined);
-  const scrTransitionTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const scrTransitionTimeout = useRef<ReturnType<typeof setTimeout> | null>(
+    null,
+  );
   const [scrTransitionRunning, setScrTransitionRunning] =
     useState<boolean>(false);
   const [loadingScrTxt, setLoadingScrTxt] = useState<boolean>(true);

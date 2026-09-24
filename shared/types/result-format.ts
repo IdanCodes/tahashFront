@@ -1,6 +1,6 @@
-import { PackedResult } from "@shared/interfaces/packed-result";
-import { TimeFormat } from "@shared/constants/time-formats";
-import { ExtraArgsMbld } from "@shared/interfaces/event-extra-args/extra-args-mbld";
+import { PackedResult } from "../interfaces/packed-result";
+import { TimeFormat } from "../constants/time-formats";
+import { ExtraArgsMbld } from "../interfaces/event-extra-args/extra-args-mbld";
 
 /**
  * Best results for events using the {@link TimeFormat.ao5} format.
@@ -75,9 +75,14 @@ export type MO3BestResults = {
 };
 
 /**
- * BO3 (Best of 3) events use the same format as MO3.
+ * BO3 events use the same format as MO3.
  */
 export type BO3BestResults = MO3BestResults;
+
+/**
+ * BO5 (Best of 5) events use the same format as MO3.
+ */
+export type BO5BestResults = AO5BestResults;
 
 /**
  * Best results for the 3x3 Multi-Blind format.
@@ -117,5 +122,6 @@ export type ResultFormatMap = {
   [TimeFormat.ao5]: AO5BestResults;
   [TimeFormat.mo3]: MO3BestResults | FMCBestResults;
   [TimeFormat.bo3]: BO3BestResults;
+  [TimeFormat.bo5]: BO5BestResults;
   [TimeFormat.multi]: MbldBestResults;
 };

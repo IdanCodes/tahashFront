@@ -1,12 +1,12 @@
-import { TimeFormat } from "@shared/constants/time-formats";
+import { TimeFormat } from "../constants/time-formats";
 import {
   AO5BestResults,
   MbldBestResults,
   MO3BestResults,
   ResultFormatMap,
 } from "./result-format";
-import { getPureCentis, NULL_TIME_CENTIS } from "@shared/utils/time-utils";
-import { PackedResult } from "@shared/interfaces/packed-result";
+import { getPureCentis, NULL_TIME_CENTIS } from "../utils/time-utils";
+import { PackedResult } from "../interfaces/packed-result";
 
 export type EventRecords<T extends TimeFormat> = ResultFormatMap[T];
 
