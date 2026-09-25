@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import LoadingSpinner from "../components/LoadingSpinner";
 import {
   EMPTY_DISPLAY_INFO,
@@ -13,18 +13,85 @@ import EventSelection from "../components/EventSelection";
 import { useUserInfo } from "../context/UserContext";
 import clsx from "clsx";
 import { motion, AnimatePresence } from "motion/react";
+import { CompDisplayInfo } from "@shared/interfaces/comp-display-info";
+import { useParams } from "react-router-dom";
+import { ResponseCode } from "@shared/types/response-code";
+import { errorObject } from "@shared/interfaces/error-object";
 
-function Results() {
+export function ResultsOfComp() {}
+
+export function Results() {
+  const activeComp = useActiveComp();
+  const [compDisplayInfo, setCompDisplayInfo] =
+    useState<CompDisplayInfo | null>(null);
+  const { compIdParam } = useParams();
+  const [currCompId, setCurrCompId] = useState(-1);
+  const earliestComp = useRef<number>(0);
+  const latestComp = useRef<number>(0);
+
+  useEffect(() => {
+    sendGetRequest(RoutePath.Get.FirstAccessibleCompNumber).then((res) => {
+      if (res.code != ResponseCode.Success) return redirectToError(res.data);
+      earliestComp.current = res.data;
+    });
+  }, []);
+
+  useEffect(() => {
+    if (!activeComp.displayInfo) return;
+    latestComp.current = activeComp.displayInfo.compNumber - 1;
+
+    const parsedParam = compIdParam ? parseInt(compIdParam) : NaN;
+    if (Number.isNaN(parsedParam) || parsedParam <= 0)
+      setCurrCompId(activeComp.displayInfo.compNumber - 1);
+    else setCurrCompId(parsedParam);
+  }, [activeComp, activeComp.displayInfo]);
+
+  useEffect(() => {
+    if (!activeComp.displayInfo || currCompId < 0) return;
+    if (currCompId < earliestComp.current) {
+      redirectToError(
+        errorObject(
+          `Invalid comp number "${currCompId}". Earliest accessible comp is ${earliestComp.current}.`,
+        ),
+      );
+      return;
+    }
+    if (currCompId > latestComp.current) {
+      redirectToError(
+        errorObject(
+          `Invalid comp number "${currCompId}". Latest accessible comp is ${latestComp.current}.`,
+        ),
+      );
+      return;
+    }
+
+    sendGetRequest(`${RoutePath.Get.CompDisplayInfo}/${currCompId}`).then(
+      (res) => {
+        if (res.aborted) return;
+        if (res.code != ResponseCode.Success) return redirectToError(res.data);
+        setCompDisplayInfo(res.data);
+      },
+    );
+  }, [currCompId, activeComp, activeComp.displayInfo]);
+
+  if (currCompId < 0 || !compDisplayInfo) return <LoadingSpinner />;
+  return <ShowResults compDisplayInfo={compDisplayInfo} />;
+}
+
+function ShowResults({
+  compDisplayInfo,
+}: {
+  compDisplayInfo: CompDisplayInfo;
+}) {
   const userInfo = useUserInfo();
   const [currEventIndex, setCurrEventIndex] = useState<number>(0);
   const [eventResults, setEventResults] = useState<EventResultDisplay[] | null>(
     null,
   );
-  const activeComp = useActiveComp();
   const currEvent = useMemo<EventDisplayInfo>(
     () =>
-      activeComp.displayInfo
-        ? activeComp.displayInfo.events[currEventIndex]
+      compDisplayInfo
+        ? compDisplayInfo.events[currEventIndex]
         : EMPTY_DISPLAY_INFO,
     [currEventIndex, eventResults],
   );
@@ -38,19 +105,19 @@ function Results() {
 
   // TODO: Add option to abort if the user switches the event mid-fetch
   useEffect(() => {
-    if (!activeComp.displayInfo) return;
+    if (!compDisplayInfo) return;
 
-    const eventId = activeComp.displayInfo.events[currEventIndex].eventId;
+    const eventId = compDisplayInfo.events[currEventIndex].eventId;
     sendGetRequest(
-      `${RoutePath.Get.EventResultDisplays}/${activeComp.displayInfo.compNumber - 1}/${eventId}`,
+      `${RoutePath.Get.EventResultDisplays}/${compDisplayInfo.compNumber}/${eventId}`,
     ).then((res) => {
       if (res.aborted) return;
       if (res.isError) return redirectToError(res.data);
       setEventResults(res.data);
     });
-  }, [currEventIndex, activeComp.displayInfo]);
+  }, [currEventIndex, compDisplayInfo]);
 
-  if (!activeComp.displayInfo)
+  if (!compDisplayInfo)
     return (
       <>
         <LoadingSpinner />
@@ -60,18 +127,16 @@ function Results() {
   return (
     <div>
       <h1 className="mt-5 mb-2 text-center text-4xl font-bold">
-        Results of Competition #{activeComp.displayInfo.compNumber - 1}
+        Results of Competition #{compDisplayInfo.compNumber}
       </h1>
       <EventSelection
-        events={activeComp.displayInfo.events}
+        events={compDisplayInfo.events}
         selectedEventId={currEvent.eventId}
         handleClickEvent={(eventId) => {
           if (eventResults && currEvent.eventId == eventId) return;
           setEventResults(null);
           setCurrEventIndex(
-            activeComp.displayInfo!.events.findIndex(
-              (e) => e.eventId === eventId,
-            ),
+            compDisplayInfo!.events.findIndex((e) => e.eventId === eventId),
           );
         }}
       />

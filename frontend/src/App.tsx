@@ -19,7 +19,7 @@ import Compete from "./pages/Compete";
 import { cancelPendingRequests } from "./utils/API/apiUtils";
 import AdminPanel from "./pages/AdminPanel";
 import NotFoundPage from "./pages/NotFoundPage";
-import Results from "./pages/Results";
+import Results, { ResultsOfComp } from "./pages/Results";
 import { ActiveCompProvider } from "./context/ActiveCompContext";
 import UserPage from "./pages/UserPage";
 import InstructionsPage from "./pages/InstructionsPage";
@@ -121,7 +121,7 @@ function AnimatedRoutes(): JSX.Element {
           }
         />
         <Route
-          path={RoutePath.Page.ResultsEvent}
+          path={RoutePath.Page.ResultsOfComp}
           element={
             <PageTransition>
               <Results />

@@ -298,6 +298,15 @@ async function activeCompInfo(_: Request, res: Response) {
   );
 }
 
+async function firstAccessibleCompNumber(_: Request, res: Response) {
+  return res.json(
+    new ApiResponse(
+      ResponseCode.Success,
+      CompManager.getInstance().firstAccessibleCompNumber(),
+    ),
+  );
+}
+
 async function compDisplayInfo(req: Request, res: Response) {
   const compNumberStr = req.params.compNumber;
   if (!compNumberStr)
@@ -381,6 +390,7 @@ export const compHandlers = {
   eventDisplayInfo,
   updateSubmissionState,
   activeCompInfo,
+  firstAccessibleCompNumber,
   compDisplayInfo,
   eventResultDisplays,
   competitorData,

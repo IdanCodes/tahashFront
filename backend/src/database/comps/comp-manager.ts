@@ -125,7 +125,10 @@ export class CompManager {
    * @param compNumber The comp number to check.
    */
   compExists(compNumber: number) {
-    return compNumber > 0 && compNumber <= this.getActiveCompNum();
+    return (
+      compNumber >= this.firstAccessibleCompNumber() &&
+      compNumber <= this.getActiveCompNum()
+    );
   }
 
   /**
@@ -159,6 +162,10 @@ export class CompManager {
     newComp.fillScrambles();
     await newComp.save();
     return (this.activeComp = newComp);
+  }
+
+  public firstAccessibleCompNumber(): number {
+    return 314;
   }
 
   // TODO: remove if unnecessary

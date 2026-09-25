@@ -94,6 +94,11 @@ router.post(
 router.get(RoutePath.Get.ActiveCompInfo, compHandlers.activeCompInfo);
 
 router.get(
+  RoutePath.Get.FirstAccessibleCompNumber,
+  compHandlers.firstAccessibleCompNumber,
+);
+
+router.get(
   `${RoutePath.Get.CompDisplayInfo}/:compNumber`,
   compHandlers.compDisplayInfo,
 );
