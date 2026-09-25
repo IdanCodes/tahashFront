@@ -33,6 +33,7 @@ import EventSelection from "../components/EventSelection";
 import PrimaryButton from "../components/buttons/PrimaryButton";
 import { ButtonSize } from "../components/buttons/ButtonSize";
 import { motion } from "motion/react";
+import clsx from "clsx";
 
 function UserPage() {
   const params = useParams();
@@ -233,12 +234,23 @@ function RecordsPanel({
     timeCentis: number;
     compNum: number;
   }) {
+    const isWCA = useMemo(() => !compNum || compNum === 0, [compNum]);
+
     return (
       <div className="flex items-baseline justify-center">
         {formatCentis(timeCentis)}
-        <p className="text-xs text-gray-400 md:text-sm">
-          {!compNum || compNum === 0 ? "WCA" : compNum}
-        </p>
+        <a
+          href={`${RoutePath.Page.Results}/${compNum}`}
+          title={`Results of comp #${compNum}`}
+          className={clsx(
+            !isWCA &&
+              "underline decoration-gray-500/30 decoration-2 underline-offset-1",
+          )}
+        >
+          <p className="ml-0.5 text-xs text-gray-500/80 md:text-sm">
+            {isWCA ? "WCA" : compNum}
+          </p>
+        </a>
       </div>
     );
   }
@@ -301,7 +313,15 @@ function PastResultsPanel({
                     key={index}
                     className="text-center font-mono odd:!bg-slate-50 even:!bg-slate-200"
                   >
-                    <TableData>{compNumber}</TableData>
+                    <TableData>
+                      <a
+                        href={`${RoutePath.Page.Results}/${compNumber}`}
+                        className="underline"
+                        title={`Results of comp #${compNumber}`}
+                      >
+                        {compNumber}
+                      </a>
+                    </TableData>
                     <TableData>#{result.place.toString()}</TableData>
                     <TableData>
                       {getBestResultStr(eventData, result.times)}
