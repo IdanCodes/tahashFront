@@ -32,7 +32,7 @@ import {
 import EventSelection from "../components/EventSelection";
 import PrimaryButton from "../components/buttons/PrimaryButton";
 import { ButtonSize } from "../components/buttons/ButtonSize";
-import { motion } from "motion/react";
+import { AnimatePresence, motion } from "motion/react";
 import clsx from "clsx";
 
 function UserPage() {
@@ -296,88 +296,93 @@ function PastResultsPanel({
           }}
         />
         <div className="w-95/100 overflow-x-auto md:w-9/10 lg:w-8/10">
-          <table className="my-2 w-full min-w-max table-auto rounded-t-2xl bg-blue-700/55 text-lg md:text-2xl">
-            <thead className="rounded-t-2xl bg-transparent text-xl text-white/90 md:text-[1.655rem]">
-              <tr>
-                <th className="pl-4 text-center">Comp</th>
-                <th className="px-2 py-2 text-center">Place</th>
-                <th className="py-2 text-center">Single</th>
-                <th className="px-2 py-2 text-center">Average</th>
-                <th className="py-2 text-center">Solves</th>
-              </tr>
-            </thead>
-            <tbody>
-              {resultEntries ? (
-                resultEntries.map(([compNumber, result], index) => (
-                  <tr
-                    key={index}
-                    className="text-center font-mono odd:!bg-slate-50 even:!bg-slate-200"
-                  >
-                    <TableData>
-                      <a
-                        href={`${RoutePath.Page.Results}/${compNumber}`}
-                        className="underline"
-                        title={`Results of comp #${compNumber}`}
-                      >
-                        {compNumber}
-                      </a>
-                    </TableData>
-                    <TableData>#{result.place.toString()}</TableData>
-                    <TableData>
-                      {getBestResultStr(eventData, result.times)}
-                    </TableData>
-                    <TableData>
-                      {getAverageStr(eventData, result.times)}
-                    </TableData>
-                    <TableData>
-                      <div className="flex justify-evenly py-2 text-center">
-                        {formatAttempts(eventData.timeFormat, result.times).map(
-                          (str, index) => (
-                            <span key={index} className="px-1">
-                              {str}
-                            </span>
-                          ),
-                        )}
-                      </div>
-                    </TableData>
-                  </tr>
-                ))
-              ) : (
-                // pastResults.map(([displayInfo, results], index) => (
-                //   <tr
-                //     key={index}
-                //     className="font-mono odd:!bg-slate-50 even:!bg-slate-200"
-                //   >
-                //     <td className="flex justify-center gap-1.5 py-2">
-                //       <EventBoxIcon
-                //         iconName={displayInfo.iconName}
-                //         size={"1.5rem"}
-                //       />
-                //       <p className="text-center">{displayInfo.eventTitle}</p>
-                //     </td>
-                //     <td className="size-fit py-2">
-                //       <div className="flex items-baseline justify-center gap-2">
-                //         <RecordLabel
-                //           timeCentis={getPureCentis(record.single)}
-                //           compNum={record.singleComp}
-                //         />
-                //       </div>
-                //     </td>
-                //     <td className="flex items-baseline justify-center gap-2">
-                //       <RecordLabel
-                //         timeCentis={record.average}
-                //         compNum={record.averageComp}
-                //       />
-                //     </td>
-                //   </tr>
-                // ))
-                <LoadingSpinner />
-              )}
-            </tbody>
-          </table>
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={selectedEventId}
+              transition={{
+                duration: 0.12,
+                ease: "easeInOut",
+              }}
+              initial={{
+                opacity: 0,
+                scale: 0.97,
+              }}
+              animate={{
+                opacity: 1,
+                scale: 1,
+              }}
+              exit={{
+                opacity: 0,
+                scale: 0.97,
+              }}
+            >
+              <ResultsTable
+                eventData={eventData}
+                resultEntries={resultEntries}
+              />
+            </motion.div>
+          </AnimatePresence>
         </div>
       </div>
     </>
+  );
+}
+
+function ResultsTable({
+  eventData,
+  resultEntries,
+}: {
+  eventData: CompEvent;
+  resultEntries: [number, { place: number; times: PackedResult[] }][];
+}) {
+  return (
+    <table className="my-2 w-full min-w-max table-auto rounded-t-2xl bg-blue-700/55 text-lg md:text-2xl">
+      <thead className="rounded-t-2xl bg-transparent text-xl text-white/90 md:text-[1.655rem]">
+        <tr>
+          <th className="pl-4 text-center">Comp</th>
+          <th className="px-2 py-2 text-center">Place</th>
+          <th className="py-2 text-center">Single</th>
+          <th className="px-2 py-2 text-center">Average</th>
+          <th className="py-2 text-center">Solves</th>
+        </tr>
+      </thead>
+      <tbody>
+        {resultEntries ? (
+          resultEntries.map(([compNumber, result], index) => (
+            <tr
+              key={index}
+              className="text-center font-mono odd:!bg-slate-50 even:!bg-slate-200"
+            >
+              <TableData>
+                <a
+                  href={`${RoutePath.Page.Results}/${compNumber}`}
+                  className="underline"
+                  title={`Results of comp #${compNumber}`}
+                >
+                  {compNumber}
+                </a>
+              </TableData>
+              <TableData>#{result.place.toString()}</TableData>
+              <TableData>{getBestResultStr(eventData, result.times)}</TableData>
+              <TableData>{getAverageStr(eventData, result.times)}</TableData>
+              <TableData>
+                <div className="flex justify-evenly py-2 text-center">
+                  {formatAttempts(eventData.timeFormat, result.times).map(
+                    (str, index) => (
+                      <span key={index} className="px-1">
+                        {str}
+                      </span>
+                    ),
+                  )}
+                </div>
+              </TableData>
+            </tr>
+          ))
+        ) : (
+          <LoadingSpinner />
+        )}
+      </tbody>
+    </table>
   );
 
   function TableData({ children }: { children: ReactNode }) {
