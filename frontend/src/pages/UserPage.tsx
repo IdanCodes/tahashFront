@@ -239,18 +239,22 @@ function RecordsPanel({
     return (
       <div className="flex items-baseline justify-center">
         {formatCentis(timeCentis)}
-        <a
-          href={`${RoutePath.Page.Results}/${compNum}`}
-          title={`Results of comp #${compNum}`}
-          className={clsx(
-            !isWCA &&
-              "underline decoration-gray-500/30 decoration-2 underline-offset-1",
+        <p className="ml-0.5 text-xs text-gray-500/80 md:text-sm">
+          {isWCA ? (
+            "WCA"
+          ) : (
+            <a
+              href={`${RoutePath.Page.Results}/${compNum}`}
+              title={`Results of comp #${compNum}`}
+              className={clsx(
+                !isWCA &&
+                  "underline decoration-gray-500/30 decoration-2 underline-offset-1",
+              )}
+            >
+              {compNum}
+            </a>
           )}
-        >
-          <p className="ml-0.5 text-xs text-gray-500/80 md:text-sm">
-            {isWCA ? "WCA" : compNum}
-          </p>
-        </a>
+        </p>
       </div>
     );
   }
