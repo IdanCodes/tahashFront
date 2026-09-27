@@ -17,6 +17,8 @@ import { CompDisplayInfo } from "@shared/interfaces/comp-display-info";
 import { useParams } from "react-router-dom";
 import { ResponseCode } from "@shared/types/response-code";
 import { errorObject } from "@shared/interfaces/error-object";
+import PrimaryButton from "../components/buttons/PrimaryButton";
+import { ButtonSize } from "../components/buttons/ButtonSize";
 
 export function ResultsOfComp() {}
 
@@ -75,7 +77,22 @@ export function Results() {
   }, [currCompId, activeComp, activeComp.displayInfo]);
 
   if (currCompId < 0 || !compDisplayInfo) return <LoadingSpinner />;
-  return <ShowResults compDisplayInfo={compDisplayInfo} />;
+  return (
+    <>
+      <ResultsHeader
+        compNumber={compDisplayInfo.compNumber}
+        canPrev={currCompId > earliestComp.current}
+        canNext={currCompId < latestComp.current}
+        prevComp={() =>
+          setCurrCompId((x) => Math.max(x - 1, earliestComp.current))
+        }
+        nextComp={() =>
+          setCurrCompId((x) => Math.min(x + 1, latestComp.current))
+        }
+      />
+      <ShowResults compDisplayInfo={compDisplayInfo} />
+    </>
+  );
 }
 
 function ShowResults({
@@ -126,9 +143,6 @@ function ShowResults({
 
   return (
     <div>
-      <h1 className="mt-5 mb-2 text-center text-4xl font-bold">
-        Results of Competition #{compDisplayInfo.compNumber}
-      </h1>
       <EventSelection
         events={compDisplayInfo.events}
         selectedEventId={currEvent.eventId}
@@ -174,6 +188,42 @@ function ShowResults({
           )}
         </motion.div>
       </AnimatePresence>
+    </div>
+  );
+}
+
+function ResultsHeader({
+  compNumber,
+  canPrev,
+  canNext,
+  prevComp,
+  nextComp,
+}: {
+  compNumber: number;
+  canPrev: boolean;
+  canNext: boolean;
+  prevComp: () => void;
+  nextComp: () => void;
+}) {
+  return (
+    <div className="mt-1.5 flex justify-center gap-5">
+      <PrimaryButton
+        content={<p className="text-3xl">{"<"}</p>}
+        colors="bg-blue-400/90 hover:bg-blue-500/80 active:bg-blue-500/90"
+        buttonSize={ButtonSize.Small}
+        onClick={prevComp}
+        disabled={!canPrev}
+      />
+      <h1 className="mt-5 mb-2 text-center text-4xl font-bold">
+        Results of Competition #{compNumber}
+      </h1>
+      <PrimaryButton
+        content={<p className="text-3xl">{">"}</p>}
+        colors="bg-blue-400/90 hover:bg-blue-500/80 active:bg-blue-500/90"
+        buttonSize={ButtonSize.Small}
+        onClick={nextComp}
+        disabled={!canNext}
+      />
     </div>
   );
 }
