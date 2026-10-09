@@ -37,6 +37,7 @@ import { getTimeFormatName, TimeFormat } from "@shared/constants/time-formats";
 import { PageTransitionProps } from "../components/PageTransition";
 import { motion } from "motion/react";
 import { clamp } from "@shared/utils/global-utils";
+import { ExtraArgsMbld } from "@shared/interfaces/event-extra-args/extra-args-mbld";
 
 const MBLDID = "333mbf";
 const hideImageEvents = Object.freeze([
@@ -494,10 +495,12 @@ function MBLDPanel({
   competeData,
   scrTransitionRunning,
   scramblesSeed,
+  finishedEvent,
 }: {
   competeData: UserCompeteData;
   scrTransitionRunning: boolean;
   scramblesSeed: string;
+  finishedEvent: boolean;
 }) {
   const csTimer = useCSTimer();
   const MIN_CUBES = 2;
@@ -506,6 +509,19 @@ function MBLDPanel({
   const [selectedNumCubes, setSelectedNumCubes] = useState<boolean>(false);
   const [scramblesReady, setScramblesReady] = useState<boolean>(false);
   const scrambles = useRef<string[]>([]);
+  const [currInput, setCurrInput] = useState<string>("");
+  const [currentResult, setCurrentResult] = useState<SolveResult>({
+    penalty: Penalties.None,
+    extraArgs: {
+      numAttempt: 2,
+      numSuccess: 0,
+    } as ExtraArgsMbld,
+    time: null,
+  } as SolveResult);
+  const previewStr = useMemo<string>(
+    () => formatSolveResult(currentResult),
+    [currentResult],
+  );
 
   function generateScrambles() {
     csTimer.setSeed(scramblesSeed);
@@ -628,6 +644,22 @@ function MBLDPanel({
     );
   }
 
+  const onInputChange = (x: React.ChangeEvent<HTMLInputElement>) => {
+    const newTimeStr = x.target.value;
+    setCurrInput(newTimeStr);
+
+    const newTimeParts = tryAnalyzeTimes(newTimeStr);
+    setCurrentResult((result) => ({
+      penalty: result.penalty,
+      extraArgs: result.extraArgs,
+      time: newTimeParts,
+    }));
+  };
+
+  // TODO: ADD TIME RESTRICTION!!
+  // 10 mintues for each cube up to an hour
+  // Also add submission, and make sure to set the extra args!!!!
+
   return (
     <motion.div
       variants={{
@@ -655,28 +687,21 @@ function MBLDPanel({
       {!selectedNumCubes ? (
         <NumCubesSelect></NumCubesSelect>
       ) : (
-        <MBLDSubmission></MBLDSubmission>
+        <>
+          <MBLDSubmission />
+        </>
       )}
 
-      {/*Scramble & Image*/}
-      {/* <ScrambleAndImage
-        scrText={scrambles[activeScramble]}
-        scrImg={hideImage.current ? undefined : scrambleImages[activeScramble]}
-        setLoading={hideImage.current ? (_) => {} : setLoadingScrTxt}
-      /> */}
-      {/* MBLD Scrambles */}
-
       {/*Submit Section*/}
-      {/* <SubmitSection
-        finishedEvent={finishedEvent.current}
+      <TimeInputField
         onInputChange={onInputChange}
-        currentInput={inputValues[activeScramble]}
-        penalties={{ togglePlusTwo, toggleDNF, currPenalty }}
-        isLastScramble={isLastScramble}
-        onSubmitTime={nextScramble}
-        currentResult={currentResult}
-        activeScramble={activeScramble}
-      /> */}
+        currentInput={currInput}
+        onSubmitTime={() => {
+          console.log("Submit time");
+        }}
+        activeScramble={0}
+      />
+      <p className="text-center text-3xl">{previewStr}</p>
     </motion.div>
   );
 }
@@ -1009,6 +1034,7 @@ function Compete() {
             competeData={competeData}
             scrTransitionRunning={scrTransitionRunning}
             scramblesSeed={scrambles[0]}
+            finishedEvent={finishedEvent.current}
           ></MBLDPanel>
         ) : (
           <motion.div
