@@ -570,11 +570,60 @@ function MBLDPanel({
     );
   }
 
+  function CubeScramble({
+    index,
+    scramble,
+  }: {
+    index: number;
+    scramble: string;
+  }) {
+    const scrText = useMemo<string>(
+      () => `${index + 1}. ${scramble}`,
+      [index, scramble],
+    );
+
+    return (
+      <div className="mx-auto flex flex-row py-2">
+        <span
+          style={{
+            fontSize: `35px`,
+            fontFamily: "monospace",
+            fontWeight: "550",
+            transition: "font-size",
+          }}
+          className="my-auto w-15/100 text-center"
+        >{`${index + 1}.`}</span>
+        <span
+          style={{
+            fontSize: `30px`,
+            fontFamily: "monospace",
+            fontWeight: "550",
+            transition: "font-size",
+          }}
+          className="mx-auto box-border w-85/100"
+        >
+          {scramble}
+        </span>
+      </div>
+    );
+  }
+
   function MBLDSubmission() {
     if (!scramblesReady) return <LoadingSpinner></LoadingSpinner>;
     return (
       <>
-        <div>{/* {scrambles.current.map()} */}</div>
+        <div className="mx-auto flex flex-col justify-center gap-2 py-5">
+          {scrambles.current.map((scr, i) => (
+            <div key={i}>
+              <CubeScramble scramble={scr} index={i} />
+              {i < scrambles.current.length - 1 ? (
+                <HorizontalPanelDivider />
+              ) : (
+                <></>
+              )}
+            </div>
+          ))}
+        </div>
       </>
     );
   }
@@ -632,7 +681,7 @@ function MBLDPanel({
   );
 }
 
-function PanelDivider() {
+function HorizontalPanelDivider() {
   return <div className="my-2 w-full border-2 border-slate-500/20" />;
 }
 
@@ -995,7 +1044,7 @@ function Compete() {
             />
 
             {/*scamble-submit divider*/}
-            <PanelDivider />
+            <HorizontalPanelDivider />
 
             {/*Submit Section*/}
             {isUploading ? (
