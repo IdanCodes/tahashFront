@@ -491,18 +491,35 @@ function AttemptResultLabel({
 }
 
 function MBLDPanel({
+  competeData,
   scrTransitionRunning,
   scramblesSeed,
 }: {
+  competeData: UserCompeteData;
   scrTransitionRunning: boolean;
   scramblesSeed: string;
 }) {
-  // const csTimer = useCSTimer();
+  const csTimer = useCSTimer();
   const MIN_CUBES = 2;
   const MAX_CUBES = 50;
   const [numCubes, setNumCubes] = useState<number>(2);
   const [selectedNumCubes, setSelectedNumCubes] = useState<boolean>(false);
-  const [scrambles, setScrambles] = useState<string[]>([]);
+  const [scramblesReady, setScramblesReady] = useState<boolean>(false);
+  const scrambles = useRef<string[]>([]);
+
+  function generateScrambles() {
+    csTimer.setSeed(scramblesSeed);
+    scrambles.current = new Array(numCubes).fill("");
+
+    for (let i = 0; i < numCubes; i++) {
+      csTimer.getScramble("333").then((scr) => {
+        scrambles.current[i] = scr;
+        if (!scrambles.current.some((x) => x.length == 0))
+          // !∃x=""
+          setScramblesReady(true);
+      });
+    }
+  }
 
   function NumCubesSelect() {
     const incrementCubes = (delta: number) => {
@@ -544,13 +561,22 @@ function MBLDPanel({
         <PrimaryButton
           content={<p className="text-xl">Generate Scrambles</p>}
           className="mx-auto"
+          onClick={() => {
+            setSelectedNumCubes(true);
+            generateScrambles();
+          }}
         />
       </div>
     );
   }
 
   function MBLDSubmission() {
-    return <></>;
+    if (!scramblesReady) return <LoadingSpinner></LoadingSpinner>;
+    return (
+      <>
+        <div>{/* {scrambles.current.map()} */}</div>
+      </>
+    );
   }
 
   return (
@@ -931,6 +957,7 @@ function Compete() {
 
         {isMultiBld ? (
           <MBLDPanel
+            competeData={competeData}
             scrTransitionRunning={scrTransitionRunning}
             scramblesSeed={scrambles[0]}
           ></MBLDPanel>

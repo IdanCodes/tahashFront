@@ -31,7 +31,7 @@ export function useCSTimer() {
   return {
     getScrambleTypes: () => callWorker("scrtype"),
     getScramble: (...args: any[]) => callWorker("scramble", args),
-    setSeed: (seed: number) => callWorker("seed", [seed]),
+    setSeed: (seed: number | string) => callWorker("seed", [seed]),
     setGlobal: (key: string, value: any) => callWorker("set", [key, value]),
     getImage: (scramble: string, type: string) =>
       callWorker("image", [scramble, type]),
