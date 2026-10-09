@@ -36,13 +36,16 @@ import {
 import { getTimeFormatName, TimeFormat } from "@shared/constants/time-formats";
 import { PageTransitionProps } from "../components/PageTransition";
 import { motion } from "motion/react";
+import { clamp } from "@shared/utils/global-utils";
 
+const MBLDID = "333mbf";
 const hideImageEvents = Object.freeze([
   "333bf",
   "444bf",
   "555bf",
   "333mbf",
   "333bf-5",
+  MBLDID,
 ]);
 // const Timeout = useRef<ReturnType<typeof setTimeout> | null>(null)>(null);
 
@@ -487,6 +490,126 @@ function AttemptResultLabel({
   );
 }
 
+function MBLDPanel({
+  scrTransitionRunning,
+  scramblesSeed,
+}: {
+  scrTransitionRunning: boolean;
+  scramblesSeed: string;
+}) {
+  // const csTimer = useCSTimer();
+  const MIN_CUBES = 2;
+  const MAX_CUBES = 50;
+  const [numCubes, setNumCubes] = useState<number>(2);
+  const [selectedNumCubes, setSelectedNumCubes] = useState<boolean>(false);
+  const [scrambles, setScrambles] = useState<string[]>([]);
+
+  function NumCubesSelect() {
+    const incrementCubes = (delta: number) => {
+      setNumCubes((x) => clamp(x + delta, MIN_CUBES, MAX_CUBES));
+    };
+
+    return (
+      <div className="mt-2 mb-3 flex flex-col gap-5">
+        <h1 className="text-center text-2xl font-semibold">How many cubes?</h1>
+        <div className="mx-auto flex w-8/10 justify-between">
+          <PrimaryButton
+            content={<p className="px-3">{"-5"}</p>}
+            buttonSize={ButtonSize.Small}
+            onClick={() => incrementCubes(-5)}
+            disabled={numCubes - 5 < MIN_CUBES}
+          />
+          <PrimaryButton
+            content={<p className="px-3">{"-1"}</p>}
+            buttonSize={ButtonSize.Small}
+            onClick={() => incrementCubes(-1)}
+            disabled={numCubes - 1 < MIN_CUBES}
+          />
+          <div className="flex place-items-center">
+            <p className="text-3xl font-bold">{numCubes}</p>
+          </div>
+          <PrimaryButton
+            content={<p className="px-3">{"+1"}</p>}
+            buttonSize={ButtonSize.Small}
+            onClick={() => incrementCubes(+1)}
+            disabled={numCubes + 1 > MAX_CUBES}
+          />
+          <PrimaryButton
+            content={<p className="px-3">{"+5"}</p>}
+            buttonSize={ButtonSize.Small}
+            onClick={() => incrementCubes(+5)}
+            disabled={numCubes + 5 > MAX_CUBES}
+          />
+        </div>
+        <PrimaryButton
+          content={<p className="text-xl">Generate Scrambles</p>}
+          className="mx-auto"
+        />
+      </div>
+    );
+  }
+
+  function MBLDSubmission() {
+    return <></>;
+  }
+
+  return (
+    <motion.div
+      variants={{
+        hide: {
+          scale: 0.98,
+          y: -15,
+        },
+        show: {
+          opacity: [0.95, 1],
+          scale: 1,
+          y: 0,
+        },
+      }}
+      initial={{
+        opacity: 1,
+      }}
+      transition={{
+        ease: "easeIn",
+        type: "spring",
+        bounce: 0.5,
+      }}
+      animate={scrTransitionRunning ? "hide" : "show"}
+      className="mx-auto w-8/10 rounded-2xl border-2 border-transparent bg-gradient-to-r from-slate-400/70 to-slate-400/80 p-1 shadow-xl"
+    >
+      {!selectedNumCubes ? (
+        <NumCubesSelect></NumCubesSelect>
+      ) : (
+        <MBLDSubmission></MBLDSubmission>
+      )}
+
+      {/*Scramble & Image*/}
+      {/* <ScrambleAndImage
+        scrText={scrambles[activeScramble]}
+        scrImg={hideImage.current ? undefined : scrambleImages[activeScramble]}
+        setLoading={hideImage.current ? (_) => {} : setLoadingScrTxt}
+      /> */}
+      {/* MBLD Scrambles */}
+
+      {/*Submit Section*/}
+      {/* <SubmitSection
+        finishedEvent={finishedEvent.current}
+        onInputChange={onInputChange}
+        currentInput={inputValues[activeScramble]}
+        penalties={{ togglePlusTwo, toggleDNF, currPenalty }}
+        isLastScramble={isLastScramble}
+        onSubmitTime={nextScramble}
+        currentResult={currentResult}
+        activeScramble={activeScramble}
+      /> */}
+    </motion.div>
+  );
+}
+
+function PanelDivider() {
+  return <div className="my-2 w-full border-2 border-slate-500/20" />;
+}
+
 function Compete() {
   const [competeData, setCompeteData] = useState<UserCompeteData>();
   const [scrambleImages, setScrambleImages] = useState<string[]>([]);
@@ -512,6 +635,10 @@ function Compete() {
   const [scrTransitionRunning, setScrTransitionRunning] =
     useState<boolean>(false);
   const [loadingScrTxt, setLoadingScrTxt] = useState<boolean>(true);
+  const isMultiBld = useMemo<boolean>(
+    () => competeData !== undefined && competeData.eventData.eventId === MBLDID,
+    [competeData],
+  );
 
   const params = useParams();
   // const { addLoading, removeLoading } = useLoading("Compete");
@@ -553,6 +680,9 @@ function Compete() {
       lastOpened++;
     setLastOpenScramble(lastOpened);
     setActiveScramble(lastOpened);
+    if (competeData.eventData.eventId == MBLDID) {
+      return setLoadingScrTxt(false);
+    }
     setCurrentResult(unpackResult(times[lastOpened]));
 
     if (!hideImage.current) {
@@ -605,10 +735,7 @@ function Compete() {
     }).then((res) => {
       if (res.aborted) return;
       else if (res.isError) return redirectToError(res.data);
-      initCompeteData(res.data)
-        .then
-        // removeLoading
-        ();
+      initCompeteData(res.data);
     });
   }, []);
 
@@ -792,64 +919,74 @@ function Compete() {
         )}
 
         {/*Scamble number menu*/}
-        <ScramblesMenu
-          scrambles={competeData.scrambles}
-          activeScramble={activeScramble}
-          timeStrs={timeStrs}
-          loadScramble={loadScramble}
-          isScrambleAccessible={isScrambleAccessible}
-        />
-        <motion.div
-          variants={{
-            hide: {
-              scale: 0.98,
-              y: -15,
-            },
-            show: {
-              opacity: [0.95, 1],
-              scale: 1,
-              y: 0,
-            },
-          }}
-          initial={{
-            opacity: 1,
-          }}
-          transition={{
-            ease: "easeIn",
-            type: "spring",
-            bounce: 0.5,
-          }}
-          animate={scrTransitionRunning ? "hide" : "show"}
-          className="mx-auto w-8/10 rounded-2xl border-2 border-transparent bg-gradient-to-r from-slate-400/70 to-slate-400/80 shadow-xl"
-        >
-          {/*Scramble & Image*/}
-          <ScrambleAndImage
-            scrText={scrambles[activeScramble]}
-            scrImg={
-              hideImage.current ? undefined : scrambleImages[activeScramble]
-            }
-            setLoading={hideImage.current ? (_) => {} : setLoadingScrTxt}
+        {!isMultiBld && (
+          <ScramblesMenu
+            scrambles={competeData.scrambles}
+            activeScramble={activeScramble}
+            timeStrs={timeStrs}
+            loadScramble={loadScramble}
+            isScrambleAccessible={isScrambleAccessible}
           />
+        )}
 
-          {/*scamble-submit divider*/}
-          <div className="my-2 w-full border-2 border-slate-500/20" />
-
-          {/*Submit Section*/}
-          {isUploading ? (
-            <LoadingSpinner />
-          ) : (
-            <SubmitSection
-              finishedEvent={finishedEvent.current}
-              onInputChange={onInputChange}
-              currentInput={inputValues[activeScramble]}
-              penalties={{ togglePlusTwo, toggleDNF, currPenalty }}
-              isLastScramble={isLastScramble}
-              onSubmitTime={nextScramble}
-              currentResult={currentResult}
-              activeScramble={activeScramble}
+        {isMultiBld ? (
+          <MBLDPanel
+            scrTransitionRunning={scrTransitionRunning}
+            scramblesSeed={scrambles[0]}
+          ></MBLDPanel>
+        ) : (
+          <motion.div
+            variants={{
+              hide: {
+                scale: 0.98,
+                y: -15,
+              },
+              show: {
+                opacity: [0.95, 1],
+                scale: 1,
+                y: 0,
+              },
+            }}
+            initial={{
+              opacity: 1,
+            }}
+            transition={{
+              ease: "easeIn",
+              type: "spring",
+              bounce: 0.5,
+            }}
+            animate={scrTransitionRunning ? "hide" : "show"}
+            className="mx-auto w-8/10 rounded-2xl border-2 border-transparent bg-gradient-to-r from-slate-400/70 to-slate-400/80 shadow-xl"
+          >
+            {/*Scramble & Image*/}
+            <ScrambleAndImage
+              scrText={scrambles[activeScramble]}
+              scrImg={
+                hideImage.current ? undefined : scrambleImages[activeScramble]
+              }
+              setLoading={hideImage.current ? (_) => {} : setLoadingScrTxt}
             />
-          )}
-        </motion.div>
+
+            {/*scamble-submit divider*/}
+            <PanelDivider />
+
+            {/*Submit Section*/}
+            {isUploading ? (
+              <LoadingSpinner />
+            ) : (
+              <SubmitSection
+                finishedEvent={finishedEvent.current}
+                onInputChange={onInputChange}
+                currentInput={inputValues[activeScramble]}
+                penalties={{ togglePlusTwo, toggleDNF, currPenalty }}
+                isLastScramble={isLastScramble}
+                onSubmitTime={nextScramble}
+                currentResult={currentResult}
+                activeScramble={activeScramble}
+              />
+            )}
+          </motion.div>
+        )}
       </div>
     </>
   );

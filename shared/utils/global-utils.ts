@@ -5,16 +5,20 @@
  * @param len The length of the string.
  * @param charSet A string representing the character set (alphabet) to generate from (for example "ABC" would be the letters A B and C). If left null, uses english uppercase and lowercase letters and numbers 0-9.
  */
-export function getRandomString(len: number = 8, charSet: string | null = null) {
-    charSet = charSet || "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-    let randomString: string = '';
+export function getRandomString(
+  len: number = 8,
+  charSet: string | null = null,
+) {
+  charSet =
+    charSet || "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  let randomString: string = "";
 
-    for (let i = 0; i < len; i++) {
-        const randomPoz = Math.floor(Math.random() * charSet.length);
-        randomString += charSet.substring(randomPoz,randomPoz + 1);
-    }
+  for (let i = 0; i < len; i++) {
+    const randomPoz = Math.floor(Math.random() * charSet.length);
+    randomString += charSet.substring(randomPoz, randomPoz + 1);
+  }
 
-    return randomString;
+  return randomString;
 }
 
 /**
@@ -26,7 +30,7 @@ export function getRandomString(len: number = 8, charSet: string | null = null) 
  * @param second Second date.
  */
 export function datediff(first: Date, second: Date): number {
-    return datediffEpoch(first.getTime(), second.getTime());
+  return datediffEpoch(first.getTime(), second.getTime());
 }
 
 /**
@@ -38,7 +42,7 @@ export function datediff(first: Date, second: Date): number {
  * @param second Second date.
  */
 export function datediffEpoch(first: number, second: number): number {
-    return Math.round(Math.abs(second - first) / (1000 * 60 * 60 * 24));
+  return Math.round(Math.abs(second - first) / (1000 * 60 * 60 * 24));
 }
 
 /**
@@ -47,7 +51,7 @@ export function datediffEpoch(first: number, second: number): number {
  * @param digits The number of digits to pad
  */
 export const pad = (num: number, digits: number = 2): string =>
-    num.toString().padStart(digits, '0');
+  num.toString().padStart(digits, "0");
 
 /**
  * Check if a string is a number.
@@ -55,7 +59,7 @@ export const pad = (num: number, digits: number = 2): string =>
  * @returns Whether the string represents a valid number.
  */
 export function isNumber(value: string): boolean {
-    return !isNaN(parseFloat(value)) && isFinite(Number(value));
+  return !isNaN(parseFloat(value)) && isFinite(Number(value));
 }
 
 /**
@@ -63,7 +67,7 @@ export function isNumber(value: string): boolean {
  * @param x The number to check.
  */
 export function isInteger(x: number): boolean {
-    return !isNaN(x) && Number.isInteger(x);
+  return !isNaN(x) && Number.isInteger(x);
 }
 
 /**
@@ -73,13 +77,18 @@ export function isInteger(x: number): boolean {
  * @return -1: r1 < r2; 0: r1 == r2; 1: r1 > r2;
  */
 export function compareNumbers(a: number, b: number): 0 | 1 | -1 {
-    return a > b ? 1 : (a === b ? 0 : -1);
+  return a > b ? 1 : a === b ? 0 : -1;
 }
 
 /**
  * Check if a string contains only letters and numbers (a-z, A-Z, 0-9)
  */
 export function isAlphanumeric(str: string) {
-    return /^[a-zA-Z0-9]+$/.test(str);
+  return /^[a-zA-Z0-9]+$/.test(str);
 }
 
+/**
+ * Clamp a value between a minimum and a maximum
+ */
+export const clamp = (val: number, min: number, max: number) =>
+  Math.min(Math.max(val, min), max);

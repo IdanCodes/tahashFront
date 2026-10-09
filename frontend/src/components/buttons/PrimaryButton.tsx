@@ -39,7 +39,7 @@ export default function PrimaryButton({
         <div
           className={clsx(
             "font-[Arial] font-bold",
-            buttonSize == ButtonSize.Small && "text-2xl",
+            buttonSize == ButtonSize.Small && "text-xl",
             buttonSize == ButtonSize.Medium && "m-0.5 text-3xl",
             buttonSize == ButtonSize.Large && "m-1 text-4xl",
           )}

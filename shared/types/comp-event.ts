@@ -135,14 +135,14 @@ export const WCAEvents: Readonly<CompEvent[]> = [
     60,
   ),
   new CompEvent("FTO", "fto", "ftoso", "unofficial-fto", TimeFormat.ao5),
-  // TODO: new CompEvent(
-  //   "3x3 MBLD",
-  //   "333mbf",
-  //   "r3ni",
-  //   "event-333mbf",
-  //   TimeFormat.multi,
-  //   1,
-  // ),
+  new CompEvent(
+    "3x3 MBLD",
+    "333mbf",
+    "r3ni",
+    "event-333mbf",
+    TimeFormat.multi,
+    1,
+  ),
 ];
 Object.freeze(WCAEvents);
 
